@@ -1,0 +1,150 @@
+{
+  "home": {
+    "title": "Hem",
+    "groups": "Dina grupper",
+    "groupsDescription": "Verksamhet i sektionsorgan",
+    "personal": "Verksamhet utanför grupper",
+    "personalDescription": "Äskningar, arbetsgrupper, etc.",
+    "division": "Hela sektionen",
+    "divisionDescription": "Granska hela sektionens ekonomi",
+    "groupExpenses": "Utgifter i grupper",
+    "groupInvoices": "Fakturor från grupper",
+    "privateExpenses": "Privata kostnader",
+    "privateInvoices": "Privata fakturor",
+    "zettleSales": "Kassaförsäljning",
+    "showInactiveGroups": "Visa avstigna grupper"
+  },
+  "group": {
+    "treasurer": "Kassör",
+    "member": "Medlem",
+    "active": "Påstigen",
+    "inactive": "Avstigen",
+    "toolsResources": "Verktyg och resurser",
+    "economicalOperations": "Ekonomisk verksamhet"
+  },
+  "categories": {
+    "nameLists": "Namnlistor",
+    "expenses": "Kostnader",
+    "invoices": "Kundfakturor",
+    "teambuilding": "Teambuilding",
+    "food": "Arbetsmat"
+  },
+  "general": {
+    "edit": "Redigera",
+    "delete": "Radera"
+  },
+  "economy": {
+    "name": "Namn",
+    "date": "Datum",
+    "person": "Person",
+    "amount": "Summa",
+    "cost": "Kostnad",
+    "price": "Pris",
+    "total": "Total",
+    "amountTotal": "Totalsumma",
+    "status": "Status",
+    "submit": "Skicka in",
+    "create": "Skapa",
+    "unpaid": "obetald",
+    "unpaidPlural": "obetalda",
+    "notSent": "ej skickad",
+    "notSentPlural": "ej skickade",
+    "requestRevision": "Begär ändring"
+  },
+  "invoice": {
+    "listNotFound": "Inga kundfakturor hittades",
+    "listNotFoundDesc": "Justera dina filter eller skapa en ny kundfaktura",
+    "new": "Skicka faktura",
+    "nameHint": "Kort beskrivning av fakturan",
+    "comments": "Kommentar",
+    "commentsHint": "Information för dig eller sektionskassören",
+    "details": "Fakturadetaljer",
+    "customerName": "Kundens namn",
+    "customerNameHint": "Ha med org. nummer om kunden är ny",
+    "dateOfDelivery": "Leveransdatum",
+    "invoiceDate": "Fakturadatum",
+    "ourReference": "Vår referens",
+    "customersReference": "Er referens",
+    "referenceCode": "Referenskod",
+    "subscriptionNumber": "Abonnemangsnummer",
+    "customerOrderReference": "Er orderreferens",
+    "contractNumber": "Kontraktsnummer",
+    "products": "Artiklar",
+    "status": {
+      "pending": "Inväntar godkännande",
+      "approved": "Inväntar skickande",
+      "rejected": "Ändring begärd",
+      "pendingRevised": "Ändring inväntas",
+      "sent": "Skickad"
+    },
+    "markSent": "Markera som skickad",
+    "markNotSent": "Markera som ej skickad",
+    "approveMarkSent": "Godkänn och markera som skickad",
+    "approveSending": "Godkänn för skickande"
+  },
+  "expense": {
+    "listNotFound": "Inga kostnader hittades",
+    "listNotFoundDesc": "Justera dina filter eller skapa en ny kostnad",
+    "newTitle": "Ny kostnad",
+    "editTitle": "Redigera kostnad",
+    "newDescription": "Se till att ha en smal omfattning för varje kostnad för att göra dem lätta att förstå. Kom ihåg att fråga din kassör om instruktioner för hur de vill att inlämnade kostnader ska struktureras.",
+    "type": "Typ",
+    "invoiceType": "Faktura",
+    "expenseType": "Utlägg",
+    "description": "Kommentar",
+    "receipts": "Bildunderlag",
+    "receiptsUpload": "Ladda upp",
+    "name": "Namn",
+    "groupId": "Grupp-ID",
+    "date": "Datum",
+    "person": "Person",
+    "amount": "Summa",
+    "status": "Status",
+    "markPaid": "Markera som betald",
+    "markUnpaid": "Markera som obetald",
+    "approveMarkPaid": "Godkänn och markera som betald",
+    "approvePayment": "Godkänn för betalning"
+  },
+  "zettleSales": {
+    "listNotFound": "Inga försäljningar hittades",
+    "listNotFoundDesc": "Justera dina filter eller registrera en ny försäljning",
+    "create": "Registrera försäljning"
+  },
+  "nameLists": {
+    "title": "Namnlistor",
+    "create": "Skapa namnlista",
+    "listNotFound": "Inga namnlistor hittades",
+    "listNotFoundDesc": "Justera dina filter eller skapa en ny namnlista",
+    "tracked": "Spårad",
+    "people": "Personer",
+    "format": "Listformat",
+    "formatMembers": "Gruppmedlemmar",
+    "formatCustom": "Egna namn",
+    "trackIndividual": "Spåra individuella kostnader",
+    "names": "Namn",
+    "membersNotFound": "Inga medlemmar hittades",
+    "list": "Namnlistor",
+    "listPersonal": "Mina namnlistor",
+    "types": {
+      "event": "Arrangemang",
+      "workFood": "Arbetsmat",
+      "teambuilding": "Teambuilding",
+      "profileClothing": "Profilering"
+    }
+  },
+  "header": {
+    "greeting": "Hej",
+    "login": "Logga in",
+    "logout": "Logga ut"
+  },
+  "requests": {
+    "status": {
+      "pending": "Inväntar godkännande",
+      "approved": "Inväntar betalning",
+      "rejected": "Ändring begärd",
+      "pendingRevised": "Ändring inväntas",
+      "paid": "Betalad",
+      "paidAt": "Markerad som betald "
+    }
+  }
+}

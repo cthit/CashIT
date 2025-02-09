@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RequestStatus {
+  PENDING
+  PENDING_REVISED
+  APPROVED
+  REJECTED
+}
+
+model Expense {
+  id                Int     @id @default(autoincrement())
+  gammaSuperGroupId String?
+  gammaGroupId      String?
+  gammaUserId       String
+
+  amount      Int
+  description String
+  name        String
+  occurredAt  DateTime @db.Date
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  paidAt    DateTime?
+  receipts  NamedMedia[]
+  type      ExpenseType
+  status    RequestStatus @default(PENDING)
+}
+
+enum ExpenseType {
+  EXPENSE
+  INVOICE
+  CARD
+}
+
+model Invoice {
+  id                Int     @id @default(autoincrement())
+  gammaSuperGroupId String?
+  gammaGroupId      String?
+  gammaUserId       String
+  inGroup           Boolean
+
+  name         String
+  customerName String
+  items        InvoiceItem[]
+
+  description                String?
+  deliveryDate               DateTime?
+  customerReference          String?
+  customerReferenceCode      String?
+  customerSubscriptionNumber String?
+  customerOrderReference     String?
+  customerContractNumber     String?
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  sentAt    DateTime?
+  status    RequestStatus @default(PENDING)
+}
+
+model InvoiceItem {
+  id     Int            @id @default(autoincrement())
+  amount Int
+  count  Int
+  name   String
+  vat    InvoiceItemVat @default(VAT_0)
+
+  invoices Invoice[]
+}
+
+enum InvoiceItemVat {
+  VAT_0
+  VAT_6
+  VAT_12
+  VAT_25
+}
+
+model NameList {
+  id                Int                  @id @default(autoincrement())
+  gammaSuperGroupId String?
+  gammaGroupId      String?
+  gammaUserId       String
+  type              NameListType
+  names             NameListEntry[]
+  gammaNames        GammaNameListEntry[]
+  tracked           Boolean              @default(false)
+
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  occurredAt DateTime @db.Date
+}
+
+enum NameListType {
+  EVENT
+  WORK_FOOD
+  TEAMBUILDING
+  PROFILE_CLOTHING
+}
+
+model GammaNameListEntry {
+  nameList    NameList @relation(fields: [nameListId], references: [id], onDelete: Cascade)
+  nameListId  Int
+  gammaUserId String
+  cost        Int
+
+  @@id([gammaUserId, nameListId])
+}
+
+model NameListEntry {
+  id         Int      @id @default(autoincrement())
+  nameList   NameList @relation(fields: [nameListId], references: [id], onDelete: Cascade)
+  nameListId Int
+  name       String
+  cost       Int
+
+  @@unique([nameListId, name])
+}
+
+model Media {
+  sha256     String       @id
+  extension  String
+  createdAt  DateTime     @default(now())
+  namedMedia NamedMedia[]
+}
+
+model NamedMedia {
+  id     Int    @id @default(autoincrement())
+  sha256 String
+  name   String
+  media  Media  @relation(fields: [sha256], references: [sha256], onDelete: Cascade)
+
+  expenses Expense[]
+
+  @@unique([sha256, name])
+}
+
+model ZettleSale {
+  id                Int      @id @default(autoincrement())
+  gammaSuperGroupId String
+  gammaGroupId      String
+  gammaUserId       String
+  amount            Int
+  description       String
+  name              String
+  saleDate          DateTime @db.Date
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  @@unique([gammaGroupId, saleDate])
+}

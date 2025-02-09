@@ -1,0 +1,150 @@
+{
+  "home": {
+    "title": "Home",
+    "groups": "Your Groups",
+    "groupsDescription": "Operations in division groups",
+    "personal": "Operations Outside Groups",
+    "personalDescription": "Requests, work groups, etc.",
+    "division": "Entire Division",
+    "divisionDescription": "Analyze the entire division's economy",
+    "groupExpenses": "Expenses in Groups",
+    "groupInvoices": "Invoices from Groups",
+    "privateExpenses": "Private Expenses",
+    "privateInvoices": "Private Invoices",
+    "zettleSales": "Zettle Sales",
+    "showInactiveGroups": "Show inactive groups"
+  },
+  "group": {
+    "treasurer": "Treasurer",
+    "member": "Member",
+    "active": "Active",
+    "inactive": "Inactive",
+    "toolsResources": "Tools and Resources",
+    "economicalOperations": "Economical Operations"
+  },
+  "categories": {
+    "nameLists": "Name Lists",
+    "expenses": "Expenses",
+    "invoices": "Customer Invoices",
+    "teambuilding": "Teambuilding",
+    "food": "Food"
+  },
+  "general": {
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "economy": {
+    "name": "Name",
+    "date": "Date",
+    "person": "Person",
+    "amount": "Amount",
+    "cost": "Cost",
+    "price": "Price",
+    "total": "Total",
+    "amountTotal": "Total Amount",
+    "status": "Status",
+    "submit": "Submit",
+    "create": "Create",
+    "unpaid": "unpaid",
+    "unpaidPlural": "unpaid",
+    "notSent": "not sent",
+    "notSentPlural": "not sent",
+    "requestRevision": "Request Revision"
+  },
+  "invoice": {
+    "listNotFound": "No invoices found",
+    "listNotFoundDesc": "Adjust your filters or create a new invoice",
+    "new": "Send an Invoice",
+    "nameHint": "Short description of the invoice",
+    "comments": "Comments",
+    "commentsHint": "Information for you or the division treasurer",
+    "details": "Invoice Details",
+    "customerName": "Customer Name",
+    "customerNameHint": "Include org. number if the customer is new",
+    "dateOfDelivery": "Date of Delivery",
+    "invoiceDate": "Invoie Date",
+    "ourReference": "Our Reference",
+    "customersReference": "Customers Reference",
+    "referenceCode": "Reference Code",
+    "subscriptionNumber": "Subscription Number",
+    "customerOrderReference": "Customer Order Reference",
+    "contractNumber": "Contract Number",
+    "products": "Invoice Products",
+    "status": {
+      "pending": "Awaiting Approval",
+      "approved": "Awating Sending",
+      "rejected": "Revision Requested",
+      "pendingRevised": "Revision Pending",
+      "sent": "Sent"
+    },
+    "markSent": "Mark as sent",
+    "markNotSent": "Mark as not sent",
+    "approveMarkSent": "Approve and mark as sent",
+    "approveSending": "Approve for sending"
+  },
+  "expense": {
+    "listNotFound": "No expenses found",
+    "listNotFoundDesc": "Adjust your filters or create a new expense",
+    "newTitle": "New Expense",
+    "editTitle": "Edit Expense",
+    "newDescription": "Make sure to have a narrow scope for each expense to make them easy to digest. Remember to ask your treasurer for any instructions on how they want submitted expenses to be structured.",
+    "type": "Type",
+    "invoiceType": "Invoice",
+    "expenseType": "Reimbursement",
+    "description": "Comment",
+    "receipts": "Receipts",
+    "receiptsUpload": "Upload Receipts",
+    "name": "Name",
+    "date": "Date",
+    "groupId": "Group ID",
+    "person": "Person",
+    "amount": "Amount",
+    "status": "Status",
+    "markPaid": "Mark as paid",
+    "markUnpaid": "Mark as unpaid",
+    "approveMarkPaid": "Approve and mark as paid",
+    "approvePayment": "Approve for payment"
+  },
+  "zettleSales": {
+    "listNotFound": "No sales found",
+    "listNotFoundDesc": "Adjust your filters or register a new sale",
+    "create": "Register sale"
+  },
+  "nameLists": {
+    "title": "Name lists",
+    "create": "Create name list",
+    "listNotFound": "No name lists found",
+    "listNotFoundDesc": "Adjust your filters or create a new name list",
+    "tracked": "Tracked",
+    "people": "People",
+    "format": "Name list format",
+    "formatMembers": "Group members",
+    "formatCustom": "Custom list",
+    "trackIndividual": "Track individual costs",
+    "names": "Names",
+    "membersNotFound": "No members found",
+    "list": "Name lists",
+    "listPersonal": "My name lists",
+    "types": {
+      "event": "Event",
+      "workFood": "Work Food",
+      "teambuilding": "Teambuilding",
+      "profileClothing": "Profile Clothing"
+    }
+  },
+  "header": {
+    "greeting": "Hello,",
+    "login": "Log in",
+    "logout": "Log out"
+  },
+  "requests": {
+    "status": {
+      "pending": "Awaiting Approval",
+      "approved": "Awating Payment",
+      "rejected": "Revision Requested",
+      "pendingRevised": "Revision Pending",
+      "paid": "Paid",
+      "paidAt": "Marked paid at "
+    }
+  }
+}

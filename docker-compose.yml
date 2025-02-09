@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:16.0-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cashit
+    ports:
+      - "5432:5432"

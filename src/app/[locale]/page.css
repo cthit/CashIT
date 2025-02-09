@@ -1,0 +1,8 @@
+ul .inactiveGroup {
+  display: none;
+}
+
+/* Show .inactive divs when the checkbox is checked */
+:has(#switch\:showInactive\:input:checked) ul .inactiveGroup {
+  display: block;
+}
