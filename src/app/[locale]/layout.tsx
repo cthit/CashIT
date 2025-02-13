@@ -1,9 +1,10 @@
 //import localFont from 'next/font/local';
 //import './globals.css';
-import { Provider } from '@/components/ui/provider';
 import Header from '@/components/Header/Header';
-import { Container } from '@chakra-ui/react';
+import { Container, Heading, Text } from '@chakra-ui/react';
 import { Metadata } from 'next';
+import SessionService from '@/services/sessionService';
+import i18nService from '@/services/i18nService';
 
 /*const geistSans = localFont({
   src: '../fonts/GeistVF.woff',
@@ -29,15 +30,24 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+  const user = await SessionService.getGammaUser();
 
   return (
-    <html lang={locale}>
-      <body>
-        <Provider>
-          <Header locale={locale} />
-          <Container py="6">{children}</Container>
-        </Provider>
-      </body>
-    </html>
+    <>
+      <Header locale={locale} />
+      <Container py="6">
+        {user ? children : <NotLoggedIn locale={locale} />}
+      </Container>
+    </>
   );
 }
+
+const NotLoggedIn = ({ locale }: { locale: string }) => {
+  const l = i18nService.getLocale(locale);
+  return (
+    <>
+      <Heading>{l.account.notLoggedIn}</Heading>
+      <Text>{l.account.notLoggedInDesc}</Text>
+    </>
+  );
+};

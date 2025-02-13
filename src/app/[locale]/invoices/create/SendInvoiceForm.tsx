@@ -205,7 +205,7 @@ export default function SendInvoiceForm({
           >
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
-          <Field label={l.invoice.comments} helperText={l.invoice.commentsHint}>
+          <Field label={l.general.comment} helperText={l.invoice.commentsHint}>
             <Textarea
               value={comments}
               onChange={(e) => setComments(e.target.value)}
@@ -240,7 +240,7 @@ export default function SendInvoiceForm({
           </Field>
 
           <Field label={l.invoice.invoiceDate} required>
-            <Input disabled value="Determined when it is sent" />
+            <Input disabled value={l.invoice.determinedWhenSent} />
           </Field>
 
           <Field label={l.invoice.ourReference} required>
@@ -308,7 +308,7 @@ export default function SendInvoiceForm({
           {items.map((item, index) => (
             <Card.Root key={index}>
               <Card.Body>
-                <Field label="Product">
+                <Field label="Product" required>
                   <Input
                     value={item.name}
                     onChange={(e) => {
@@ -319,7 +319,11 @@ export default function SendInvoiceForm({
                   />
                 </Field>
 
-                <Field label="Price (each)" invalid={isNaN(+item.amount)}>
+                <Field
+                  label="Price (each)"
+                  invalid={isNaN(+item.amount)}
+                  required
+                >
                   <Input
                     value={item.amount}
                     onChange={(e) => {
@@ -330,7 +334,7 @@ export default function SendInvoiceForm({
                   />
                 </Field>
 
-                <Field label="Amount" invalid={isNaN(+item.count)}>
+                <Field label="Amount" invalid={isNaN(+item.count)} required>
                   <Input
                     value={item.count}
                     onChange={(e) => {
@@ -341,7 +345,7 @@ export default function SendInvoiceForm({
                   />
                 </Field>
 
-                <Field label="VAT">
+                <Field label="VAT" required>
                   <SelectRoot
                     collection={vatTypes}
                     value={[item.vat]}
@@ -393,7 +397,7 @@ export default function SendInvoiceForm({
               type="submit"
               disabled={items.length === 0}
             >
-              Submit
+              {l.economy.submit}
             </Button>
           </Field>
         </Fieldset.Content>

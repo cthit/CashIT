@@ -54,19 +54,26 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group && (
+        {group ? (
           <BreadcrumbLink as={Link} href={'/group?' + idParam}>
             {group.prettyName}
           </BreadcrumbLink>
+        ) : (
+          !fetchAll && (
+            <BreadcrumbLink as={Link} href="/groupless">
+              {l.home.personal}
+            </BreadcrumbLink>
+          )
         )}
         <BreadcrumbCurrentLink>{l.categories.expenses}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
       <ExpensesTable
         e={expenses}
-        showGroups={!personal && useSuperGroup}
+        showGroups={fetchAll || (!personal && useSuperGroup)}
         locale={locale}
         isTreasurer={isTreasurer || divisionTreasurer}
+        personal={personal && !fetchAll}
       />
       <Box p="4" />
       {(personal || !useSuperGroup) && (

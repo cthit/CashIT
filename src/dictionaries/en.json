@@ -31,7 +31,9 @@
   },
   "general": {
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "description": "Description",
+    "comment": "Comment"
   },
   "economy": {
     "name": "Name",
@@ -70,6 +72,7 @@
     "customerOrderReference": "Customer Order Reference",
     "contractNumber": "Contract Number",
     "products": "Invoice Products",
+    "determinedWhenSent": "Determined when it is sent",
     "status": {
       "pending": "Awaiting Approval",
       "approved": "Awating Sending",
@@ -91,7 +94,6 @@
     "type": "Type",
     "invoiceType": "Invoice",
     "expenseType": "Reimbursement",
-    "description": "Comment",
     "receipts": "Receipts",
     "receiptsUpload": "Upload Receipts",
     "name": "Name",
@@ -146,5 +148,9 @@
       "paid": "Paid",
       "paidAt": "Marked paid at "
     }
+  },
+  "account": {
+    "notLoggedIn": "Not logged in",
+    "notLoggedInDesc": "Log in to access the system"
   }
 }

@@ -112,9 +112,7 @@ export default function CreateNameListForm({
             trackIndividual,
             new Date(date)
           ).then(() =>
-            router.push(
-              g ? `/name-lists?gid=${g.id}` : '/name-lists'
-            )
+            router.push(g ? `/name-lists?gid=${g.id}` : '/name-lists')
           )
         : g && sg !== undefined
         ? createNameListForGroup(
@@ -174,7 +172,7 @@ export default function CreateNameListForm({
         value: NameListType.TEAMBUILDING
       },
       {
-        label: l.nameLists.types.workFood,
+        label: l.nameLists.types.profileClothing,
         value: NameListType.PROFILE_CLOTHING
       }
     ]
@@ -238,7 +236,7 @@ export default function CreateNameListForm({
             />
           </Field>
 
-          <Field label={l.expense.description}>
+          <Field label={l.general.comment}>
             <Textarea />
           </Field>
 

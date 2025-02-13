@@ -25,17 +25,23 @@ export default async function Page(props: {
   }
 
   const expense = await ExpenseService.getById(+id);
-  if (expense === null || expense.gammaGroupId === null) {
+  if (expense === null) {
+    notFound();
+  }
+  const personal = expense.gammaGroupId === null;
+
+  const group = !personal
+    ? (await SessionService.getGroups()).find(
+        (g) => g.group.id === expense.gammaGroupId
+      )?.group
+    : undefined;
+
+  if (!personal && group === undefined) {
     notFound();
   }
 
-  const group = (await SessionService.getGroups()).find(
-    (g) => g.group.id === expense.gammaGroupId
-  )?.group;
-
-  if (group === undefined) {
-    notFound();
-  }
+  const user = (await SessionService.getGammaUser())?.user;
+  const canEdit = group || user?.id === expense.gammaUserId;
 
   return (
     <>
@@ -43,12 +49,27 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href={'/group' + (expense.gammaGroupId ? '?gid=' + expense.gammaGroupId : '')}>
-          {group.prettyName}
-        </BreadcrumbLink>
+        {group ? (
+          <BreadcrumbLink
+            as={Link}
+            href={
+              '/group' +
+              (expense.gammaGroupId ? '?gid=' + expense.gammaGroupId : '')
+            }
+          >
+            {group.prettyName}
+          </BreadcrumbLink>
+        ) : (
+          <BreadcrumbLink as={Link} href="/groupless">
+            {l.home.personal}
+          </BreadcrumbLink>
+        )}
         <BreadcrumbLink
           as={Link}
-          href={'/expenses' + (expense.gammaGroupId ? '?gid=' + expense.gammaGroupId : '')}
+          href={
+            '/expenses' +
+            (expense.gammaGroupId ? '?gid=' + expense.gammaGroupId : '')
+          }
         >
           {l.categories.expenses}
         </BreadcrumbLink>
@@ -59,6 +80,7 @@ export default async function Page(props: {
         gid={expense.gammaGroupId ?? undefined}
         e={expense}
         locale={locale}
+        readOnly={!canEdit}
       />
     </>
   );

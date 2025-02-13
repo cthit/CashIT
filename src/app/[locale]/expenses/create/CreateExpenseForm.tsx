@@ -41,10 +41,12 @@ import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 
 export default function CreateExpenseForm({
+  readOnly,
   locale,
   gid,
   e
 }: {
+  readOnly?: boolean;
   locale: string;
   gid?: string;
   e?: Prisma.ExpenseGetPayload<{ include: { receipts: true } }>;
@@ -153,7 +155,7 @@ export default function CreateExpenseForm({
           <Text color="fg.muted" textStyle="sm">
             {l.expense.newDescription}
           </Text>
-          <Field label={l.economy.name} required>
+          <Field label={l.general.description} disabled={readOnly} required>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
 
@@ -162,11 +164,16 @@ export default function CreateExpenseForm({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              disabled={readOnly}
             />
           </Field>
 
           <Field label={l.economy.amountTotal} required>
-            <Input value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <Input
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              disabled={readOnly}
+            />
           </Field>
 
           <Field label={l.expense.type} required>
@@ -174,6 +181,7 @@ export default function CreateExpenseForm({
               collection={expenseTypes}
               value={type ? [type] : []}
               onValueChange={({ value }) => setType(value?.[0] as ExpenseType)}
+              disabled={readOnly}
             >
               <SelectLabel />
               <SelectTrigger>
@@ -189,8 +197,9 @@ export default function CreateExpenseForm({
             </SelectRoot>
           </Field>
 
-          <Field label={l.expense.description}>
+          <Field label={l.general.comment}>
             <Textarea
+              disabled={readOnly}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -198,6 +207,7 @@ export default function CreateExpenseForm({
 
           <Field label={l.expense.receipts}>
             <FileUploadRoot
+              disabled={readOnly}
               maxFiles={10}
               onFileChange={({ acceptedFiles }) =>
                 setFiles(deduplicateFiles(acceptedFiles))
@@ -231,11 +241,13 @@ export default function CreateExpenseForm({
             </FileUploadRoot>
           </Field>
 
-          <Field>
-            <Button variant="surface" type="submit">
-              {l.economy.submit}
-            </Button>
-          </Field>
+          {!readOnly && (
+            <Field>
+              <Button variant="surface" type="submit">
+                {l.economy.submit}
+              </Button>
+            </Field>
+          )}
         </Fieldset.Content>
       </Fieldset.Root>
     </form>

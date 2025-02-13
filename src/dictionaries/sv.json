@@ -31,7 +31,9 @@
   },
   "general": {
     "edit": "Redigera",
-    "delete": "Radera"
+    "delete": "Radera",
+    "description": "Beskrivning",
+    "comment": "Kommentar"
   },
   "economy": {
     "name": "Namn",
@@ -56,7 +58,6 @@
     "listNotFoundDesc": "Justera dina filter eller skapa en ny kundfaktura",
     "new": "Skicka faktura",
     "nameHint": "Kort beskrivning av fakturan",
-    "comments": "Kommentar",
     "commentsHint": "Information för dig eller sektionskassören",
     "details": "Fakturadetaljer",
     "customerName": "Kundens namn",
@@ -70,6 +71,7 @@
     "customerOrderReference": "Er orderreferens",
     "contractNumber": "Kontraktsnummer",
     "products": "Artiklar",
+    "determinedWhenSent": "Bestäms vid utskick",
     "status": {
       "pending": "Inväntar godkännande",
       "approved": "Inväntar skickande",
@@ -146,5 +148,9 @@
       "paid": "Betalad",
       "paidAt": "Markerad som betald "
     }
+  },
+  "account": {
+    "notLoggedIn": "Inte inloggad",
+    "notLoggedInDesc": "Logga in för att komma åt systemet"
   }
 }
