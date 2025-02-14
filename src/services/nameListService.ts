@@ -1,6 +1,7 @@
 import prisma from '@/prisma';
 import GammaService from './gammaService';
 import { NameListType, Prisma } from '@prisma/client';
+import i18nService from './i18nService';
 
 export default class NameListService {
   static async getAll() {
@@ -221,5 +222,20 @@ export default class NameListService {
         id
       }
     });
+  }
+
+  static prettifyType(type: NameListType, locale: string) {
+    const l = i18nService.getLocale(locale);
+
+    switch (type) {
+      case 'EVENT':
+        return l.nameLists.types.event;
+      case 'PROFILE_CLOTHING':
+        return l.nameLists.types.profileClothing;
+      case 'TEAMBUILDING':
+        return l.nameLists.types.teambuilding;
+      case 'WORK_FOOD':
+        return l.nameLists.types.workFood;
+    }
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { pdf } from '@react-pdf/renderer';
 import { useCallback, useState } from 'react';
 import {
   Box,
@@ -35,6 +36,8 @@ import {
 } from '@/actions/nameLists';
 import { useRouter } from 'next/navigation';
 import NameListService from '@/services/nameListService';
+import FileService from '@/services/fileService';
+import NameListPdf from '@/components/NameListPdf/NameListPdf';
 
 interface GroupNameItem {
   name: string;
@@ -163,6 +166,13 @@ export default function CreateNameListForm({
     ]
   );
 
+  const exportPdf = useCallback(async () => {
+    if (!nl) return;
+
+    const blob = await pdf(<NameListPdf nl={nl} locale={locale} />).toBlob();
+    FileService.saveToFile('name-list.pdf', blob);
+  }, [locale, nl]);
+
   const listTypes = createListCollection({
     items: [
       { label: l.nameLists.types.event, value: NameListType.EVENT },
@@ -181,6 +191,12 @@ export default function CreateNameListForm({
   return (
     <form onSubmit={createList}>
       <Heading>{l.nameLists.create}</Heading>
+      <Box p="1.5" />
+      {nl && (
+        <Button variant="surface" type="button" onClick={exportPdf}>
+          {l.general.download}
+        </Button>
+      )}
       <Box p="2.5" />
       <Fieldset.Root width={400}>
         <Fieldset.Content>
@@ -271,6 +287,11 @@ export default function CreateNameListForm({
             <Button variant="surface" type="submit">
               {l.economy.submit}
             </Button>
+            {nl && (
+              <Button variant="surface" type="button" onClick={exportPdf}>
+                Download
+              </Button>
+            )}
           </Field>
         </Fieldset.Content>
       </Fieldset.Root>

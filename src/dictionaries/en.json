@@ -33,7 +33,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "description": "Description",
-    "comment": "Comment"
+    "comment": "Comment",
+    "download": "Download"
   },
   "economy": {
     "name": "Name",

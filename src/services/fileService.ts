@@ -100,4 +100,17 @@ export default class FileService {
       types.includes(mimeTypes[key].type)
     );
   }
+
+  static saveToFile(filename: string, content: Blob) {
+    const url = window.URL.createObjectURL(content);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
 }
