@@ -116,6 +116,7 @@
   "nameLists": {
     "title": "Name lists",
     "create": "Create name list",
+    "edit": "Edit name list",
     "listNotFound": "No name lists found",
     "listNotFoundDesc": "Adjust your filters or create a new name list",
     "tracked": "Tracked",

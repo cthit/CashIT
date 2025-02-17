@@ -29,18 +29,22 @@ export default async function Page(props: {
   }
   const personal = invoice.gammaGroupId === null;
 
-  const group = !personal
-    ? (await SessionService.getGroups()).find(
-        (g) => g.group.id === invoice.gammaGroupId
-      )?.group
-    : undefined;
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
 
-  if (!personal && group === undefined) {
+  const group =
+    !personal && !divisionTreasurer
+      ? (await SessionService.getGroups()).find(
+          (g) => g.group.id === invoice.gammaGroupId
+        )?.group
+      : undefined;
+
+  if (!personal && !divisionTreasurer && group === undefined) {
     notFound();
   }
 
   const user = (await SessionService.getGammaUser())?.user;
-  const canEdit = group || user?.id === invoice.gammaUserId;
+  const canEdit =
+    divisionTreasurer || group || user?.id === invoice.gammaUserId;
 
   return (
     <>

@@ -76,7 +76,7 @@ export default async function Page(props: {
         personal={personal && !fetchAll}
       />
       <Box p="4" />
-      {(personal || !useSuperGroup) && (
+      {!fetchAll && (personal || !useSuperGroup) && (
         <Link href={'/expenses/create' + (personal ? '' : '?gid=' + gid)}>
           <Button variant="surface">{l.expense.newTitle}</Button>
         </Link>

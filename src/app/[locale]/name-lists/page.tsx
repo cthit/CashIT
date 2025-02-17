@@ -72,7 +72,7 @@ export default async function Page(props: {
         showGroups={fetchAll}
       />
       <Box p="4" />
-      {(personal || !useSuperGroup) && (
+      {!fetchAll && (personal || !useSuperGroup) && (
         <Link href={'/name-lists/create' + (personal ? '' : '?gid=' + gid)}>
           <Button variant="surface">{l.nameLists.create}</Button>
         </Link>

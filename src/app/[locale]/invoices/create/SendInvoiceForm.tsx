@@ -70,11 +70,13 @@ const invoiceToForm = (item: Prisma.InvoiceItemGetPayload<{}>) =>
   } satisfies FormInvoiceItem);
 
 export default function SendInvoiceForm({
+  readOnly,
   locale,
   gid,
   user,
   i
 }: {
+  readOnly?: boolean;
   locale: string;
   gid?: string;
   user?: GammaUser;
@@ -199,7 +201,8 @@ export default function SendInvoiceForm({
       <Fieldset.Root maxW="md" size="lg">
         <Fieldset.Content mt="0.25rem">
           <Field
-            label={l.economy.name}
+            disabled={readOnly}
+            label={l.general.description}
             helperText={l.invoice.nameHint}
             required
           >
@@ -207,6 +210,7 @@ export default function SendInvoiceForm({
           </Field>
           <Field label={l.general.comment} helperText={l.invoice.commentsHint}>
             <Textarea
+              disabled={readOnly}
               value={comments}
               onChange={(e) => setComments(e.target.value)}
             />
@@ -221,6 +225,7 @@ export default function SendInvoiceForm({
         <Fieldset.Content mt="0.25rem">
           <Separator />
           <Field
+            disabled={readOnly}
             label={l.invoice.customerName}
             helperText={l.invoice.customerNameHint}
             required
@@ -231,7 +236,7 @@ export default function SendInvoiceForm({
             />
           </Field>
 
-          <Field label={l.invoice.dateOfDelivery}>
+          <Field disabled={readOnly} label={l.invoice.dateOfDelivery}>
             <Input
               type="date"
               value={deliveryDate}
@@ -239,43 +244,43 @@ export default function SendInvoiceForm({
             />
           </Field>
 
-          <Field label={l.invoice.invoiceDate} required>
+          <Field disabled={readOnly} label={l.invoice.invoiceDate} required>
             <Input disabled value={l.invoice.determinedWhenSent} />
           </Field>
 
-          <Field label={l.invoice.ourReference} required>
+          <Field disabled={readOnly} label={l.invoice.ourReference} required>
             <Input disabled value={user?.firstName + ' ' + user?.lastName} />
           </Field>
 
-          <Field label={l.invoice.customersReference}>
+          <Field disabled={readOnly} label={l.invoice.customersReference}>
             <Input
               value={customerReference}
               onChange={(e) => setCustomerReference(e.target.value)}
             />
           </Field>
 
-          <Field label={l.invoice.referenceCode}>
+          <Field disabled={readOnly} label={l.invoice.referenceCode}>
             <Input
               value={referenceCode}
               onChange={(e) => setReferenceCode(e.target.value)}
             />
           </Field>
 
-          <Field label={l.invoice.subscriptionNumber}>
+          <Field disabled={readOnly} label={l.invoice.subscriptionNumber}>
             <Input
               value={subscriptionNumber}
               onChange={(e) => setSubscriptionNumber(e.target.value)}
             />
           </Field>
 
-          <Field label={l.invoice.customerOrderReference}>
+          <Field disabled={readOnly} label={l.invoice.customerOrderReference}>
             <Input
               value={customerOrderReference}
               onChange={(e) => setCustomerOrderReference(e.target.value)}
             />
           </Field>
 
-          <Field label={l.invoice.contractNumber}>
+          <Field disabled={readOnly} label={l.invoice.contractNumber}>
             <Input
               value={contractNumber}
               onChange={(e) => setContractNumber(e.target.value)}
@@ -290,6 +295,7 @@ export default function SendInvoiceForm({
         <Fieldset.Legend>
           {l.invoice.products}{' '}
           <IconButton
+            disabled={readOnly}
             variant="subtle"
             size="sm"
             onClick={() =>
@@ -308,7 +314,7 @@ export default function SendInvoiceForm({
           {items.map((item, index) => (
             <Card.Root key={index}>
               <Card.Body>
-                <Field label="Product" required>
+                <Field label="Product" disabled={readOnly} required>
                   <Input
                     value={item.name}
                     onChange={(e) => {
@@ -320,6 +326,7 @@ export default function SendInvoiceForm({
                 </Field>
 
                 <Field
+                  disabled={readOnly}
                   label="Price (each)"
                   invalid={isNaN(+item.amount)}
                   required
@@ -334,7 +341,12 @@ export default function SendInvoiceForm({
                   />
                 </Field>
 
-                <Field label="Amount" invalid={isNaN(+item.count)} required>
+                <Field
+                  disabled={readOnly}
+                  label="Amount"
+                  invalid={isNaN(+item.count)}
+                  required
+                >
                   <Input
                     value={item.count}
                     onChange={(e) => {
@@ -345,7 +357,7 @@ export default function SendInvoiceForm({
                   />
                 </Field>
 
-                <Field label="VAT" required>
+                <Field disabled={readOnly} label="VAT" required>
                   <SelectRoot
                     collection={vatTypes}
                     value={[item.vat]}
@@ -369,6 +381,7 @@ export default function SendInvoiceForm({
                   </SelectRoot>
                 </Field>
                 <IconButton
+                  disabled={readOnly}
                   variant="subtle"
                   size="sm"
                   onClick={() => {
@@ -395,7 +408,7 @@ export default function SendInvoiceForm({
             <Button
               variant="surface"
               type="submit"
-              disabled={items.length === 0}
+              disabled={readOnly || items.length === 0}
             >
               {l.economy.submit}
             </Button>

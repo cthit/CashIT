@@ -36,6 +36,9 @@ export default async function Page(props: {
 
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const fetchAll = show === 'all' && divisionTreasurer;
+  const isTreasurer = fetchAll
+    ? false
+    : await SessionService.isTreasurerInGroup(group!.id);
 
   const invoices = fetchAll
     ? await InvoiceService.getAllPrettified()
@@ -72,7 +75,7 @@ export default async function Page(props: {
         personal={personal && !fetchAll}
       />
       <Box p="4" />
-      {(personal || !useSuperGroup) && (
+      {!fetchAll && (personal || (!useSuperGroup && isTreasurer)) && (
         <Link href={'/invoices/create' + (personal ? '' : '?gid=' + gid)}>
           <Button variant="surface">{l.invoice.new}</Button>
         </Link>

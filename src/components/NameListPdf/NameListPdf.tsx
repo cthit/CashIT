@@ -8,7 +8,6 @@ const styles = StyleSheet.create({
   },
   page: {
     flexDirection: 'column',
-    backgroundColor: '#E4E4E4',
     fontSize: 15
   },
   title: {
@@ -73,7 +72,9 @@ const NameListPdf = ({
             <Text>{nl.name}</Text>
           </View>
           <View>
-            <Text>Exporterad {i18nService.formatDate(new Date())}</Text>
+            <Text style={styles.dataTitle}>
+              Exporterad {i18nService.formatDate(new Date())}
+            </Text>
           </View>
         </View>
         <View style={styles.section}>

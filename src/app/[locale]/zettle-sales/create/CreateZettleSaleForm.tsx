@@ -24,7 +24,7 @@ export default function CreateZettleSaleForm({
 
   const [name, setName] = useState<string>(s?.name ?? '');
   const [date, setDate] = useState<string>(
-    s?.saleDate ? i18nService.formatDate(s.saleDate, false) : ''
+    i18nService.formatDate(s?.saleDate ?? new Date(), false)
   );
   const [amount, setAmount] = useState<string>(s?.amount?.toString() ?? '');
 

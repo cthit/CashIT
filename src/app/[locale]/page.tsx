@@ -15,7 +15,13 @@ import {
   Text
 } from '@chakra-ui/react';
 import Link from 'next/link';
-import { PiCoins, PiPlus, PiReceipt, PiUsersThree } from 'react-icons/pi';
+import {
+  PiCashRegister,
+  PiCoins,
+  PiPlus,
+  PiReceipt,
+  PiUsersThree
+} from 'react-icons/pi';
 import './page.css';
 import ExpenseService from '@/services/expenseService';
 import InvoiceService from '@/services/invoiceService';
@@ -110,8 +116,6 @@ export default async function Home(props: {
               )}
               <NavCard
                 topLink="/expenses?show=all"
-                bottomLink="/expenses?show=all"
-                bottomChildren={l.home.privateExpenses}
               >
                 <Icon size="2xl">
                   <PiCoins />
@@ -140,8 +144,6 @@ export default async function Home(props: {
               )}
               <NavCard
                 topLink="/invoices?show=all"
-                bottomLink="/invoices?show=all"
-                bottomChildren={l.home.privateInvoices}
               >
                 <Icon size="2xl">
                   <PiReceipt />
@@ -154,10 +156,9 @@ export default async function Home(props: {
 
             <NavCard
               topLink={'/zettle-sales?show=all'}
-              bottomLink={'/zettle-sales/create'}
             >
               <Icon size="2xl">
-                <PiReceipt />
+                <PiCashRegister />
               </Icon>
               <Heading size="lg" mt="2">
                 {l.home.zettleSales}
@@ -166,7 +167,6 @@ export default async function Home(props: {
 
             <NavCard
               topLink={'/name-lists?show=all'}
-              bottomLink={'/name-lists/create'}
             >
               <Icon size="2xl">
                 <PiUsersThree />

@@ -34,7 +34,7 @@ const ZettleSalesTable = ({
     <Table.Root>
       <Table.Header>
         <Table.Row>
-          <Table.ColumnHeader>{l.expense.name}</Table.ColumnHeader>
+          <Table.ColumnHeader>{l.general.description}</Table.ColumnHeader>
           {showGroups && (
             <Table.ColumnHeader>{l.expense.groupId}</Table.ColumnHeader>
           )}

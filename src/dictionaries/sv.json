@@ -11,7 +11,7 @@
     "groupInvoices": "Fakturor från grupper",
     "privateExpenses": "Privata kostnader",
     "privateInvoices": "Privata fakturor",
-    "zettleSales": "Kassaförsäljning",
+    "zettleSales": "Zettle-försäljning",
     "showInactiveGroups": "Visa avstigna grupper"
   },
   "group": {
@@ -116,6 +116,7 @@
   "nameLists": {
     "title": "Namnlistor",
     "create": "Skapa namnlista",
+    "edit": "Redigera namnlista",
     "listNotFound": "Inga namnlistor hittades",
     "listNotFoundDesc": "Justera dina filter eller skapa en ny namnlista",
     "tracked": "Spårad",

@@ -101,17 +101,23 @@ export default function CreateNameListForm({
     async (event: React.FormEvent) => {
       event.preventDefault();
       const useMembers = nameSource === 'members';
+
+      const customNames = !useMembers
+        ? names.map((n) => ({ name: n.name, cost: +n.amount }))
+        : [];
+      const gammaNames = useMembers
+        ? groupNames
+            .map((n) => ({ gammaUserId: n.id, cost: +n.amount }))
+            .filter((n) => n.cost > 0)
+        : [];
+
       edited
         ? editNameList(
             nl.id,
             name,
             type,
-            !useMembers
-              ? names.map((n) => ({ name: n.name, cost: +n.amount }))
-              : [],
-            useMembers
-              ? groupNames.map((n) => ({ gammaUserId: n.id, cost: +n.amount }))
-              : [],
+            customNames,
+            gammaNames,
             trackIndividual,
             new Date(date)
           ).then(() =>
@@ -122,30 +128,16 @@ export default function CreateNameListForm({
             g.id,
             name,
             type,
-            !useMembers
-              ? names.map((n) => ({ name: n.name, cost: +n.amount }))
-              : [],
-            useMembers
-              ? groupNames.map((n) => ({
-                  gammaUserId: n.id,
-                  cost: +n.amount
-                }))
-              : [],
+            customNames,
+            gammaNames,
             trackIndividual,
             new Date(date)
           ).then(() => router.push(`/name-lists?gid=${g.id}`))
         : createPersonalNameList(
             name,
             type,
-            !useMembers
-              ? names.map((n) => ({ name: n.name, cost: +n.amount }))
-              : [],
-            useMembers
-              ? groupNames.map((n) => ({
-                  gammaUserId: n.id,
-                  cost: +n.amount
-                }))
-              : [],
+            customNames,
+            gammaNames,
             trackIndividual,
             new Date(date)
           ).then(() => router.push('/name-lists'));
@@ -170,7 +162,10 @@ export default function CreateNameListForm({
     if (!nl) return;
 
     const blob = await pdf(<NameListPdf nl={nl} locale={locale} />).toBlob();
-    FileService.saveToFile('name-list.pdf', blob);
+    FileService.saveToFile(
+      `name-list-${nl.id}-${new Date().getTime()}.pdf`,
+      blob
+    );
   }, [locale, nl]);
 
   const listTypes = createListCollection({
@@ -190,7 +185,7 @@ export default function CreateNameListForm({
 
   return (
     <form onSubmit={createList}>
-      <Heading>{l.nameLists.create}</Heading>
+      <Heading>{nl ? l.nameLists.edit : l.nameLists.create}</Heading>
       <Box p="1.5" />
       {nl && (
         <Button variant="surface" type="button" onClick={exportPdf}>
@@ -200,7 +195,7 @@ export default function CreateNameListForm({
       <Box p="2.5" />
       <Fieldset.Root width={400}>
         <Fieldset.Content>
-          <Field label={l.expense.name} required>
+          <Field label={l.general.description} required>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
 
@@ -267,15 +262,27 @@ export default function CreateNameListForm({
 
           {groupNames.map((member, index) => (
             <Field label={member.nick} key={member.id}>
-              <Input
-                type="number"
-                value={member.amount}
-                onChange={(e) => {
-                  const newItems = [...groupNames];
-                  newItems[index].amount = e.target.value;
-                  setGroupNames(newItems);
-                }}
-              />
+              {trackIndividual ? (
+                <Input
+                  type="number"
+                  value={member.amount}
+                  onChange={(e) => {
+                    const newItems = [...groupNames];
+                    newItems[index].amount = e.target.value;
+                    setGroupNames(newItems);
+                  }}
+                />
+              ) : (
+                <Switch
+                  checked={+groupNames[index].amount > 0}
+                  onChange={() => {
+                    const newItems = [...groupNames];
+                    newItems[index].amount =
+                      +groupNames[index].amount > 0 ? '0' : '1';
+                    setGroupNames(newItems);
+                  }}
+                />
+              )}
             </Field>
           ))}
 

@@ -27,20 +27,22 @@ export default async function Page(props: {
   const nameList = await NameListService.getById(+id);
   if (nameList === null) notFound();
   const personal = nameList === null || nameList.gammaGroupId === null;
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
 
-  const group = personal
-    ? undefined
-    : (await SessionService.getGroups()).find(
+  const group = !personal
+    ? (await SessionService.getGroups()).find(
         (g) => g.group.id === nameList.gammaGroupId
-      )?.group;
-  if (!personal && group === undefined) {
+      )?.group
+    : undefined;
+
+  if (!personal && !divisionTreasurer && group === undefined) {
     notFound();
   }
 
   const sg = personal
     ? undefined
     : await GammaService.getSuperGroup(group!.superGroup.id);
-  if (!personal && sg === undefined) {
+  if (!personal && !divisionTreasurer && sg === undefined) {
     notFound();
   }
 
