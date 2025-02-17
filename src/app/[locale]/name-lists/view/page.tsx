@@ -39,9 +39,10 @@ export default async function Page(props: {
     notFound();
   }
 
-  const sg = personal
-    ? undefined
-    : await GammaService.getSuperGroup(group!.superGroup.id);
+  const sg =
+    personal || group === undefined
+      ? undefined
+      : await GammaService.getSuperGroup(group.superGroup.id);
   if (!personal && !divisionTreasurer && sg === undefined) {
     notFound();
   }
