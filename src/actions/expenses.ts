@@ -2,9 +2,10 @@
 
 import ExpenseService from '@/services/expenseService';
 import { MediaType } from '@/services/fileService';
+import GotifyService from '@/services/gotifyService';
 import MediaService from '@/services/mediaService';
 import SessionService from '@/services/sessionService';
-import { ExpenseType } from '@prisma/client';
+import { ExpenseType, RequestStatus } from '@prisma/client';
 
 export async function getExpensesForGroup(gammaSuperGroupId: string) {
   if (!SessionService.canEditGroup(gammaSuperGroupId)) {
@@ -103,6 +104,12 @@ export async function editExpenseForGroup(
     throw new Error('Expense is not a group expense');
   } else if (existing.gammaGroupId !== group.id) {
     throw new Error('Group does not own this expense');
+  }
+
+  if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
+    throw new Error(
+      'Expense cannot be edited after it has been paid or approved'
+    );
   }
 
   const receipts = (
@@ -208,6 +215,12 @@ export async function editPersonalExpense(
     throw new Error('Expense is not a personal expense');
   } else if (existing.gammaUserId !== gammaUserId) {
     throw new Error('User does not own this expense');
+  }
+
+  if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
+    throw new Error(
+      'Expense cannot be edited after it has been paid or approved'
+    );
   }
 
   const receipts = (
