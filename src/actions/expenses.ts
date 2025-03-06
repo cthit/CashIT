@@ -303,3 +303,20 @@ export async function approveExpense(expenseId: number) {
 
   return ExpenseService.approve(expenseId);
 }
+
+export async function forwardExpenseToEmail(expenseId: number, email: string) {
+  const existing = await ExpenseService.getById(expenseId);
+
+  if (existing === null) {
+    throw new Error('Expense does not exist');
+  }
+
+  let attachments = '';
+
+  await GotifyService.sendMessage(
+    email,
+    'noreply.cashit@chalmers.it',
+    'Forwarded expense',
+    `You have been forwarded an expense. You can view it at ${process.env.NEXT_PUBLIC_ROOT_URL}/expenses/view?id=${expenseId}`
+  );
+}
