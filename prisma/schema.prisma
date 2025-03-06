@@ -154,3 +154,23 @@ model ZettleSale {
   updatedAt         DateTime @updatedAt
   @@unique([gammaGroupId, saleDate])
 }
+
+model BankAccount {
+  id               Int                    @id @default(autoincrement())
+  goCardlessId     String
+  requisition      GoCardlessRequisition? @relation(fields: [requisitionid], references: [id])
+  requisitionid    Int?
+  name             String
+  iban             String
+  balanceBooked    Float                  @db.DoublePrecision
+  balanceAvailable Float                  @db.DoublePrecision
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  refreshedAt      DateTime               @default(now())
+}
+
+model GoCardlessRequisition {
+  id           Int           @id @default(autoincrement())
+  goCardlessId String        @unique
+  bankAccounts BankAccount[]
+}

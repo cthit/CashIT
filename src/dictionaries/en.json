@@ -154,5 +154,11 @@
   "account": {
     "notLoggedIn": "Not logged in",
     "notLoggedInDesc": "Log in to access the system"
+  },
+  "bankAccounts": {
+    "title": "Bank Accounts",
+    "updated": "Updated",
+    "liquidityTotal": "Total liquidity",
+    "refresh": "Refresh bank accounts"
   }
 }

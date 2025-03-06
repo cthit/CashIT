@@ -146,17 +146,13 @@ export default class GoCardlessService {
       );
     }
 
-    return (await response.json()) as {
-      balances: [
-        {
-          balanceAmount: {
-            amount: number;
-            currency: string;
-          };
-          balanceType: 'interimAvailable' | 'interimBooked';
-        }
-      ];
-    };
+    return (await response.json()).balances as {
+      balanceAmount: {
+        amount: string;
+        currency: string;
+      };
+      balanceType: 'interimAvailable' | 'interimBooked';
+    }[];
   }
 
   static async createRequisition(r: RequisitionRequest) {

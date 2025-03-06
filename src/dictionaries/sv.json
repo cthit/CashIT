@@ -154,5 +154,11 @@
   "account": {
     "notLoggedIn": "Inte inloggad",
     "notLoggedInDesc": "Logga in för att komma åt systemet"
+  },
+  "bankAccounts": {
+    "title": "Bankkonton",
+    "updated": "Uppdaterad",
+    "liquidityTotal": "Total likviditet",
+    "refresh": "Uppdatera bankkonton"
   }
 }

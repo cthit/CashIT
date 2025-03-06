@@ -27,6 +27,8 @@ import ExpenseService from '@/services/expenseService';
 import InvoiceService from '@/services/invoiceService';
 import { MdOutlineArrowForwardIos } from 'react-icons/md';
 import { LiaUserAltSlashSolid } from 'react-icons/lia';
+import BankAccountService from '@/services/bankAccountService';
+import BankAccountsCard from '@/components/BankAccountsCard/BankAccountsCard';
 
 export default async function Home(props: {
   params: Promise<{ locale: string }>;
@@ -34,7 +36,12 @@ export default async function Home(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const groups = await SessionService.getGroupsWithPosts();
+  const allowedTypes = process.env.GROUP_TYPE_ALLOW_LIST?.split(',');
+  const groups = allowedTypes
+    ? (await SessionService.getGroupsWithPosts()).filter((t) =>
+        allowedTypes.includes(t.group.superGroup.type)
+      )
+    : await SessionService.getGroupsWithPosts();
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const totalUnpaid = divisionTreasurer
     ? await ExpenseService.getUnpaidCount()
@@ -42,6 +49,9 @@ export default async function Home(props: {
   const totalUnsent = divisionTreasurer
     ? await InvoiceService.getUnsentCount()
     : 0;
+
+  // '96c7d36e-f4fb-48a2-9426-99962a6ee648'
+  const mainAccountBalance = await BankAccountService.getAll();
 
   return (
     <>
@@ -114,9 +124,7 @@ export default async function Home(props: {
                   {totalUnpaid > 1 ? l.economy.unpaidPlural : l.economy.unpaid}
                 </Badge>
               )}
-              <NavCard
-                topLink="/expenses?show=all"
-              >
+              <NavCard topLink="/expenses?show=all">
                 <Icon size="2xl">
                   <PiCoins />
                 </Icon>
@@ -142,9 +150,7 @@ export default async function Home(props: {
                   {totalUnsent > 1 ? l.economy.unpaidPlural : l.economy.unpaid}
                 </Badge>
               )}
-              <NavCard
-                topLink="/invoices?show=all"
-              >
+              <NavCard topLink="/invoices?show=all">
                 <Icon size="2xl">
                   <PiReceipt />
                 </Icon>
@@ -154,9 +160,7 @@ export default async function Home(props: {
               </NavCard>
             </Box>
 
-            <NavCard
-              topLink={'/zettle-sales?show=all'}
-            >
+            <NavCard topLink={'/zettle-sales?show=all'}>
               <Icon size="2xl">
                 <PiCashRegister />
               </Icon>
@@ -165,9 +169,7 @@ export default async function Home(props: {
               </Heading>
             </NavCard>
 
-            <NavCard
-              topLink={'/name-lists?show=all'}
-            >
+            <NavCard topLink={'/name-lists?show=all'}>
               <Icon size="2xl">
                 <PiUsersThree />
               </Icon>
@@ -176,6 +178,12 @@ export default async function Home(props: {
               </Heading>
             </NavCard>
           </Grid>
+          <Box p="2" />
+          <BankAccountsCard
+            accounts={mainAccountBalance}
+            locale={locale}
+            linkToControls={divisionTreasurer}
+          />
         </>
       )}
     </>
@@ -204,7 +212,6 @@ function GroupLink({
       p="0.5rem"
       pl="0.75rem"
       _hover={{ bg: activeSuperGroup && isTreasurer ? 'bg.subtle' : undefined }}
-      bg={activeSuperGroup && isTreasurer ? undefined : 'bg.muted'}
       roundedBottom="md"
       alignItems="center"
       justifyContent="space-between"
