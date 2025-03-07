@@ -2,6 +2,7 @@
   "home": {
     "title": "Home",
     "groups": "Your Groups",
+    "groupsEmpty": "Not member of any group",
     "groupsDescription": "Operations in division groups",
     "personal": "Operations Outside Groups",
     "personalDescription": "Requests, work groups, etc.",

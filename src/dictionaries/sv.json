@@ -2,6 +2,7 @@
   "home": {
     "title": "Hem",
     "groups": "Dina grupper",
+    "groupsEmpty": "Inte medlem i någon grupp",
     "groupsDescription": "Verksamhet i sektionsorgan",
     "personal": "Verksamhet utanför grupper",
     "personalDescription": "Äskningar, arbetsgrupper, etc.",

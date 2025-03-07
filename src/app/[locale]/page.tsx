@@ -15,13 +15,7 @@ import {
   Text
 } from '@chakra-ui/react';
 import Link from 'next/link';
-import {
-  PiCashRegister,
-  PiCoins,
-  PiPlus,
-  PiReceipt,
-  PiUsersThree
-} from 'react-icons/pi';
+import { PiCashRegister, PiPlus, PiUsersThree } from 'react-icons/pi';
 import './page.css';
 import ExpenseService from '@/services/expenseService';
 import InvoiceService from '@/services/invoiceService';
@@ -88,10 +82,10 @@ export default async function Home(props: {
           <GroupLink g={g} key={g.group.id} locale={locale} />
         ))}
       </Grid>
-      {groups.length === 0 && <Text>Not member of any group</Text>}
+      {groups.length === 0 && <Text>{l.home.groupsEmpty}</Text>}
       <Box p="2" />
 
-      {(bankAccounts || divisionTreasurer) && (
+      {(bankAccounts.length > 0 || divisionTreasurer) && (
         <>
           <Box>
             <Heading as="h1" size="xl" display="inline" mr="auto">

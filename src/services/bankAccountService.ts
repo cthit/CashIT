@@ -7,12 +7,8 @@ export default class BankAccountService {
       groups
         ? {
             where: {
-              accesses: {
-                some: {
-                  gammaSuperGroupId: {
-                    in: groups
-                  }
-                }
+              gammaSuperGroupAccesses: {
+                hasSome: groups
               }
             }
           }
@@ -63,6 +59,17 @@ export default class BankAccountService {
         balanceBooked:
           booked !== undefined ? +booked?.balanceAmount.amount : undefined,
         refreshedAt: new Date()
+      }
+    });
+  }
+
+  static async setAccess(goCardlessId: string, groups: string[]) {
+    return await prisma.bankAccount.update({
+      where: {
+        goCardlessId
+      },
+      data: {
+        gammaSuperGroupAccesses: groups
       }
     });
   }

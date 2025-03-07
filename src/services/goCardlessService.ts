@@ -1,7 +1,9 @@
 import NodeCache from 'node-cache';
+import prisma from '@/prisma';
 
 const secretId = process.env.GOCARDLESS_SECRET_ID;
 const secretKey = process.env.GOCARDLESS_SECRET_KEY;
+const cache = new NodeCache({ stdTTL: 0, checkperiod: 0 });
 
 interface RequisitionRequest {
   redirect: string;
@@ -19,6 +21,32 @@ interface AccessToken {
   access_expires: number;
   refresh: string;
   refresh_expires: number;
+}
+
+export interface Requisition {
+  id: string;
+  created: string;
+  redirect: string;
+  status: string;
+  institution_id: string;
+  reference: string;
+  accounts: string[];
+  link: string;
+  ssn?: string;
+  account_selection: boolean;
+  redirect_immediate: boolean;
+}
+
+interface AccountDetails {
+  account: {
+    resourceId: string;
+    iban: string;
+    currency: string;
+    ownerName: string;
+    name?: string;
+    product: string;
+    cashAccountType: string;
+  };
 }
 
 export default class GoCardlessService {
@@ -166,6 +194,34 @@ export default class GoCardlessService {
     }[];
   }
 
+  static async registerBankAccount(id: string, requisitionId: string) {
+    const response = await fetch(
+      this.apiUrl + '/accounts/' + id + '/details/',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + (await this.getToken()).access
+        }
+      }
+    );
+
+    const account = ((await response.json()) as AccountDetails).account;
+    await prisma.bankAccount.create({
+      data: {
+        name: account.name ?? account.product,
+        goCardlessId: id,
+        iban: account.iban,
+        balanceAvailable: 0,
+        balanceBooked: 0,
+        requisition: {
+          connect: {
+            goCardlessId: requisitionId
+          }
+        }
+      }
+    });
+  }
+
   static async createRequisition(r: RequisitionRequest) {
     const response = await fetch(this.apiUrl + '/requisitions/', {
       method: 'POST',
@@ -193,5 +249,33 @@ export default class GoCardlessService {
       balance: number;
       currency: string;
     };
+  }
+
+  static async getRequisitions() {
+    const response = await fetch(this.apiUrl + '/requisitions/', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + (await this.getToken()).access
+      }
+    });
+
+    return (await response.json()) as {
+      count: number;
+      next: string;
+      previous: string;
+      results: Requisition[];
+    };
+  }
+
+  static async registerRequisition(id: string) {
+    await prisma.goCardlessRequisition.create({
+      data: {
+        goCardlessId: id
+      }
+    });
+  }
+
+  static async getRegisteredRequisitions() {
+    return await prisma.goCardlessRequisition.findMany();
   }
 }

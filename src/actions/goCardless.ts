@@ -1,25 +1,22 @@
 'use server';
 
-import BankAccountService from '@/services/bankAccountService';
+import GoCardlessService from '@/services/goCardlessService';
 import SessionService from '@/services/sessionService';
 
-export async function refreshAllBankAccounts() {
+export async function registerRequisition(id: string) {
   const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!isDivisionTreasurer) {
     throw new Error('User is not a division treasurer');
   }
 
-  return await BankAccountService.refreshAll();
+  return await GoCardlessService.registerRequisition(id);
 }
 
-export async function setBankAccountAccess(
-  bankAccountId: number,
-  gammaSuperGroupIds: string[]
-) {
+export async function registerBankAccount(id: string, requisitionId: string) {
   const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!isDivisionTreasurer) {
     throw new Error('User is not a division treasurer');
   }
 
-  return await BankAccountService.setAccess(bankAccountId, gammaSuperGroupIds);
+  return await GoCardlessService.registerBankAccount(id, requisitionId);
 }

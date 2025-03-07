@@ -18,10 +18,12 @@ export default function BankAccountsCard({
   const title = (
     <>
       <Heading>{l.bankAccounts.title}</Heading>
-      <Text textStyle="sm" color="fg.muted">
-        {l.bankAccounts.updated}{' '}
-        {i18nService.formatDate(accounts[0].refreshedAt)}
-      </Text>
+      {accounts.length > 0 && (
+        <Text textStyle="sm" color="fg.muted">
+          {l.bankAccounts.updated}{' '}
+          {i18nService.formatDate(accounts[0]?.refreshedAt)}
+        </Text>
+      )}
     </>
   );
 
@@ -49,15 +51,20 @@ export default function BankAccountsCard({
       ) : (
         <Box p="2">{title}</Box>
       )}
-      <Separator />
-      <Box p="2">
-        {accounts.map((a) => (
-          <Flex justifyContent="space-between" key={a.id}>
-            <Text>{a.name}</Text>
-            <Text>{i18nService.formatNumber(a.balanceAvailable)}</Text>
-          </Flex>
-        ))}
-      </Box>
+
+      {accounts.length > 0 && (
+        <>
+          <Separator />
+          <Box p="2">
+            {accounts.map((a) => (
+              <Flex justifyContent="space-between" key={a.id}>
+                <Text>{a.name}</Text>
+                <Text>{i18nService.formatNumber(a.balanceAvailable)}</Text>
+              </Flex>
+            ))}
+          </Box>
+        </>
+      )}
 
       {accounts.length !== 1 && (
         <>
