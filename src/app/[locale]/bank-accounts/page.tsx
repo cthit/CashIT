@@ -9,10 +9,17 @@ import i18nService from '@/services/i18nService';
 import UpdateAccountsButton from './UpdateAccountsButton';
 import BankAccountsCard from '@/components/BankAccountsCard/BankAccountsCard';
 import BankAccountService from '@/services/bankAccountService';
+import SessionService from '@/services/sessionService';
+import { notFound } from 'next/navigation';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
 }) {
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  if (!divisionTreasurer) {
+    notFound();
+  }
+
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
