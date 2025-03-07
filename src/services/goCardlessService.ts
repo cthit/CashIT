@@ -1,4 +1,4 @@
-import { revalidateTag, unstable_cache } from 'next/cache';
+import NodeCache from 'node-cache';
 
 const secretId = process.env.GOCARDLESS_SECRET_ID;
 const secretKey = process.env.GOCARDLESS_SECRET_KEY;
@@ -80,7 +80,10 @@ export default class GoCardlessService {
   }
 
   private static async getToken() {
-    const tokenCache = unstable_cache(
+    const cachedToken = cache.get('gocardless-token') as
+      | { res: AccessToken; time: number }
+      | undefined;
+    /*const tokenCache = unstable_cache(
       async (oldToken?: AccessToken) => {
         console.log('Refreshing token');
         const requestAt = Date.now() / 1000;
@@ -98,24 +101,32 @@ export default class GoCardlessService {
       },
       ['gocardless-token'],
       { tags: ['gocardless-token'], revalidate: false }
-    );
-
-    const cachedToken = await tokenCache();
+    );*/
 
     if (
+      cachedToken === undefined ||
       cachedToken.time + cachedToken.res.refresh_expires - 60 <
-      Date.now() / 1000
+        Date.now() / 1000
     ) {
-      console.log('Refresh token expired');
-      revalidateTag('gocardless-token');
-      return (await tokenCache()).res;
-    } else if (
+      console.log('No token or refresh token expired');
+      const newToken = await GoCardlessService.newToken();
+      cache.set('gocardless-token', { res: newToken, time: Date.now() / 1000 });
+
+      return newToken;
+    }
+
+    if (
       cachedToken.time + cachedToken.res.access_expires - 60 <
       Date.now() / 1000
     ) {
       console.log('Access token expired');
-      revalidateTag('gocardless-token');
-      return (await tokenCache(cachedToken.res)).res;
+
+      const newToken = await GoCardlessService.refreshToken(
+        cachedToken.res.refresh
+      );
+      cache.set('gocardless-token', { res: newToken, time: Date.now() / 1000 });
+
+      return newToken;
     }
 
     return cachedToken.res;

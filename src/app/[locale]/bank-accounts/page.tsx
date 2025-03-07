@@ -24,12 +24,12 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Bank Accounts</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>{l.bankAccounts.title}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
       <BankAccountsCard accounts={accounts} locale={locale} />
       <Box p="4" />
-      <UpdateAccountsButton />
+      <UpdateAccountsButton locale={locale} />
     </>
   );
 }

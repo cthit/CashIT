@@ -7,11 +7,11 @@ export default class BankAccountService {
   }
 
   static async refreshAll() {
-    const accounts = await this.getAll();
+    const accounts = await BankAccountService.getAll();
 
     await Promise.all(
       accounts.map(async (account) => {
-        await this.refresh(account.id);
+        await BankAccountService.refresh(account.id);
       })
     );
   }
