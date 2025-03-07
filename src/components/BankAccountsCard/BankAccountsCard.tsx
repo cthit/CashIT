@@ -26,7 +26,13 @@ export default function BankAccountsCard({
   );
 
   return (
-    <Box maxW="20rem" borderWidth="1px" rounded="md">
+    <Box
+      minW="14rem"
+      maxW="20rem"
+      borderWidth="1px"
+      rounded="md"
+      height="max-content"
+    >
       {linkToControls ? (
         <Link href="/bank-accounts">
           <Flex
@@ -52,17 +58,22 @@ export default function BankAccountsCard({
           </Flex>
         ))}
       </Box>
-      <Separator />
-      <Box p="2">
-        <Flex justifyContent="space-between">
-          <Text>{l.bankAccounts.liquidityTotal}</Text>
-          <Text>
-            {i18nService.formatNumber(
-              accounts.reduce((a, b) => a + b.balanceAvailable, 0)
-            )}
-          </Text>
-        </Flex>
-      </Box>
+
+      {accounts.length !== 1 && (
+        <>
+          <Separator />
+          <Box p="2">
+            <Flex justifyContent="space-between">
+              <Text>{l.bankAccounts.liquidityTotal}</Text>
+              <Text>
+                {i18nService.formatNumber(
+                  accounts.reduce((a, b) => a + b.balanceAvailable, 0)
+                )}
+              </Text>
+            </Flex>
+          </Box>
+        </>
+      )}
     </Box>
   );
 }

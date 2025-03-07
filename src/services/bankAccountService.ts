@@ -2,8 +2,22 @@ import prisma from '@/prisma';
 import GoCardlessService from './goCardlessService';
 
 export default class BankAccountService {
-  static async getAll() {
-    return await prisma.bankAccount.findMany();
+  static async getAll(groups?: string[]) {
+    return await prisma.bankAccount.findMany(
+      groups
+        ? {
+            where: {
+              accesses: {
+                some: {
+                  gammaSuperGroupId: {
+                    in: groups
+                  }
+                }
+              }
+            }
+          }
+        : undefined
+    );
   }
 
   static async refreshAll() {

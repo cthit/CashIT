@@ -43,15 +43,12 @@ export default async function Home(props: {
       )
     : await SessionService.getGroupsWithPosts();
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
-  const totalUnpaid = divisionTreasurer
-    ? await ExpenseService.getUnpaidCount()
-    : 0;
-  const totalUnsent = divisionTreasurer
-    ? await InvoiceService.getUnsentCount()
-    : 0;
+  const unpaid = divisionTreasurer ? await ExpenseService.getUnpaid() : [];
+  const unsent = divisionTreasurer ? await InvoiceService.getUnsent() : [];
 
-  // '96c7d36e-f4fb-48a2-9426-99962a6ee648'
-  const mainAccountBalance = await BankAccountService.getAll();
+  const bankAccounts = divisionTreasurer
+    ? await BankAccountService.getAll()
+    : await SessionService.getBankAccounts();
 
   return (
     <>
@@ -94,6 +91,131 @@ export default async function Home(props: {
       {groups.length === 0 && <Text>Not member of any group</Text>}
       <Box p="2" />
 
+      {(bankAccounts || divisionTreasurer) && (
+        <>
+          <Box>
+            <Heading as="h1" size="xl" display="inline" mr="auto">
+              {l.home.statistics}
+            </Heading>
+            <Text color="fg.muted" textStyle="sm">
+              {l.home.statisticsDescription}
+            </Text>
+          </Box>
+          <Box p="1" />
+
+          <Flex as="ul" gap="1rem" justifyContent="start">
+            {bankAccounts && (
+              <BankAccountsCard
+                accounts={bankAccounts}
+                locale={locale}
+                linkToControls={divisionTreasurer}
+              />
+            )}
+            {divisionTreasurer && (
+              <>
+                <Box
+                  borderWidth="1px"
+                  borderRadius="md"
+                  minW="15rem"
+                  maxW="20rem"
+                  height="max-content"
+                >
+                  <Link href="/expenses?show=all">
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      p="2"
+                      _hover={{ bg: 'bg.subtle' }}
+                      roundedTop="md"
+                    >
+                      <Box>
+                        <Heading as="h1" size="xl" display="inline" mr="auto">
+                          {l.categories.expenses}
+                        </Heading>
+                        <Text>
+                          <Badge
+                            size="sm"
+                            colorPalette={unpaid.length > 0 ? 'yellow' : 'gray'}
+                          >
+                            {unpaid.length}{' '}
+                            {unpaid.length > 1
+                              ? l.economy.unpaidPlural
+                              : l.economy.unpaid}
+                          </Badge>
+                        </Text>
+                      </Box>
+                      <MdOutlineArrowForwardIos />
+                    </Flex>
+                  </Link>
+                  <Separator />
+                  <Box p="2">
+                    <Flex justifyContent="space-between">
+                      <Text>{l.economy.total}</Text>
+                      <Text>
+                        {i18nService.formatNumber(
+                          unpaid.reduce((a, b) => a + b.amount, 0)
+                        )}
+                      </Text>
+                    </Flex>
+                  </Box>
+                </Box>
+                <Box
+                  borderWidth="1px"
+                  borderRadius="md"
+                  minW="15rem"
+                  maxW="20rem"
+                  height="max-content"
+                >
+                  <Link href="/invoices?show=all">
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      p="2"
+                      _hover={{ bg: 'bg.subtle' }}
+                      roundedTop="md"
+                    >
+                      <Box>
+                        <Heading as="h1" size="xl" display="inline" mr="auto">
+                          {l.categories.invoices}
+                        </Heading>
+                        <Text>
+                          <Badge
+                            size="sm"
+                            colorPalette={unsent.length > 0 ? 'yellow' : 'gray'}
+                          >
+                            {unsent.length}{' '}
+                            {unsent.length > 1
+                              ? l.economy.unpaidPlural
+                              : l.economy.unpaid}
+                          </Badge>
+                        </Text>
+                      </Box>
+                      <MdOutlineArrowForwardIos />
+                    </Flex>
+                  </Link>
+                  <Separator />
+                  <Box p="2">
+                    <Flex justifyContent="space-between">
+                      <Text>{l.economy.total}</Text>
+                      <Text>
+                        {i18nService.formatNumber(
+                          unsent.reduce(
+                            (a, b) =>
+                              a + InvoiceService.calculateSumForItems(b.items),
+                            0
+                          )
+                        )}
+                      </Text>
+                    </Flex>
+                  </Box>
+                </Box>
+              </>
+            )}
+          </Flex>
+        </>
+      )}
+      <Box p="2" />
+
       {divisionTreasurer && (
         <>
           <Heading as="h1" size="xl">
@@ -109,57 +231,6 @@ export default async function Home(props: {
             justifyContent="start"
             templateColumns="repeat( auto-fill, minmax(15rem, max-content) )"
           >
-            <Box position="relative">
-              {totalUnpaid > 0 && (
-                <Badge
-                  size="sm"
-                  colorPalette="yellow"
-                  position="absolute"
-                  top="2"
-                  right="2"
-                  zIndex={2}
-                  pointerEvents="none"
-                >
-                  {totalUnpaid}{' '}
-                  {totalUnpaid > 1 ? l.economy.unpaidPlural : l.economy.unpaid}
-                </Badge>
-              )}
-              <NavCard topLink="/expenses?show=all">
-                <Icon size="2xl">
-                  <PiCoins />
-                </Icon>
-
-                <Heading size="lg" mt="2">
-                  {l.home.groupExpenses}
-                </Heading>
-              </NavCard>
-            </Box>
-
-            <Box position="relative">
-              {totalUnsent > 0 && (
-                <Badge
-                  size="sm"
-                  colorPalette="yellow"
-                  position="absolute"
-                  top="2"
-                  right="2"
-                  zIndex={2}
-                  pointerEvents="none"
-                >
-                  {totalUnsent}{' '}
-                  {totalUnsent > 1 ? l.economy.unpaidPlural : l.economy.unpaid}
-                </Badge>
-              )}
-              <NavCard topLink="/invoices?show=all">
-                <Icon size="2xl">
-                  <PiReceipt />
-                </Icon>
-                <Heading size="lg" mt="2">
-                  {l.home.groupInvoices}
-                </Heading>
-              </NavCard>
-            </Box>
-
             <NavCard topLink={'/zettle-sales?show=all'}>
               <Icon size="2xl">
                 <PiCashRegister />
@@ -178,12 +249,6 @@ export default async function Home(props: {
               </Heading>
             </NavCard>
           </Grid>
-          <Box p="2" />
-          <BankAccountsCard
-            accounts={mainAccountBalance}
-            locale={locale}
-            linkToControls={divisionTreasurer}
-          />
         </>
       )}
     </>

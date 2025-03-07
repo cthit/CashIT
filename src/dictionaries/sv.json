@@ -12,7 +12,9 @@
     "privateExpenses": "Privata kostnader",
     "privateInvoices": "Privata fakturor",
     "zettleSales": "Zettle-försäljning",
-    "showInactiveGroups": "Visa avstigna grupper"
+    "showInactiveGroups": "Visa avstigna grupper",
+    "statistics": "Statistik",
+    "statisticsDescription": "Nyckeltal för sektionen"
   },
   "group": {
     "treasurer": "Kassör",

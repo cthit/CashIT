@@ -12,7 +12,9 @@
     "privateExpenses": "Private Expenses",
     "privateInvoices": "Private Invoices",
     "zettleSales": "Zettle Sales",
-    "showInactiveGroups": "Show inactive groups"
+    "showInactiveGroups": "Show inactive groups",
+    "statistics": "Statistics",
+    "statisticsDescription": "Key figures for the division"
   },
   "group": {
     "treasurer": "Treasurer",

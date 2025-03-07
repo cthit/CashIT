@@ -22,6 +22,15 @@ export default class ExpenseService {
     });
   }
 
+  static async getUnpaid(gammaGroupId?: string) {
+    return await prisma.expense.findMany({
+      where: {
+        gammaGroupId,
+        paidAt: null
+      }
+    });
+  }
+
   static async getAllPrettified() {
     const expenses = await this.getAll();
     const prettifiedExpenses = await Promise.all(
