@@ -13,7 +13,7 @@ export async function refreshAllBankAccounts() {
 }
 
 export async function setBankAccountAccess(
-  bankAccountId: number,
+  goCardlessId: string,
   gammaSuperGroupIds: string[]
 ) {
   const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
@@ -21,5 +21,14 @@ export async function setBankAccountAccess(
     throw new Error('User is not a division treasurer');
   }
 
-  return await BankAccountService.setAccess(bankAccountId, gammaSuperGroupIds);
+  return await BankAccountService.setAccess(goCardlessId, gammaSuperGroupIds);
+}
+
+export async function deleteBankAccount(goCardlessId: string) {
+  const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
+  if (!isDivisionTreasurer) {
+    throw new Error('User is not a division treasurer');
+  }
+
+  return await BankAccountService.remove(goCardlessId);
 }

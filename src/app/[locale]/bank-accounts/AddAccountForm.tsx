@@ -34,6 +34,8 @@ export default function AddAccountForm({
 
       if (accId && reqId) {
         await registerBankAccount(accId, reqId);
+        setReqId(undefined);
+        setAccId(undefined);
         router.refresh();
       }
     },

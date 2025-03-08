@@ -16,6 +16,7 @@ import AddAccountForm from './AddAccountForm';
 import AddPermissionForm from './AddPermissionForm';
 import AddRequisitionForm from './AddRequisitionForm';
 import GammaService from '@/services/gammaService';
+import DeleteAccountButton from './DeleteAccountButton';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -61,7 +62,10 @@ export default async function Page(props: {
       {accounts.length > 0 && (
         <ul>
           {accounts.map((account) => (
-            <li key={account.id}>{account.name}</li>
+            <li key={account.id}>
+              {account.name}{' '}
+              <DeleteAccountButton goCardlessId={account.goCardlessId} />
+            </li>
           ))}
         </ul>
       )}

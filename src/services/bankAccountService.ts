@@ -73,4 +73,12 @@ export default class BankAccountService {
       }
     });
   }
+
+  static async remove(goCardlessId: string) {
+    return await prisma.bankAccount.delete({
+      where: {
+        goCardlessId
+      }
+    });
+  }
 }
