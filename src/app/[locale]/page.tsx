@@ -97,7 +97,7 @@ export default async function Home(props: {
           </Box>
           <Box p="1" />
 
-          <Flex as="ul" gap="1rem" justifyContent="start">
+          <Flex as="ul" gap="1rem" justifyContent="start" flexWrap="wrap">
             {bankAccounts && (
               <BankAccountsCard
                 accounts={bankAccounts}
