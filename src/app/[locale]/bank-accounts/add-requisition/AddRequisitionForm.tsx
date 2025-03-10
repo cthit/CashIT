@@ -12,7 +12,7 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { Requisition } from '@/services/goCardlessService';
-import { Box, createListCollection, Heading } from '@chakra-ui/react';
+import { Box, createListCollection } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
@@ -30,7 +30,7 @@ export default function AddRequisitionForm({
 
       if (id) {
         await registerRequisition(id);
-        router.refresh();
+        router.push('/bank-accounts');
       }
     },
     [id, router]
@@ -47,8 +47,6 @@ export default function AddRequisitionForm({
 
   return (
     <form onSubmit={submit}>
-      <Heading size="md">Add Requisition</Heading>
-
       <Field label="Requisition Reference" required>
         <SelectRoot
           collection={reqs}

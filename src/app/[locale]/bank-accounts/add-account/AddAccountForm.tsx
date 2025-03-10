@@ -12,7 +12,7 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { Requisition } from '@/services/goCardlessService';
-import { Box, createListCollection, Heading } from '@chakra-ui/react';
+import { Box, createListCollection } from '@chakra-ui/react';
 import { Prisma } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
@@ -20,10 +20,10 @@ import { useCallback, useMemo, useState } from 'react';
 export default function AddAccountForm({
   requisitions,
   accounts
-  }: {
-    requisitions: Requisition[];
-    accounts: Prisma.BankAccountGetPayload<{}>[];
-  }) {
+}: {
+  requisitions: Requisition[];
+  accounts: Prisma.BankAccountGetPayload<{}>[];
+}) {
   const router = useRouter();
   const [reqId, setReqId] = useState<string | undefined>();
   const [accId, setAccId] = useState<string | undefined>();
@@ -34,37 +34,50 @@ export default function AddAccountForm({
 
       if (accId && reqId) {
         await registerBankAccount(accId, reqId);
-        setReqId(undefined);
-        setAccId(undefined);
-        router.refresh();
+        router.push('/bank-accounts');
       }
     },
     [accId, reqId, router]
   );
 
-  const reqs = useMemo(() => createListCollection({
-    items: requisitions.map((r) => {
-      return {
-        label: r.reference,
-        value: r.id
-      };
-    })
-  }), [requisitions]);
+  const reqs = useMemo(
+    () =>
+      createListCollection({
+        items: requisitions.map((r) => {
+          return {
+            label: r.reference,
+            value: r.id
+          };
+        })
+      }),
+    [requisitions]
+  );
 
-  const selectedRequisition = useMemo(() => requisitions.find((r) => r.id === reqId), [reqId, requisitions]);
-  const requisitionAccounts = useMemo(() => createListCollection({
-    items: selectedRequisition?.accounts?.filter((a) => !accounts.find((b) => b.goCardlessId === a)) ?? []
-  }), [selectedRequisition, accounts]);
+  const selectedRequisition = useMemo(
+    () => requisitions.find((r) => r.id === reqId),
+    [reqId, requisitions]
+  );
+  const requisitionAccounts = useMemo(
+    () =>
+      createListCollection({
+        items:
+          selectedRequisition?.accounts?.filter(
+            (a) => !accounts.find((b) => b.goCardlessId === a)
+          ) ?? []
+      }),
+    [selectedRequisition, accounts]
+  );
 
   return (
     <form onSubmit={submit}>
-      <Heading size="md">Add Account</Heading>
-
       <Field label="Requisition" required>
         <SelectRoot
           collection={reqs}
           value={reqId ? [reqId] : []}
-          onValueChange={({ value }) => {setReqId(value?.[0]); setAccId(undefined)}}
+          onValueChange={({ value }) => {
+            setReqId(value?.[0]);
+            setAccId(undefined);
+          }}
         >
           <SelectLabel />
           <SelectTrigger>

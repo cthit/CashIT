@@ -111,25 +111,6 @@ export default class GoCardlessService {
     const cachedToken = cache.get('gocardless-token') as
       | { res: AccessToken; time: number }
       | undefined;
-    /*const tokenCache = unstable_cache(
-      async (oldToken?: AccessToken) => {
-        console.log('Refreshing token');
-        const requestAt = Date.now() / 1000;
-
-        return {
-          res: oldToken
-            ? {
-                ...(await this.refreshToken(oldToken.refresh)),
-                refresh: oldToken.refresh,
-                refresh_expires: oldToken.refresh_expires
-              }
-            : await this.newToken(),
-          time: requestAt
-        };
-      },
-      ['gocardless-token'],
-      { tags: ['gocardless-token'], revalidate: false }
-    );*/
 
     if (
       cachedToken === undefined ||
@@ -158,6 +139,10 @@ export default class GoCardlessService {
     }
 
     return cachedToken.res;
+  }
+
+  static async checkToken() {
+    await GoCardlessService.getToken();
   }
 
   static async getBankAccountBalance(id: string) {

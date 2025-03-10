@@ -132,9 +132,9 @@ export default async function Home(props: {
                             colorPalette={unpaid.length > 0 ? 'yellow' : 'gray'}
                           >
                             {unpaid.length}{' '}
-                            {unpaid.length > 1
-                              ? l.economy.unpaidPlural
-                              : l.economy.unpaid}
+                            {unpaid.length === 1
+                              ? l.economy.unpaid
+                              : l.economy.unpaidPlural}
                           </Badge>
                         </Text>
                       </Box>
@@ -178,9 +178,9 @@ export default async function Home(props: {
                             colorPalette={unsent.length > 0 ? 'yellow' : 'gray'}
                           >
                             {unsent.length}{' '}
-                            {unsent.length > 1
-                              ? l.economy.unpaidPlural
-                              : l.economy.unpaid}
+                            {unsent.length === 1
+                              ? l.economy.unpaid
+                              : l.economy.unpaidPlural}
                           </Badge>
                         </Text>
                       </Box>

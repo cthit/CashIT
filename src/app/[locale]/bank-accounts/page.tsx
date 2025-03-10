@@ -1,4 +1,4 @@
-import { Box, Heading, Text } from '@chakra-ui/react';
+import { Box, Button, Heading, Text } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -12,9 +12,7 @@ import BankAccountService from '@/services/bankAccountService';
 import SessionService from '@/services/sessionService';
 import { notFound } from 'next/navigation';
 import GoCardlessService from '@/services/goCardlessService';
-import AddAccountForm from './AddAccountForm';
 import AddPermissionForm from './AddPermissionForm';
-import AddRequisitionForm from './AddRequisitionForm';
 import GammaService from '@/services/gammaService';
 import DeleteAccountButton from './DeleteAccountButton';
 
@@ -30,15 +28,11 @@ export default async function Page(props: {
   const l = i18nService.getLocale(locale);
 
   const accounts = await BankAccountService.getAll();
+  const accountPermissions = accounts.filter(
+    (a) => a.gammaSuperGroupAccesses.length > 0
+  );
 
   const localRequisitions = await GoCardlessService.getRegisteredRequisitions();
-  const requisitions = (await GoCardlessService.getRequisitions()).results;
-  const unusedRequisitions = requisitions.filter(
-    (r) => !localRequisitions.find((lr) => lr.goCardlessId === r.id)
-  );
-  const usedRequisitions = requisitions.filter((r) =>
-    localRequisitions.find((lr) => lr.goCardlessId === r.id)
-  );
 
   const groups = await GammaService.getAllSuperGroups();
 
@@ -71,7 +65,9 @@ export default async function Page(props: {
       )}
       {accounts.length === 0 && <Text>No accounts found</Text>}
       {localRequisitions.length > 0 && (
-        <AddAccountForm requisitions={usedRequisitions} accounts={accounts} />
+        <Link href="/bank-accounts/add-account">
+          <Button variant="surface">Add Account</Button>
+        </Link>
       )}
       <Box p="2" />
 
@@ -80,26 +76,23 @@ export default async function Page(props: {
       </Heading>
       {accounts.length > 0 && (
         <ul>
-          {accounts.map(
-            (a) =>
-              a.gammaSuperGroupAccesses.length > 0 && (
-                <li key={a.id}>
-                  <Heading size="sm">{a.name}</Heading>
-                  <ul>
-                    {a.gammaSuperGroupAccesses.map((b) => (
-                      <li key={b}>
-                        <Text color="subtle" fontSize="sm">
-                          {b}
-                        </Text>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              )
-          )}
+          {accountPermissions.map((a) => (
+            <li key={a.id}>
+              <Heading size="sm">{a.name}</Heading>
+              <ul>
+                {a.gammaSuperGroupAccesses.map((b) => (
+                  <li key={b}>
+                    <Text color="subtle" fontSize="sm">
+                      {b}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
         </ul>
       )}
-      {accounts.length === 0 && <Text>No accesses found</Text>}
+      {accountPermissions.length === 0 && <Text>No accesses found</Text>}
       {accounts.length > 0 && (
         <>
           <Box p="2" />
@@ -120,7 +113,9 @@ export default async function Page(props: {
       )}
       {localRequisitions.length === 0 && <Text>No requisitions found</Text>}
       <Box p="2" />
-      <AddRequisitionForm requisitions={unusedRequisitions} />
+      <Link href="/bank-accounts/add-requisition">
+        <Button variant="surface">Add Requisition</Button>
+      </Link>
     </>
   );
 }

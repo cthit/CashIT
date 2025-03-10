@@ -19,6 +19,8 @@ export default class BankAccountService {
   static async refreshAll() {
     const accounts = await BankAccountService.getAll();
 
+    await GoCardlessService.checkToken();
+
     await Promise.all(
       accounts.map(async (account) => {
         await BankAccountService.refresh(account.id);
