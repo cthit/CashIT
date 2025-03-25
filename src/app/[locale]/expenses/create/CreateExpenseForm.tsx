@@ -39,6 +39,7 @@ import { ExpenseType, Prisma } from '@prisma/client';
 import { LuCloud, LuUndo, LuX } from 'react-icons/lu';
 import Link from 'next/link';
 import i18nService from '@/services/i18nService';
+import { InputGroup } from '@/components/ui/input-group';
 
 export default function CreateExpenseForm({
   readOnly,
@@ -169,11 +170,13 @@ export default function CreateExpenseForm({
           </Field>
 
           <Field label={l.economy.amountTotal} required>
-            <Input
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={readOnly}
-            />
+            <InputGroup endElement="kr" width="100%">
+              <Input
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={readOnly}
+              />
+            </InputGroup>
           </Field>
 
           <Field label={l.expense.type} required>

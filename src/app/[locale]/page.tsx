@@ -15,18 +15,14 @@ import {
   Text
 } from '@chakra-ui/react';
 import Link from 'next/link';
-import {
-  PiCashRegister,
-  PiCoins,
-  PiPlus,
-  PiReceipt,
-  PiUsersThree
-} from 'react-icons/pi';
+import { PiCashRegister, PiPlus, PiUsersThree } from 'react-icons/pi';
 import './page.css';
 import ExpenseService from '@/services/expenseService';
 import InvoiceService from '@/services/invoiceService';
 import { MdOutlineArrowForwardIos } from 'react-icons/md';
 import { LiaUserAltSlashSolid } from 'react-icons/lia';
+import BankAccountService from '@/services/bankAccountService';
+import BankAccountsCard from '@/components/BankAccountsCard/BankAccountsCard';
 
 export default async function Home(props: {
   params: Promise<{ locale: string }>;
@@ -34,14 +30,19 @@ export default async function Home(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const groups = await SessionService.getGroupsWithPosts();
+  const allowedTypes = process.env.GROUP_TYPE_ALLOW_LIST?.split(',');
+  const groups = allowedTypes
+    ? (await SessionService.getGroupsWithPosts()).filter((t) =>
+        allowedTypes.includes(t.group.superGroup.type)
+      )
+    : await SessionService.getGroupsWithPosts();
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
-  const totalUnpaid = divisionTreasurer
-    ? await ExpenseService.getUnpaidCount()
-    : 0;
-  const totalUnsent = divisionTreasurer
-    ? await InvoiceService.getUnsentCount()
-    : 0;
+  const unpaid = divisionTreasurer ? await ExpenseService.getUnpaid() : [];
+  const unsent = divisionTreasurer ? await InvoiceService.getUnsent() : [];
+
+  const bankAccounts = divisionTreasurer
+    ? await BankAccountService.getAll()
+    : await SessionService.getBankAccounts();
 
   return (
     <>
@@ -81,7 +82,132 @@ export default async function Home(props: {
           <GroupLink g={g} key={g.group.id} locale={locale} />
         ))}
       </Grid>
-      {groups.length === 0 && <Text>Not member of any group</Text>}
+      {groups.length === 0 && <Text>{l.home.groupsEmpty}</Text>}
+      <Box p="2" />
+
+      {(bankAccounts.length > 0 || divisionTreasurer) && (
+        <>
+          <Box>
+            <Heading as="h1" size="xl" display="inline" mr="auto">
+              {l.home.statistics}
+            </Heading>
+            <Text color="fg.muted" textStyle="sm">
+              {l.home.statisticsDescription}
+            </Text>
+          </Box>
+          <Box p="1" />
+
+          <Flex as="ul" gap="1rem" justifyContent="start" flexWrap="wrap">
+            {bankAccounts && (
+              <BankAccountsCard
+                accounts={bankAccounts}
+                locale={locale}
+                linkToControls={divisionTreasurer}
+              />
+            )}
+            {divisionTreasurer && (
+              <>
+                <Box
+                  borderWidth="1px"
+                  borderRadius="md"
+                  minW="15rem"
+                  maxW="20rem"
+                  height="max-content"
+                >
+                  <Link href="/expenses?show=all">
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      p="2"
+                      _hover={{ bg: 'bg.subtle' }}
+                      roundedTop="md"
+                    >
+                      <Box>
+                        <Heading as="h1" size="xl" display="inline" mr="auto">
+                          {l.categories.expenses}
+                        </Heading>
+                        <Text>
+                          <Badge
+                            size="sm"
+                            colorPalette={unpaid.length > 0 ? 'yellow' : 'gray'}
+                          >
+                            {unpaid.length}{' '}
+                            {unpaid.length === 1
+                              ? l.economy.unpaid
+                              : l.economy.unpaidPlural}
+                          </Badge>
+                        </Text>
+                      </Box>
+                      <MdOutlineArrowForwardIos />
+                    </Flex>
+                  </Link>
+                  <Separator />
+                  <Box p="2">
+                    <Flex justifyContent="space-between">
+                      <Text>{l.economy.total}</Text>
+                      <Text>
+                        {i18nService.formatNumber(
+                          unpaid.reduce((a, b) => a + b.amount, 0)
+                        )}
+                      </Text>
+                    </Flex>
+                  </Box>
+                </Box>
+                <Box
+                  borderWidth="1px"
+                  borderRadius="md"
+                  minW="15rem"
+                  maxW="20rem"
+                  height="max-content"
+                >
+                  <Link href="/invoices?show=all">
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      p="2"
+                      _hover={{ bg: 'bg.subtle' }}
+                      roundedTop="md"
+                    >
+                      <Box>
+                        <Heading as="h1" size="xl" display="inline" mr="auto">
+                          {l.categories.invoices}
+                        </Heading>
+                        <Text>
+                          <Badge
+                            size="sm"
+                            colorPalette={unsent.length > 0 ? 'yellow' : 'gray'}
+                          >
+                            {unsent.length}{' '}
+                            {unsent.length === 1
+                              ? l.economy.unpaid
+                              : l.economy.unpaidPlural}
+                          </Badge>
+                        </Text>
+                      </Box>
+                      <MdOutlineArrowForwardIos />
+                    </Flex>
+                  </Link>
+                  <Separator />
+                  <Box p="2">
+                    <Flex justifyContent="space-between">
+                      <Text>{l.economy.total}</Text>
+                      <Text>
+                        {i18nService.formatNumber(
+                          unsent.reduce(
+                            (a, b) =>
+                              a + InvoiceService.calculateSumForItems(b.items),
+                            0
+                          )
+                        )}
+                      </Text>
+                    </Flex>
+                  </Box>
+                </Box>
+              </>
+            )}
+          </Flex>
+        </>
+      )}
       <Box p="2" />
 
       {divisionTreasurer && (
@@ -99,64 +225,7 @@ export default async function Home(props: {
             justifyContent="start"
             templateColumns="repeat( auto-fill, minmax(15rem, max-content) )"
           >
-            <Box position="relative">
-              {totalUnpaid > 0 && (
-                <Badge
-                  size="sm"
-                  colorPalette="yellow"
-                  position="absolute"
-                  top="2"
-                  right="2"
-                  zIndex={2}
-                  pointerEvents="none"
-                >
-                  {totalUnpaid}{' '}
-                  {totalUnpaid > 1 ? l.economy.unpaidPlural : l.economy.unpaid}
-                </Badge>
-              )}
-              <NavCard
-                topLink="/expenses?show=all"
-              >
-                <Icon size="2xl">
-                  <PiCoins />
-                </Icon>
-
-                <Heading size="lg" mt="2">
-                  {l.home.groupExpenses}
-                </Heading>
-              </NavCard>
-            </Box>
-
-            <Box position="relative">
-              {totalUnsent > 0 && (
-                <Badge
-                  size="sm"
-                  colorPalette="yellow"
-                  position="absolute"
-                  top="2"
-                  right="2"
-                  zIndex={2}
-                  pointerEvents="none"
-                >
-                  {totalUnsent}{' '}
-                  {totalUnsent > 1 ? l.economy.unpaidPlural : l.economy.unpaid}
-                </Badge>
-              )}
-              <NavCard
-                topLink="/invoices?show=all"
-              >
-                <Icon size="2xl">
-                  <PiReceipt />
-                </Icon>
-                <Heading size="lg" mt="2">
-                  {l.home.groupInvoices}
-                </Heading>
-              </NavCard>
-            </Box>
-
-            <NavCard
-              topLink={'/zettle-sales?show=all'}
-            >
+            <NavCard topLink={'/zettle-sales?show=all'}>
               <Icon size="2xl">
                 <PiCashRegister />
               </Icon>
@@ -165,9 +234,7 @@ export default async function Home(props: {
               </Heading>
             </NavCard>
 
-            <NavCard
-              topLink={'/name-lists?show=all'}
-            >
+            <NavCard topLink={'/name-lists?show=all'}>
               <Icon size="2xl">
                 <PiUsersThree />
               </Icon>
@@ -204,7 +271,6 @@ function GroupLink({
       p="0.5rem"
       pl="0.75rem"
       _hover={{ bg: activeSuperGroup && isTreasurer ? 'bg.subtle' : undefined }}
-      bg={activeSuperGroup && isTreasurer ? undefined : 'bg.muted'}
       roundedBottom="md"
       alignItems="center"
       justifyContent="space-between"

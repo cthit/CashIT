@@ -2,7 +2,7 @@
 
 import InvoiceService from '@/services/invoiceService';
 import SessionService from '@/services/sessionService';
-import { Prisma } from '@prisma/client';
+import { Prisma, RequestStatus } from '@prisma/client';
 
 export async function getInvoicesForGroup(gammaSuperGroupId: string) {
   if (!SessionService.canEditGroup(gammaSuperGroupId)) {
@@ -72,6 +72,21 @@ export async function editInvoiceForGroup(
   const gammaUserId = (await SessionService.getUser())?.id;
   if (!gammaUserId) {
     throw new Error('User is not logged in and cannot create an invoice');
+  }
+
+  const existing = await InvoiceService.getById(id);
+  if (existing === null) {
+    throw new Error('Invoice does not exist');
+  } else if (existing.gammaSuperGroupId === null) {
+    throw new Error('Invoice is not a group invoice');
+  } else if (existing.gammaGroupId !== gammaGroupId) {
+    throw new Error('Group does not own this invoice');
+  }
+
+  if (existing.sentAt !== null || existing.status === RequestStatus.APPROVED) {
+    throw new Error(
+      'Expense cannot be edited after it has been paid or approved'
+    );
   }
 
   const group = (await SessionService.getGroups()).find(
@@ -147,6 +162,25 @@ export async function editPersonalInvoice(
   const gammaUserId = (await SessionService.getUser())?.id;
   if (!gammaUserId) {
     throw new Error('User is not logged in and cannot create an invoice');
+  }
+
+  const existing = await InvoiceService.getById(id);
+
+  if (existing === null) {
+    throw new Error('Invoice does not exist');
+  } else if (
+    existing.gammaSuperGroupId !== null ||
+    existing.gammaGroupId !== null
+  ) {
+    throw new Error('Invoice is not a personal invoice');
+  } else if (existing.gammaUserId !== gammaUserId) {
+    throw new Error('User does not own this invoice');
+  }
+
+  if (existing.sentAt !== null || existing.status === RequestStatus.APPROVED) {
+    throw new Error(
+      'Expense cannot be edited after it has been paid or approved'
+    );
   }
 
   return InvoiceService.editPersonal(

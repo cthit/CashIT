@@ -2,9 +2,11 @@
 
 import ExpenseService from '@/services/expenseService';
 import { MediaType } from '@/services/fileService';
+import GotifyService, { GotifyAttachment } from '@/services/gotifyService';
+import i18nService from '@/services/i18nService';
 import MediaService from '@/services/mediaService';
 import SessionService from '@/services/sessionService';
-import { ExpenseType } from '@prisma/client';
+import { ExpenseType, RequestStatus } from '@prisma/client';
 
 export async function getExpensesForGroup(gammaSuperGroupId: string) {
   if (!SessionService.canEditGroup(gammaSuperGroupId)) {
@@ -103,6 +105,12 @@ export async function editExpenseForGroup(
     throw new Error('Expense is not a group expense');
   } else if (existing.gammaGroupId !== group.id) {
     throw new Error('Group does not own this expense');
+  }
+
+  if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
+    throw new Error(
+      'Expense cannot be edited after it has been paid or approved'
+    );
   }
 
   const receipts = (
@@ -210,6 +218,12 @@ export async function editPersonalExpense(
     throw new Error('User does not own this expense');
   }
 
+  if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
+    throw new Error(
+      'Expense cannot be edited after it has been paid or approved'
+    );
+  }
+
   const receipts = (
     await Promise.all(
       Array.from(files.getAll('file') as unknown as File[]).map(
@@ -289,4 +303,32 @@ export async function approveExpense(expenseId: number) {
   }
 
   return ExpenseService.approve(expenseId);
+}
+
+export async function forwardExpenseToEmail(expenseId: number, email: string) {
+  const existing = await ExpenseService.getById(expenseId);
+
+  if (existing === null) {
+    throw new Error('Expense does not exist');
+  }
+
+  const attachments = [] as GotifyAttachment[];
+  for (const r of existing.receipts) {
+    const m = await MediaService.load(r.media.sha256);
+    if (m === null) continue;
+    const data = m.data.toString('base64');
+    attachments.push({
+      name: r.name,
+      content_type: r.media.extension,
+      data
+    });
+  }
+
+  await GotifyService.sendMessage(
+    email,
+    'noreply.cashit@chalmers.it',
+    'Forwarded expense',
+    `You have been forwarded an expense.\n\nName: ${existing.name}\nDescription: ${existing.description}\nAmount: ${existing.amount}\nDate: ${i18nService.formatDate(existing.occurredAt)}\nType: ${existing.type}\n  Receipts: See included email attachments.\n\nYou can view it at ${process.env.NEXT_PUBLIC_ROOT_URL}/expenses/view?id=${expenseId}.`,
+    attachments
+  );
 }

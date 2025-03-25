@@ -20,6 +20,16 @@ export default class InvoiceService {
     });
   }
 
+  static async getUnsent(gammaGroupId?: string) {
+    return await prisma.invoice.findMany({
+      where: {
+        gammaGroupId,
+        sentAt: null
+      },
+      include: { items: true }
+    });
+  }
+
   static async getAllPrettified() {
     const expenses = await this.getAll();
     const prettified = await Promise.all(

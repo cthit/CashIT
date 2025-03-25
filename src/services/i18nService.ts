@@ -24,4 +24,11 @@ export default class i18nService {
       minute: '2-digit'
     });
   };
+
+  static formatNumber = (num: number, fractionDigits: number = 2) => {
+    return num.toLocaleString('sv-SE', {
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits
+    });
+  };
 }

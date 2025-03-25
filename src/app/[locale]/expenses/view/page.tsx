@@ -10,6 +10,7 @@ import Link from 'next/link';
 import CreateExpenseForm from '../create/CreateExpenseForm';
 import ExpenseService from '@/services/expenseService';
 import i18nService from '@/services/i18nService';
+import ForwardExpenseForm from './ForwardExpenseForm';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
@@ -78,6 +79,8 @@ export default async function Page(props: {
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
+      <Box p="4" />
+      <ForwardExpenseForm e={expense} locale={locale} />
       <Box p="4" />
       <CreateExpenseForm
         gid={expense.gammaGroupId ?? undefined}

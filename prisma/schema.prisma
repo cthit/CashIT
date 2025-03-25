@@ -20,7 +20,7 @@ model Expense {
   gammaGroupId      String?
   gammaUserId       String
 
-  amount      Int
+  amount      Float    @db.DoublePrecision
   description String
   name        String
   occurredAt  DateTime @db.Date
@@ -66,7 +66,7 @@ model Invoice {
 
 model InvoiceItem {
   id     Int            @id @default(autoincrement())
-  amount Int
+  amount Float          @db.DoublePrecision
   count  Int
   name   String
   vat    InvoiceItemVat @default(VAT_0)
@@ -108,7 +108,7 @@ model GammaNameListEntry {
   nameList    NameList @relation(fields: [nameListId], references: [id], onDelete: Cascade)
   nameListId  Int
   gammaUserId String
-  cost        Int
+  cost        Float    @db.DoublePrecision
 
   @@id([gammaUserId, nameListId])
 }
@@ -118,7 +118,7 @@ model NameListEntry {
   nameList   NameList @relation(fields: [nameListId], references: [id], onDelete: Cascade)
   nameListId Int
   name       String
-  cost       Int
+  cost       Float    @db.DoublePrecision
 
   @@unique([nameListId, name])
 }
@@ -146,11 +146,33 @@ model ZettleSale {
   gammaSuperGroupId String
   gammaGroupId      String
   gammaUserId       String
-  amount            Int
+  amount            Float    @db.DoublePrecision
   description       String
   name              String
   saleDate          DateTime @db.Date
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
   @@unique([gammaGroupId, saleDate])
+}
+
+model BankAccount {
+  id                      Int                   @id @default(autoincrement())
+  goCardlessId            String                @unique
+  requisition             GoCardlessRequisition @relation(fields: [requisitionId], references: [id])
+  requisitionId           Int
+  name                    String
+  iban                    String
+  balanceBooked           Float                 @db.DoublePrecision
+  balanceAvailable        Float                 @db.DoublePrecision
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  refreshedAt             DateTime              @default(now())
+  gammaSuperGroupAccesses String[]
+}
+
+model GoCardlessRequisition {
+  id           Int           @id @default(autoincrement())
+  goCardlessId String        @unique
+  bankAccounts BankAccount[]
 }

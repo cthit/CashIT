@@ -6,6 +6,7 @@ import GammaService from './gammaService';
 import ExpenseService from './expenseService';
 import InvoiceService from './invoiceService';
 import NameListService from './nameListService';
+import BankAccountService from './bankAccountService';
 
 /**
  * Service for handling the session of the current user
@@ -136,5 +137,17 @@ export default class SessionService {
             adminGroups.includes(g.group.superGroup!.name)
         )
       : false;
+  }
+
+  static async getBankAccounts(s?: Session | null) {
+    const session = s ?? (await this.getSession());
+
+    const groups = (await this.getSuperGroups(session)).filter(
+      (g) => g.post.id === process.env.TREASURER_POST_ID
+    );
+
+    return session?.user?.id
+      ? await BankAccountService.getAll(groups.map((g) => g.group.id))
+      : [];
   }
 }

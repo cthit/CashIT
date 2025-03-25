@@ -2,6 +2,7 @@
   "home": {
     "title": "Home",
     "groups": "Your Groups",
+    "groupsEmpty": "Not member of any group",
     "groupsDescription": "Operations in division groups",
     "personal": "Operations Outside Groups",
     "personalDescription": "Requests, work groups, etc.",
@@ -12,7 +13,9 @@
     "privateExpenses": "Private Expenses",
     "privateInvoices": "Private Invoices",
     "zettleSales": "Zettle Sales",
-    "showInactiveGroups": "Show inactive groups"
+    "showInactiveGroups": "Show inactive groups",
+    "statistics": "Statistics",
+    "statisticsDescription": "Key figures for the division"
   },
   "group": {
     "treasurer": "Treasurer",
@@ -106,7 +109,8 @@
     "markPaid": "Mark as paid",
     "markUnpaid": "Mark as unpaid",
     "approveMarkPaid": "Approve and mark as paid",
-    "approvePayment": "Approve for payment"
+    "approvePayment": "Approve for payment",
+    "forward": "Forward Expense"
   },
   "zettleSales": {
     "listNotFound": "No sales found",
@@ -154,5 +158,11 @@
   "account": {
     "notLoggedIn": "Not logged in",
     "notLoggedInDesc": "Log in to access the system"
+  },
+  "bankAccounts": {
+    "title": "Bank Accounts",
+    "updated": "Updated",
+    "liquidityTotal": "Total liquidity",
+    "refresh": "Refresh bank accounts"
   }
 }

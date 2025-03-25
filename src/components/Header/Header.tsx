@@ -11,7 +11,7 @@ const Header = ({ locale }: { locale: string }) => {
         <Heading textStyle="2xl" display="inline" mr="0.3rem">
           <Link href="/">CashIT</Link>
         </Heading>
-        <Span color="fg.muted" fontSize="sm">beta v0.2.2</Span></div>
+        <Span color="fg.muted" fontSize="sm">beta v0.3.0</Span></div>
         <Navbar locale={locale} />
       </Container>
     </Box>

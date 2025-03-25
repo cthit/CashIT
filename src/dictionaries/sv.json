@@ -2,6 +2,7 @@
   "home": {
     "title": "Hem",
     "groups": "Dina grupper",
+    "groupsEmpty": "Inte medlem i någon grupp",
     "groupsDescription": "Verksamhet i sektionsorgan",
     "personal": "Verksamhet utanför grupper",
     "personalDescription": "Äskningar, arbetsgrupper, etc.",
@@ -12,7 +13,9 @@
     "privateExpenses": "Privata kostnader",
     "privateInvoices": "Privata fakturor",
     "zettleSales": "Zettle-försäljning",
-    "showInactiveGroups": "Visa avstigna grupper"
+    "showInactiveGroups": "Visa avstigna grupper",
+    "statistics": "Statistik",
+    "statisticsDescription": "Nyckeltal för sektionen"
   },
   "group": {
     "treasurer": "Kassör",
@@ -106,7 +109,8 @@
     "markPaid": "Markera som betald",
     "markUnpaid": "Markera som obetald",
     "approveMarkPaid": "Godkänn och markera som betald",
-    "approvePayment": "Godkänn för betalning"
+    "approvePayment": "Godkänn för betalning",
+    "forward": "Vidarebefordra kostnad"
   },
   "zettleSales": {
     "listNotFound": "Inga försäljningar hittades",
@@ -154,5 +158,11 @@
   "account": {
     "notLoggedIn": "Inte inloggad",
     "notLoggedInDesc": "Logga in för att komma åt systemet"
+  },
+  "bankAccounts": {
+    "title": "Bankkonton",
+    "updated": "Uppdaterad",
+    "liquidityTotal": "Total likviditet",
+    "refresh": "Uppdatera bankkonton"
   }
 }
