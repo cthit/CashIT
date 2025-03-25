@@ -109,7 +109,8 @@
     "markPaid": "Markera som betald",
     "markUnpaid": "Markera som obetald",
     "approveMarkPaid": "Godkänn och markera som betald",
-    "approvePayment": "Godkänn för betalning"
+    "approvePayment": "Godkänn för betalning",
+    "forward": "Vidarebefordra kostnad"
   },
   "zettleSales": {
     "listNotFound": "Inga försäljningar hittades",

@@ -109,7 +109,8 @@
     "markPaid": "Mark as paid",
     "markUnpaid": "Mark as unpaid",
     "approveMarkPaid": "Approve and mark as paid",
-    "approvePayment": "Approve for payment"
+    "approvePayment": "Approve for payment",
+    "forward": "Forward Expense"
   },
   "zettleSales": {
     "listNotFound": "No sales found",

@@ -80,13 +80,14 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
+      <ForwardExpenseForm e={expense} locale={locale} />
+      <Box p="4" />
       <CreateExpenseForm
         gid={expense.gammaGroupId ?? undefined}
         e={expense}
         locale={locale}
         readOnly={!canEdit}
       />
-      <ForwardExpenseForm e={expense} />
     </>
   );
 }
