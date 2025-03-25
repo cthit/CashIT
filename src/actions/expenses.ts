@@ -2,7 +2,8 @@
 
 import ExpenseService from '@/services/expenseService';
 import { MediaType } from '@/services/fileService';
-import GotifyService from '@/services/gotifyService';
+import GotifyService, { GotifyAttachment } from '@/services/gotifyService';
+import i18nService from '@/services/i18nService';
 import MediaService from '@/services/mediaService';
 import SessionService from '@/services/sessionService';
 import { ExpenseType, RequestStatus } from '@prisma/client';
@@ -311,12 +312,23 @@ export async function forwardExpenseToEmail(expenseId: number, email: string) {
     throw new Error('Expense does not exist');
   }
 
-  let attachments = '';
+  const attachments = [] as GotifyAttachment[];
+  for (const r of existing.receipts) {
+    const m = await MediaService.load(r.media.sha256);
+    if (m === null) continue;
+    const data = m.data.toString('base64');
+    attachments.push({
+      name: r.name,
+      content_type: r.media.extension,
+      data
+    });
+  }
 
   await GotifyService.sendMessage(
     email,
     'noreply.cashit@chalmers.it',
     'Forwarded expense',
-    `You have been forwarded an expense. You can view it at ${process.env.NEXT_PUBLIC_ROOT_URL}/expenses/view?id=${expenseId}`
+    `You have been forwarded an expense.\n\nName: ${existing.name}\nDescription: ${existing.description}\nAmount: ${existing.amount}\nDate: ${i18nService.formatDate(existing.occurredAt)}\nType: ${existing.type}\n  Receipts: See included email attachments.\n\nYou can view it at ${process.env.NEXT_PUBLIC_ROOT_URL}/expenses/view?id=${expenseId}.`,
+    attachments
   );
 }

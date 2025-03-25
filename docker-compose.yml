@@ -8,7 +8,7 @@ services:
     ports:
       - "5432:5432"
   gotify:
-    image: cthit/gotify:latest
+    image: ghcr.io/cthit/gotify:edge
     environment:
       GOTIFY_PRE-SHARED-KEY: "123abc"
       GOTIFY_MOCK-MODE: "true"

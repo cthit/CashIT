@@ -1,5 +1,11 @@
 const apiKey = process.env.GOTIFY_TOKEN;
 
+export interface GotifyAttachment {
+  name: string;
+  data: string;
+  content_type: string;
+}
+
 export default class GotifyService {
   static gotifyUrl = process.env.GOTIFY_ROOT_URL?.replace(/\/$/, '');
 
@@ -7,7 +13,8 @@ export default class GotifyService {
     to: string,
     from: string,
     subject: string,
-    body: string
+    body: string,
+    attachments: GotifyAttachment[] = []
   ) {
     const response = await fetch(this.gotifyUrl + '/mail', {
       method: 'POST',
@@ -18,7 +25,8 @@ export default class GotifyService {
         to,
         from,
         subject,
-        body
+        body,
+        attachments
       })
     });
 
