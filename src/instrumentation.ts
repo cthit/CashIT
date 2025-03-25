@@ -10,6 +10,6 @@ export async function register() {
       '0 16 * * *',
       MailNotificationService.notifyNewDocuments
     );
-    schedule.scheduleJob('0 */12 * * *', BankAccountService.refreshAll);
+    schedule.scheduleJob('0 */6 * * *', BankAccountService.refreshAll);
   }
 }
