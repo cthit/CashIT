@@ -38,7 +38,9 @@ export default async function Page(props: {
   const fetchAll = show === 'all' && divisionTreasurer;
   const isTreasurer = fetchAll
     ? false
-    : await SessionService.isTreasurerInGroup(group!.id);
+    : group
+    ? await SessionService.isTreasurerInGroup(group.id)
+    : false;
 
   const invoices = fetchAll
     ? await InvoiceService.getAllPrettified()
