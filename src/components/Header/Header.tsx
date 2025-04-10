@@ -7,7 +7,8 @@ import {
   IconButton,
   Span,
   Drawer,
-  Portal
+  Portal,
+  Flex
 } from '@chakra-ui/react';
 import { HiMenu, HiX } from 'react-icons/hi';
 import Navigation from '../Navigation/Navigation';
@@ -19,12 +20,13 @@ const Header = ({ locale }: { locale: string }) => {
       borderBottomWidth="1px"
       borderColor="border.emphasized"
       height="4rem"
+      px="2"
       className={styles.header}
     >
-      <div>
+      <Flex alignItems="center">
         <Drawer.Root placement="start">
           <Drawer.Trigger asChild>
-            <IconButton variant="ghost" size="sm">
+            <IconButton variant="ghost" size="md" display={{ md: 'none' }}>
               <HiMenu />
             </IconButton>
           </Drawer.Trigger>
@@ -34,7 +36,7 @@ const Header = ({ locale }: { locale: string }) => {
               <Drawer.Content pt="4">
                 <Drawer.Body>
                   <Drawer.CloseTrigger asChild>
-                    <Navigation />
+                    <Navigation locale={locale} />
                   </Drawer.CloseTrigger>
                 </Drawer.Body>
 
@@ -47,13 +49,15 @@ const Header = ({ locale }: { locale: string }) => {
             </Drawer.Positioner>
           </Portal>
         </Drawer.Root>
-        <Heading textStyle="2xl" display="inline" mr="0.3rem">
-          <Link href="/">CashIT</Link>
-        </Heading>
-        <Span color="fg.muted" fontSize="sm">
-          beta v0.4.0
-        </Span>
-      </div>
+        <Box>
+          <Heading textStyle="2xl" display="inline" mr="0.3rem" ml="2">
+            <Link href="/">CashIT</Link>
+          </Heading>
+          <Span color="fg.muted" fontSize="sm">
+            beta v0.4.0
+          </Span>
+        </Box>
+      </Flex>
       <Navbar locale={locale} />
     </Box>
   );

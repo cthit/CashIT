@@ -36,24 +36,34 @@ export default async function RootLayout({
   return (
     <>
       <Header locale={locale} />
-      {user ? <LoggedIn>{children}</LoggedIn> : <NotLoggedIn locale={locale} />}
+      {user ? (
+        <LoggedIn locale={locale}>{children}</LoggedIn>
+      ) : (
+        <NotLoggedIn locale={locale} />
+      )}
     </>
   );
 }
 
-const LoggedIn = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+const LoggedIn = ({
+  children,
+  locale
+}: Readonly<{ children: React.ReactNode; locale: string }>) => {
   return (
-    <Flex direction="row" height="calc(100vh - 4rem)">
+    <Flex direction="row" height="calc(100vh - 4rem)" overflow="hidden">
       <Box
         bg="bg.panel"
         borderRightWidth="1px"
         borderColor="border.emphasized"
         p="4"
         width="20rem"
+        display={{ base: 'none', md: 'block' }}
       >
-        <Navigation />
+        <Navigation locale={locale} />
       </Box>
-      <Container py="6">{children}</Container>
+      <Box overflowY="scroll" width="100%">
+        <Container py="6">{children}</Container>
+      </Box>
     </Flex>
   );
 };

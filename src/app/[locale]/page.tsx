@@ -15,7 +15,7 @@ import {
   Text
 } from '@chakra-ui/react';
 import Link from 'next/link';
-import { PiCashRegister, PiPlus, PiUsersThree } from 'react-icons/pi';
+import { PiPlus } from 'react-icons/pi';
 import './page.css';
 import ExpenseService from '@/services/expenseService';
 import InvoiceService from '@/services/invoiceService';
@@ -206,43 +206,6 @@ export default async function Home(props: {
               </>
             )}
           </Flex>
-        </>
-      )}
-      <Box p="2" />
-
-      {divisionTreasurer && (
-        <>
-          <Heading as="h1" size="xl">
-            {l.home.division}
-          </Heading>
-          <Text color="fg.muted" textStyle="sm">
-            {l.home.divisionDescription}
-          </Text>
-          <Box p="1" />
-          <Grid
-            as="ul"
-            gap="1rem"
-            justifyContent="start"
-            templateColumns="repeat( auto-fill, minmax(15rem, max-content) )"
-          >
-            <NavCard topLink={'/zettle-sales?show=all'}>
-              <Icon size="2xl">
-                <PiCashRegister />
-              </Icon>
-              <Heading size="lg" mt="2">
-                {l.home.zettleSales}
-              </Heading>
-            </NavCard>
-
-            <NavCard topLink={'/name-lists?show=all'}>
-              <Icon size="2xl">
-                <PiUsersThree />
-              </Icon>
-              <Heading size="lg" mt="2">
-                {l.categories.nameLists}
-              </Heading>
-            </NavCard>
-          </Grid>
         </>
       )}
     </>

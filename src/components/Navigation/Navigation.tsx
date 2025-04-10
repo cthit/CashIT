@@ -1,11 +1,73 @@
-import { Flex } from '@chakra-ui/react';
+import { Box, Flex, Heading, Icon, Text } from '@chakra-ui/react';
 import NavigationLink from './NavigationLink/NavigationLink';
+import i18nService from '@/services/i18nService';
+import {
+  PiBank,
+  PiCashRegister,
+  PiCoins,
+  PiHouse,
+  PiReceipt,
+  PiUsersThree
+} from 'react-icons/pi';
+import { LiaUserAltSlashSolid } from 'react-icons/lia';
 
-const Navigation = () => {
+const Navigation = ({ locale }: { locale: string }) => {
+  const l = i18nService.getLocale(locale);
+
   return (
     <Flex gap="0.25rem" direction="column">
-      <NavigationLink href="/">Home</NavigationLink>
-      <NavigationLink href="/bank-accounts">Bank Accounts</NavigationLink>
+      <NavigationLink href="/">
+        <Icon size="md">
+          <PiHouse />
+        </Icon>{' '}
+        {l.home.title}
+      </NavigationLink>
+      <NavigationLink href="/bank-accounts">
+        <Icon size="md">
+          <LiaUserAltSlashSolid />
+        </Icon>{' '}
+        {l.home.personal}
+      </NavigationLink>
+
+      <Box>
+        <Heading as="h1" size="xl" mt="4" mb="0">
+          {l.home.division}
+        </Heading>
+        <Text color="fg.muted" textStyle="sm">
+          {l.home.divisionDescription}
+        </Text>
+      </Box>
+
+      <NavigationLink href="/bank-accounts">
+        <Icon size="md">
+          <PiBank />
+        </Icon>{' '}
+        {l.bankAccounts.title}
+      </NavigationLink>
+      <NavigationLink href="/expenses?show=all">
+        <Icon size="md">
+          <PiCoins />
+        </Icon>{' '}
+        {l.categories.expenses}
+      </NavigationLink>
+      <NavigationLink href="/invoices?show=all">
+        <Icon size="md">
+          <PiReceipt />
+        </Icon>{' '}
+        {l.categories.invoices}
+      </NavigationLink>
+      <NavigationLink href="/zettle-sales?show=all">
+        <Icon size="md">
+          <PiCashRegister />
+        </Icon>{' '}
+        {l.home.zettleSales}
+      </NavigationLink>
+      <NavigationLink href="/name-lists?show=all">
+        <Icon size="md">
+          <PiUsersThree />
+        </Icon>{' '}
+        {l.categories.nameLists}
+      </NavigationLink>
     </Flex>
   );
 };
