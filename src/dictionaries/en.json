@@ -110,7 +110,7 @@
     "markUnpaid": "Mark as unpaid",
     "approveMarkPaid": "Approve and mark as paid",
     "approvePayment": "Approve for payment",
-    "forward": "Forward Expense"
+    "forward": "Forward to scanner"
   },
   "zettleSales": {
     "listNotFound": "No sales found",
@@ -161,8 +161,23 @@
   },
   "bankAccounts": {
     "title": "Bank Accounts",
+    "details": "Account Details",
+    "accountDetails": "Details for account",
+    "transactions": "Transactions",
+    "transactionsTitle": "Transactions for account",
+    "transactionsEmpty": "No transactions found",
+    "transactionsEmptyDesc": "Adjust your filters or wait for transactions to refresh",
     "updated": "Updated",
     "liquidityTotal": "Total liquidity",
-    "refresh": "Refresh bank accounts"
+    "refresh": "Refresh bank accounts",
+    "balance": "Balance",
+    "bookedBalance": "Booked balance",
+    "availableBalance": "Available balance",
+    "transactionBooked": "Booked",
+    "transactionPending": "Pending"
+  },
+  "userSettings": {
+    "title": "User Settings",
+    "forwardEmail": "Document Forward Email"
   }
 }

@@ -1,9 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { deleteBankAccount } from '@/actions/bankAccounts';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { IconButton } from '@chakra-ui/react';
+import { HiTrash } from 'react-icons/hi';
 
 export default function UpdateAccountsButton({
   goCardlessId
@@ -18,8 +19,8 @@ export default function UpdateAccountsButton({
   }, [goCardlessId, router]);
 
   return (
-    <Button variant="surface" onClick={submit}>
-      Delete
-    </Button>
+    <IconButton variant="surface" size="sm" onClick={submit}>
+      <HiTrash />
+    </IconButton>
   );
 }

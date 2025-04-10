@@ -110,7 +110,7 @@
     "markUnpaid": "Markera som obetald",
     "approveMarkPaid": "Godkänn och markera som betald",
     "approvePayment": "Godkänn för betalning",
-    "forward": "Vidarebefordra kostnad"
+    "forward": "Skicka vidare till scanner"
   },
   "zettleSales": {
     "listNotFound": "Inga försäljningar hittades",
@@ -161,8 +161,23 @@
   },
   "bankAccounts": {
     "title": "Bankkonton",
+    "details": "Kontoinformation",
+    "accountDetails": "Information för konto",
+    "transactions": "Transaktioner",
+    "transactionsTitle": "Transaktioner för konto",
+    "transactionsEmpty": "Inga transaktioner hittades",
+    "transactionsEmptyDesc": "Justera dina filter eller vänta på att transaktioner uppdateras",
     "updated": "Uppdaterad",
     "liquidityTotal": "Total likviditet",
-    "refresh": "Uppdatera bankkonton"
+    "refresh": "Uppdatera bankkonton",
+    "balance": "Saldo",
+    "bookedBalance": "Bokfört saldo",
+    "availableBalance": "Tillgängligt saldo",
+    "transactionBooked": "Bokförd",
+    "transactionPending": "Reserverad"
+  },
+  "userSettings": {
+    "title": "Användarinställningar",
+    "forwardEmail": "Mail för vidarebefordran av dokument"
   }
 }

@@ -1,5 +1,8 @@
 import swedish from '@/dictionaries/sv.json';
 import english from '@/dictionaries/en.json';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/sv';
 
 export default class i18nService {
   static getLocale = (loc?: string) => (loc === 'en' ? english : swedish);
@@ -23,6 +26,12 @@ export default class i18nService {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  static formatRelative = (date: Date, loc: string) => {
+    dayjs.extend(relativeTime);
+    dayjs.locale(loc);
+    return dayjs(date).fromNow();
   };
 
   static formatNumber = (num: number, fractionDigits: number = 2) => {

@@ -6,6 +6,7 @@ import GotifyService, { GotifyAttachment } from '@/services/gotifyService';
 import i18nService from '@/services/i18nService';
 import MediaService from '@/services/mediaService';
 import SessionService from '@/services/sessionService';
+import UserService from '@/services/userService';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 
 export async function getExpensesForGroup(gammaSuperGroupId: string) {
@@ -305,11 +306,23 @@ export async function approveExpense(expenseId: number) {
   return ExpenseService.approve(expenseId);
 }
 
-export async function forwardExpenseToEmail(expenseId: number, email: string) {
+export async function forwardExpenseToEmail(expenseId: number, email?: string) {
+  const user = await SessionService.getUser();
+  if (user === undefined) {
+    throw new Error('User is not logged in and cannot forward an expense');
+  }
+
   const existing = await ExpenseService.getById(expenseId);
 
   if (existing === null) {
     throw new Error('Expense does not exist');
+  }
+
+  const userDb =
+    email === undefined ? await UserService.getById(user.id) : undefined;
+  const recipient = email ?? userDb?.forwardEmail;
+  if (recipient === undefined || recipient === null) {
+    throw new Error('No recipient email address provided');
   }
 
   const attachments = [] as GotifyAttachment[];
@@ -325,10 +338,20 @@ export async function forwardExpenseToEmail(expenseId: number, email: string) {
   }
 
   await GotifyService.sendMessage(
-    email,
+    recipient,
     'noreply.cashit@chalmers.it',
     'Forwarded expense',
-    `You have been forwarded an expense.\n\nName: ${existing.name}\nDescription: ${existing.description}\nAmount: ${existing.amount}\nDate: ${i18nService.formatDate(existing.occurredAt)}\nType: ${existing.type}\n  Receipts: See included email attachments.\n\nYou can view it at ${process.env.NEXT_PUBLIC_ROOT_URL}/expenses/view?id=${expenseId}.`,
+    `You have been forwarded an expense.\n\nName: ${
+      existing.name
+    }\nDescription: ${existing.description}\nAmount: ${
+      existing.amount
+    } kr\nCreation date: ${i18nService.formatDate(
+      existing.occurredAt
+    )}\nType: ${
+      existing.type
+    }\nReceipts: See included email attachments.\n\nYou can view it at ${
+      process.env.NEXT_PUBLIC_ROOT_URL
+    }/expenses/view?id=${expenseId}.`,
     attachments
   );
 }

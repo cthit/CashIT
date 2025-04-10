@@ -1,10 +1,11 @@
 //import localFont from 'next/font/local';
 //import './globals.css';
 import Header from '@/components/Header/Header';
-import { Container, Heading, Text } from '@chakra-ui/react';
+import { Box, Container, Flex, Heading, Text } from '@chakra-ui/react';
 import { Metadata } from 'next';
 import SessionService from '@/services/sessionService';
 import i18nService from '@/services/i18nService';
+import Navigation from '@/components/Navigation/Navigation';
 
 /*const geistSans = localFont({
   src: '../fonts/GeistVF.woff',
@@ -35,19 +36,34 @@ export default async function RootLayout({
   return (
     <>
       <Header locale={locale} />
-      <Container py="6">
-        {user ? children : <NotLoggedIn locale={locale} />}
-      </Container>
+      {user ? <LoggedIn>{children}</LoggedIn> : <NotLoggedIn locale={locale} />}
     </>
   );
 }
 
+const LoggedIn = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+  return (
+    <Flex direction="row" height="calc(100vh - 4rem)">
+      <Box
+        bg="bg.panel"
+        borderRightWidth="1px"
+        borderColor="border.emphasized"
+        p="4"
+        width="20rem"
+      >
+        <Navigation />
+      </Box>
+      <Container py="6">{children}</Container>
+    </Flex>
+  );
+};
+
 const NotLoggedIn = ({ locale }: { locale: string }) => {
   const l = i18nService.getLocale(locale);
   return (
-    <>
+    <Container py="6">
       <Heading>{l.account.notLoggedIn}</Heading>
       <Text>{l.account.notLoggedInDesc}</Text>
-    </>
+    </Container>
   );
 };

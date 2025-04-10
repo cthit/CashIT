@@ -69,7 +69,7 @@ export default function AddPermissionForm({
 
   return (
     <form onSubmit={submit}>
-      <Heading size="md">Set Account Permissions</Heading>
+      <Heading size="md">Set Account Access</Heading>
 
       <Field label="Account" required>
         <SelectRoot
