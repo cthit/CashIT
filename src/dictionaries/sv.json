@@ -174,7 +174,10 @@
     "bookedBalance": "Bokfört saldo",
     "availableBalance": "Tillgängligt saldo",
     "transactionBooked": "Bokförd",
-    "transactionPending": "Reserverad"
+    "transactionPending": "Reserverad",
+    "transactionDate": "Transaktionsdatum",
+    "bookDate": "Bokföringsdatum",
+    "reference": "Reference"
   },
   "userSettings": {
     "title": "Användarinställningar",

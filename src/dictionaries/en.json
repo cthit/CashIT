@@ -174,7 +174,10 @@
     "bookedBalance": "Booked balance",
     "availableBalance": "Available balance",
     "transactionBooked": "Booked",
-    "transactionPending": "Pending"
+    "transactionPending": "Pending",
+    "transactionDate": "Transaction date",
+    "bookDate": "Booking date",
+    "reference": "Reference"
   },
   "userSettings": {
     "title": "User Settings",

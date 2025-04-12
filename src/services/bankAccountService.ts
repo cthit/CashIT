@@ -25,7 +25,10 @@ export default class BankAccountService {
       },
       include: {
         transactions: {
-          orderBy: [{ booked: 'asc' }, { occurredAt: 'desc' }]
+          orderBy: [
+            { bookingDate: { sort: 'desc', nulls: 'first' } },
+            { valueDate: 'desc' }
+          ]
         }
       }
     });
@@ -72,15 +75,14 @@ export default class BankAccountService {
       transactions.booked.concat(transactions.pending).map((transaction) => ({
         goCardlessId: transaction.internalTransactionId,
         amount: +transaction.transactionAmount.amount,
-        occurredAt: new Date(transaction.bookingDate),
-        description: transaction.remittanceInformationUnstructured,
-        type: transaction.remittanceInformationStructured,
-        account: {
-          connect: {
-            id
-          }
-        },
-        booked: transactions.booked.includes(transaction)
+        bookingDate: transaction.bookingDate
+          ? new Date(transaction.bookingDate)
+          : null,
+        valueDate: transaction.valueDate
+          ? new Date(transaction.valueDate)
+          : null,
+        reference: transaction.remittanceInformationUnstructured,
+        type: transaction.remittanceInformationStructured
       }));
 
     await prisma.bankAccount

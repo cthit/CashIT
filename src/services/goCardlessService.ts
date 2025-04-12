@@ -49,21 +49,23 @@ interface AccountDetails {
 }
 
 interface AccountTransaction {
-  transactionId: string;
-  debtorName: string;
-  debtorAccount: {
-    iban: string;
+  transactionId?: string;
+  creditorName?: string;
+  creditorAccount?: {
+    iban?: string;
   };
   transactionAmount: {
+    amount: string;
     currency: string;
-    amount: number;
   };
-  bankTransactionCode: string;
-  bookingDate: string;
-  valueDate: string;
-  remittanceInformationUnstructured: string;
-  remittanceInformationStructured: string;
-  internalTransactionId: string;
+  bookingDate?: string;
+  valueDate?: string;
+  remittanceInformationUnstructured?: string;
+  remittanceInformationUnstructuredArray?: string[];
+  remittanceInformationStructured?: string;
+  remittanceInformationStructuredArray?: string[];
+  internalTransactionId?: string;
+  additionalInformation?: string;
 }
 
 export default class GoCardlessService {

@@ -173,14 +173,16 @@ model BankAccount {
 }
 
 model BankAccountTransaction {
-  goCardlessId String      @id
+  id           Int         @id @default(autoincrement())
+  goCardlessId String?     @unique
   account      BankAccount @relation(fields: [accountId], references: [id])
   accountId    Int
   amount       Float       @db.DoublePrecision
-  type         String
-  description  String
-  booked       Boolean     @default(false)
-  occurredAt   DateTime    @db.Date
+  type         String?
+  reference    String?
+  valueDate    DateTime?   @db.Date
+  bookingDate  DateTime?   @db.Date
+  createdAt    DateTime    @default(now())
 }
 
 model GoCardlessRequisition {

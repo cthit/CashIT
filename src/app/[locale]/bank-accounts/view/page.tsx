@@ -72,7 +72,10 @@ export default async function Page(props: {
       <Table.Root>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader>{l.expense.date}</Table.ColumnHeader>
+            <Table.ColumnHeader>
+              {l.bankAccounts.transactionDate}
+            </Table.ColumnHeader>
+            <Table.ColumnHeader>{l.bankAccounts.bookDate}</Table.ColumnHeader>
             <Table.ColumnHeader>{l.expense.type}</Table.ColumnHeader>
             <Table.ColumnHeader>{l.general.description}</Table.ColumnHeader>
             <Table.ColumnHeader>{l.expense.status}</Table.ColumnHeader>
@@ -83,12 +86,15 @@ export default async function Page(props: {
           {account.transactions.map((t) => (
             <Table.Row key={t.goCardlessId}>
               <Table.Cell>
-                {i18nService.formatDate(t.occurredAt, false)}
+                {t.valueDate && i18nService.formatDate(t.valueDate, false)}
+              </Table.Cell>
+              <Table.Cell>
+                {t.bookingDate && i18nService.formatDate(t.bookingDate, false)}
               </Table.Cell>
               <Table.Cell>{t.type}</Table.Cell>
-              <Table.Cell>{t.description}</Table.Cell>
+              <Table.Cell>{t.reference}</Table.Cell>
               <Table.Cell>
-                {t.booked
+                {t.bookingDate
                   ? l.bankAccounts.transactionBooked
                   : l.bankAccounts.transactionPending}
               </Table.Cell>
