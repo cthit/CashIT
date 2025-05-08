@@ -64,8 +64,9 @@ export default class SessionService {
 
   static async getExpenses(s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await ExpenseService.getForUser(session?.user?.id!)
+      ? await ExpenseService.getForUserWithGroups(session?.user?.id!, groupIds, [])
       : [];
   }
 
@@ -82,6 +83,17 @@ export default class SessionService {
       ? await DivisionGroupService.getUserActiveGroupsWithPosts(
           session?.user?.id!
         )
+      : [];
+  }
+
+  static async getTreasurerGroups(s?: Session | null) {
+    const session = s ?? (await SessionService.getSession());
+    return session?.user?.id
+      ? (
+          await DivisionGroupService.getUserActiveGroupsWithPosts(
+            session?.user?.id!
+          )
+        ).filter((g) => g.post.id === process.env.TREASURER_POST_ID)
       : [];
   }
 

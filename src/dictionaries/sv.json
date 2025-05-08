@@ -101,7 +101,7 @@
     "receipts": "Bildunderlag",
     "receiptsUpload": "Ladda upp",
     "name": "Namn",
-    "groupId": "Grupp-ID",
+    "group": "Grupp",
     "date": "Datum",
     "person": "Person",
     "amount": "Summa",

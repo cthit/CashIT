@@ -52,28 +52,7 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink
-            as={Link}
-            href={
-              '/group' +
-              (invoice.gammaGroupId ? '?gid=' + invoice.gammaGroupId : '')
-            }
-          >
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
-        <BreadcrumbLink
-          as={Link}
-          href={
-            '/invoices' +
-            (invoice.gammaGroupId ? '?gid=' + invoice.gammaGroupId : '')
-          }
-        >
+        <BreadcrumbLink as={Link} href={'/invoices'}>
           {l.categories.invoices}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>

@@ -13,6 +13,7 @@
     "@emotion/react": "^11.14.0",
     "@prisma/client": "6.6.0",
     "@react-pdf/renderer": "^4.2.1",
+    "@tanstack/react-table": "^8.21.3",
     "dayjs": "^1.11.13",
     "next": "15.3.0",
     "next-auth": "^4.24.11",

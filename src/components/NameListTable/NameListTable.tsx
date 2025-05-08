@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
-import { IconButton, Table, LinkBox, LinkOverlay } from '@chakra-ui/react';
+import { useCallback, useMemo, useState } from 'react';
+import { IconButton, Table, LinkBox, LinkOverlay, Box } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -19,56 +19,199 @@ import styles from './NameListTable.module.css';
 import NameListService from '@/services/nameListService';
 import { deleteNameList } from '@/actions/nameLists';
 import { NameListType } from '@prisma/client';
-import { GammaUser } from '@/types/gamma';
+import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
+import {
+  ColumnFiltersState,
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable
+} from '@tanstack/react-table';
+import TableFilter from '../TableFilter/TableFilter';
 
 type NameList = Omit<
   Awaited<ReturnType<typeof NameListService.getPrettifiedForGroup>>[number],
   'user'
 > & { user?: GammaUser };
 
+const columnHelper = createColumnHelper<NameListRow>();
+
+interface NameListRow {
+  id: number;
+  description: string;
+  group: string;
+  groupId?: string;
+  date: Date;
+  person: string;
+  tracked: string;
+  peopleCount: number;
+  type: NameListType;
+}
+
 const NameListTable = ({
   e,
-  showGroups,
-  personal,
+  groups,
   locale
 }: {
   e: NameList[];
-  showGroups?: boolean;
-  personal?: boolean;
+  groups: { group: GammaGroup; post: GammaPost }[];
   locale: string;
 }) => {
+  const rows = useMemo(() => {
+    const groupsReverse = groups.reduce((acc, group) => {
+      acc[group.group.id] = group;
+      return acc;
+    }, {} as Record<string, { group: GammaGroup; post: GammaPost }>);
+
+    return e.map(
+      (list) =>
+        ({
+          id: list.id,
+          description: list.name,
+          group: list.gammaGroupId
+            ? groupsReverse[list.gammaGroupId]?.group.prettyName ?? 'No group'
+            : 'No group',
+          groupId: list.gammaGroupId,
+          date: list.occurredAt,
+          person: `${list.user?.firstName} "${list.user?.nick}" ${list.user?.lastName}`,
+          tracked: list.tracked ? 'Yes' : 'No',
+          peopleCount: list.names.length + list.gammaNames.length,
+          type: ListTypeText({ type: list.type, locale })
+        } as NameListRow)
+    );
+  }, [e, groups, locale]);
+
   const l = i18nService.getLocale(locale);
+
+  const defaultColumns = [
+    columnHelper.accessor('description', {
+      header: l.general.description,
+      cell: (info) => (
+        <LinkOverlay
+          as={Link}
+          href={'/name-lists/view?id=' + info.row.original.id}
+          className={styles.overlay}
+        >
+          {info.getValue()}
+        </LinkOverlay>
+      )
+    }),
+    columnHelper.accessor('group', {
+      header: l.expense.group,
+      cell: (info) => info.getValue(),
+      meta: {
+        filterVariant: 'select'
+      }
+    }),
+    columnHelper.accessor('date', {
+      header: l.expense.date,
+      cell: (info) => info.getValue().toLocaleDateString()
+    }),
+    columnHelper.accessor('person', {
+      header: l.expense.person,
+      cell: (info) => info.getValue()
+    }),
+    columnHelper.accessor('tracked', {
+      header: l.nameLists.tracked,
+      cell: (info) => info.getValue(),
+      meta: {
+        filterVariant: 'select'
+      }
+    }),
+    columnHelper.accessor('peopleCount', {
+      header: l.nameLists.people,
+      cell: (info) => info.getValue()
+    }),
+    columnHelper.accessor('type', {
+      header: l.expense.type,
+      cell: (info) => info.getValue(),
+      meta: {
+        filterVariant: 'select'
+      }
+    }),
+    columnHelper.display({
+      id: 'actions',
+      cell: (info) => {
+        const list = info.row.original;
+        return <NameListActions id={list.id} locale={locale} />;
+      }
+    })
+  ];
+
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: 'date',
+      desc: true
+    }
+  ]);
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const table = useReactTable({
+    columns: defaultColumns,
+    data: rows,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    state: {
+      sorting,
+      columnFilters
+    }
+  });
 
   return (
     <Table.Root>
       <Table.Header>
         <Table.Row>
-          <Table.ColumnHeader>{l.general.description}</Table.ColumnHeader>
-          {showGroups && (
-            <Table.ColumnHeader>{l.expense.groupId}</Table.ColumnHeader>
+          {table.getHeaderGroups().map((headerGroup) =>
+            headerGroup.headers.map((header) => {
+              return (
+                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
+                  <Box
+                    onClick={header.column.getToggleSortingHandler()}
+                    cursor={header.column.getCanSort() ? 'pointer' : undefined}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                    {header.column.getCanSort() &&
+                      ({
+                        asc: '▴',
+                        desc: '▾'
+                      }[header.column.getIsSorted() as string] ??
+                        '⇅')}
+                  </Box>
+                  {header.column.getCanFilter() ? (
+                    <TableFilter column={header.column} />
+                  ) : null}
+                </Table.ColumnHeader>
+              );
+            })
           )}
-          <Table.ColumnHeader>{l.expense.date}</Table.ColumnHeader>
-          {!personal && (
-            <Table.ColumnHeader>{l.expense.person}</Table.ColumnHeader>
-          )}
-          <Table.ColumnHeader>{l.nameLists.tracked}</Table.ColumnHeader>
-          <Table.ColumnHeader>{l.nameLists.people}</Table.ColumnHeader>
-          <Table.ColumnHeader>{l.expense.type}</Table.ColumnHeader>
-          <Table.ColumnHeader />
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {e.map((expense) => (
-          <NameListRow
-            {...expense}
-            key={expense.id}
-            showGroups={showGroups}
-            locale={locale}
-            personal={personal}
-          />
+        {table.getRowModel().rows.map((row) => (
+          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <Table.Cell key={cell.id} py="1" textOverflow="ellipsis">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </Table.Cell>
+            ))}
+          </LinkBox>
         ))}
       </Table.Body>
-      {e.length === 0 && (
+      {table.getRowModel().rows.length === 0 && (
         <Table.Caption>
           <EmptyState
             icon={<PiUserList />}
@@ -81,26 +224,8 @@ const NameListTable = ({
   );
 };
 
-const NameListRow = ({
-  user,
-  id,
-  name,
-  gammaGroupId,
-  showGroups,
-  locale,
-  names,
-  tracked,
-  gammaNames,
-  type,
-  occurredAt,
-  personal
-}: NameList & {
-  showGroups?: boolean;
-  locale: string;
-  personal?: boolean;
-}) => {
+const NameListActions = ({ id, locale }: { id: number; locale: string }) => {
   const l = i18nService.getLocale(locale);
-  const count = names.length + gammaNames.length;
   const router = useRouter();
 
   const remove = useCallback(() => {
@@ -110,60 +235,25 @@ const NameListRow = ({
   }, [id, router]);
 
   return (
-    <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }}>
-      <Table.Cell>
-        <LinkOverlay
-          as={Link}
-          href={
-            '/name-lists/view?id=' + id + (personal ? '&type=p' : '&type=g')
-          }
-          className={styles.overlay}
+    <MenuRoot>
+      <MenuTrigger asChild>
+        <IconButton size="sm" variant="subtle" ml="0.25rem">
+          <HiDotsHorizontal />
+        </IconButton>
+      </MenuTrigger>
+      <MenuContent>
+        <MenuItem
+          value="edit"
+          cursor="pointer"
+          onClick={() => router.push('/name-lists/view?id=' + id)}
         >
-          {name}
-        </LinkOverlay>
-      </Table.Cell>
-      {showGroups && <Table.Cell>{gammaGroupId}</Table.Cell>}
-      <Table.Cell>
-        {occurredAt && i18nService.formatDate(occurredAt, false)}
-      </Table.Cell>
-      {!personal && (
-        <Table.Cell>
-          {user?.firstName} &quot;{user?.nick}&quot; {user?.lastName}
-        </Table.Cell>
-      )}
-      <Table.Cell>{tracked ? 'Yes' : 'No'}</Table.Cell>
-      <Table.Cell>{count}</Table.Cell>
-      <Table.Cell>
-        <ListTypeText type={type} locale={locale} />
-      </Table.Cell>
-      <Table.Cell maxW="fit-content">
-        <MenuRoot>
-          <MenuTrigger asChild>
-            <IconButton size="sm" variant="subtle" ml="0.25rem">
-              <HiDotsHorizontal />
-            </IconButton>
-          </MenuTrigger>
-          <MenuContent>
-            <MenuItem
-              value="edit"
-              cursor="pointer"
-              onClick={() =>
-                router.push(
-                  '/name-lists/view?id=' +
-                    id +
-                    (personal ? '&type=p' : '&type=g')
-                )
-              }
-            >
-              {l.general.edit}
-            </MenuItem>
-            <MenuItem color="fg.error" value="delete" onClick={remove}>
-              {l.general.delete} <MenuItemCommand>D</MenuItemCommand>
-            </MenuItem>
-          </MenuContent>
-        </MenuRoot>
-      </Table.Cell>
-    </LinkBox>
+          {l.general.edit}
+        </MenuItem>
+        <MenuItem color="fg.error" value="delete" onClick={remove}>
+          {l.general.delete} <MenuItemCommand>D</MenuItemCommand>
+        </MenuItem>
+      </MenuContent>
+    </MenuRoot>
   );
 };
 

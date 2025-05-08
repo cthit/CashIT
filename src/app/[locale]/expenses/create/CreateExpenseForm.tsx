@@ -40,14 +40,17 @@ import { LuCloud, LuUndo, LuX } from 'react-icons/lu';
 import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { InputGroup } from '@/components/ui/input-group';
+import { GammaGroup } from '@/types/gamma';
 
 export default function CreateExpenseForm({
   readOnly,
+  groups,
   locale,
   gid,
   e
 }: {
   readOnly?: boolean;
+  groups: GammaGroup[];
   locale: string;
   gid?: string;
   e?: Prisma.ExpenseGetPayload<{ include: { receipts: true } }>;
@@ -63,9 +66,19 @@ export default function CreateExpenseForm({
     ]
   });
 
+  const groupOptions = createListCollection({
+    items: [{ label: 'No group', value: '' }].concat(
+      groups.map((group) => ({
+        label: group.prettyName,
+        value: group.id
+      }))
+    )
+  });
+
   const [removeFiles, setRemoveFiles] = useState<number[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [amount, setAmount] = useState<string>((e?.amount ?? '') + '');
+  const [groupId, setGroupId] = useState<string | undefined>(gid);
   const [name, setName] = useState<string>(e?.name ?? '');
   const [date, setDate] = useState<string>(
     e?.occurredAt ? i18nService.formatDate(e.occurredAt, false) : ''
@@ -84,11 +97,11 @@ export default function CreateExpenseForm({
       files.forEach((file) => {
         formData.append('file', file);
       });
-      gid
+      groupId
         ? (editing
             ? editExpenseForGroup(
                 e.id,
-                gid,
+                groupId,
                 +amount,
                 name,
                 description,
@@ -100,7 +113,7 @@ export default function CreateExpenseForm({
                 type
               )
             : createExpenseForGroup(
-                gid,
+                groupId,
                 +amount,
                 name,
                 description,
@@ -108,7 +121,7 @@ export default function CreateExpenseForm({
                 formData,
                 type
               )
-          ).then(() => router.push(`/expenses?gid=${gid}`))
+          ).then(() => router.push(`/expenses`))
         : (editing
             ? editPersonalExpense(
                 e.id,
@@ -133,7 +146,6 @@ export default function CreateExpenseForm({
     },
     [
       files,
-      gid,
       type,
       date,
       editing,
@@ -143,7 +155,8 @@ export default function CreateExpenseForm({
       name,
       description,
       removeFiles,
-      router
+      router,
+      groupId
     ]
   );
 
@@ -156,6 +169,28 @@ export default function CreateExpenseForm({
           <Text color="fg.muted" textStyle="sm">
             {l.expense.newDescription}
           </Text>
+
+          <Field label={'Group'} required>
+            <SelectRoot
+              collection={groupOptions}
+              value={groupId !== undefined ? [groupId] : []}
+              onValueChange={({ value }) => setGroupId(value?.[0])}
+              disabled={readOnly}
+            >
+              <SelectLabel />
+              <SelectTrigger>
+                <SelectValueText placeholder="Select a group" />
+              </SelectTrigger>
+              <SelectContent>
+                {groupOptions.items.map((item) => (
+                  <SelectItem key={item.value} item={item}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          </Field>
+
           <Field label={l.general.description} disabled={readOnly} required>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>

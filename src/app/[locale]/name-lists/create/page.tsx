@@ -42,19 +42,7 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink as={Link} href={'/group?gid=' + gid}>
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
-        <BreadcrumbLink
-          as={Link}
-          href={'/name-lists' + (gid ? '?gid=' + gid : '')}
-        >
+        <BreadcrumbLink as={Link} href={'/name-lists'}>
           {l.nameLists.list}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.economy.create}</BreadcrumbCurrentLink>

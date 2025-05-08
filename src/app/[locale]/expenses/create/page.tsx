@@ -14,19 +14,11 @@ export default async function Page(props: {
   searchParams: Promise<{ gid?: string }>;
   params: Promise<{ locale: string }>;
 }) {
-  const { gid } = await props.searchParams;
   const { locale } = await props.params;
 
   const l = i18nService.getLocale(locale);
 
-  const group =
-    gid !== undefined
-      ? (await SessionService.getGroups()).find((g) => g.group.id === gid)
-          ?.group
-      : undefined;
-  if (gid !== undefined && group === undefined) {
-    notFound();
-  }
+  const groups = await SessionService.getActiveGroups();
 
   return (
     <>
@@ -34,25 +26,16 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink as={Link} href={'/group?gid=' + gid}>
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
         <BreadcrumbLink
           as={Link}
-          href={'/expenses' + (gid ? '?gid=' + gid : '')}
+          href={'/expenses'}
         >
           {l.categories.expenses}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.economy.create}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <CreateExpenseForm gid={gid} locale={locale} />
+      <CreateExpenseForm groups={groups} locale={locale} />
     </>
   );
 }

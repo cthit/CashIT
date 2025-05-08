@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   markInvoiceAsSent,
   markInvoiceAsNotSent,
@@ -11,6 +11,7 @@ import {
 } from '@/actions/invoices';
 import {
   Badge,
+  Box,
   IconButton,
   LinkBox,
   LinkOverlay,
@@ -40,58 +41,218 @@ import { EmptyState } from '../ui/empty-state';
 import Link from 'next/link';
 import styles from './InvoicesTable.module.css';
 import i18nService from '@/services/i18nService';
-import { GammaUser } from '@/types/gamma';
+import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
+import {
+  ColumnFiltersState,
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable
+} from '@tanstack/react-table';
+import TableFilter from '../TableFilter/TableFilter';
 
 type Invoice = Omit<
   Awaited<ReturnType<typeof InvoiceService.getPrettifiedForGroup>>[number],
   'user'
 > & { user?: GammaUser };
 
+const columnHelper = createColumnHelper<InvoiceRow>();
+
+type InvoiceStatus = RequestStatus | 'FINISHED';
+
+interface InvoiceRow {
+  id: number;
+  description: string;
+  group: string;
+  date: Date;
+  person: string;
+  total: number;
+  status: InvoiceStatus;
+  statusText: string;
+  groupId?: string;
+}
+
 const InvoicesTable = ({
   e,
-  showGroups,
-  personal,
   locale,
-  isTreasurer
+  groups
 }: {
   e: Invoice[];
-  showGroups?: boolean;
-  personal?: boolean;
   locale: string;
-  isTreasurer?: boolean;
+  groups: { group: GammaGroup; post: GammaPost }[];
 }) => {
+  const invoices = useMemo(() => {
+    const groupsReverse = groups.reduce((acc, group) => {
+      acc[group.group.id] = group;
+      return acc;
+    }, {} as Record<string, { group: GammaGroup; post: GammaPost }>);
+
+    return e.map((invoice) => {
+      const status: InvoiceStatus =
+        invoice.sentAt !== null ? 'FINISHED' : invoice.status;
+      return {
+        id: invoice.id,
+        description: invoice.name,
+        group: invoice.gammaGroupId
+          ? groupsReverse[invoice.gammaGroupId]?.group.prettyName ?? 'No group'
+          : 'No group',
+        date: invoice.createdAt,
+        person:
+          invoice.user?.firstName +
+          ' "' +
+          invoice.user?.nick +
+          '" ' +
+          invoice.user?.lastName,
+        total: InvoiceService.calculateSumForItems(invoice.items),
+        status: status,
+        statusText: RequestStatusText({ b: status, locale: locale }),
+        groupId: invoice.gammaGroupId
+      } as InvoiceRow;
+    });
+  }, [e, groups, locale]);
+
   const l = i18nService.getLocale(locale);
+
+  const defaultColumns = [
+    columnHelper.accessor('description', {
+      header: l.general.description,
+      cell: (info) => (
+        <LinkOverlay
+          as={Link}
+          href={'/invoices/view?id=' + info.row.original.id}
+          className={styles.overlay}
+        >
+          {info.getValue()}
+        </LinkOverlay>
+      )
+    }),
+    columnHelper.accessor('group', {
+      header: l.expense.group,
+      cell: (info) => info.getValue(),
+      meta: {
+        filterVariant: 'select'
+      }
+    }),
+    columnHelper.accessor('date', {
+      header: l.expense.date,
+      cell: (info) => info.getValue().toLocaleDateString()
+    }),
+    columnHelper.accessor('person', {
+      header: l.expense.person,
+      cell: (info) => info.getValue()
+    }),
+    columnHelper.accessor('total', {
+      header: l.expense.amount,
+      cell: (info) => info.getValue().toFixed(2) + ' kr'
+    }),
+    columnHelper.accessor('statusText', {
+      header: l.expense.status,
+      cell: (info) => (
+        <RequestStatusBadge b={info.row.original.status} locale={locale} />
+      ),
+      meta: {
+        filterVariant: 'select'
+      },
+      sortingFn: (rowA, rowB) => {
+        const statusA = rowA.original.status as InvoiceStatus;
+        const statusB = rowB.original.status as InvoiceStatus;
+        const order = [
+          RequestStatus.PENDING,
+          RequestStatus.PENDING_REVISED,
+          RequestStatus.APPROVED,
+          RequestStatus.REJECTED,
+          'FINISHED'
+        ];
+        return order.indexOf(statusA) - order.indexOf(statusB);
+      }
+    }),
+    columnHelper.display({
+      id: 'actions',
+      cell: (info) => {
+        const invoice = info.row.original;
+        return <InvoiceActions {...invoice} locale={locale} />;
+      }
+    })
+  ];
+
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: 'statusText',
+      desc: false
+    },
+    {
+      id: 'date',
+      desc: true
+    }
+  ]);
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const table = useReactTable({
+    columns: defaultColumns,
+    data: invoices,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    state: {
+      sorting,
+      columnFilters
+    }
+  });
 
   return (
     <Table.Root>
       <Table.Header>
         <Table.Row>
-          <Table.ColumnHeader>{l.general.description}</Table.ColumnHeader>
-          {showGroups && (
-            <Table.ColumnHeader>{l.expense.groupId}</Table.ColumnHeader>
+          {table.getHeaderGroups().map((headerGroup) =>
+            headerGroup.headers.map((header) => {
+              return (
+                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
+                  <Box
+                    onClick={header.column.getToggleSortingHandler()}
+                    cursor={header.column.getCanSort() ? 'pointer' : undefined}
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                    {header.column.getCanSort() &&
+                      ({
+                        asc: '▴',
+                        desc: '▾'
+                      }[header.column.getIsSorted() as string] ??
+                        '⇅')}
+                  </Box>
+                  {header.column.getCanFilter() ? (
+                    <TableFilter column={header.column} />
+                  ) : null}
+                </Table.ColumnHeader>
+              );
+            })
           )}
-          <Table.ColumnHeader>{l.economy.date}</Table.ColumnHeader>
-          {!personal && (
-            <Table.ColumnHeader>{l.expense.person}</Table.ColumnHeader>
-          )}
-          <Table.ColumnHeader>{l.economy.total}</Table.ColumnHeader>
-          <Table.ColumnHeader>{l.expense.status}</Table.ColumnHeader>
-          <Table.ColumnHeader />
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {e.map((expense) => (
-          <InvoiceRow
-            {...expense}
-            key={expense.id}
-            showGroups={showGroups}
-            personal={personal}
-            isTreasurer={isTreasurer}
-            locale={locale}
-          />
+        {table.getRowModel().rows.map((row) => (
+          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <Table.Cell key={cell.id} py="1" textOverflow="ellipsis">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </Table.Cell>
+            ))}
+          </LinkBox>
         ))}
       </Table.Body>
-      {e.length === 0 && (
+      {table.getRowModel().rows.length === 0 && (
         <Table.Caption>
           <EmptyState
             icon={<PiFileX />}
@@ -104,28 +265,15 @@ const InvoicesTable = ({
   );
 };
 
-const InvoiceRow = ({
-  user,
+const InvoiceActions = ({
   id,
-  name,
-  sentAt,
   status,
-  createdAt,
   description,
-  items,
-  showGroups,
-  personal,
-  gammaGroupId,
-  isTreasurer,
   locale
-}: Invoice & {
-  showGroups?: boolean;
-  personal?: boolean;
-  isTreasurer?: boolean;
+}: InvoiceRow & {
   locale: string;
 }) => {
   const router = useRouter();
-  const total = InvoiceService.calculateSumForItems(items);
   const l = i18nService.getLocale(locale);
 
   const markUnpaid = useCallback(() => {
@@ -159,94 +307,52 @@ const InvoiceRow = ({
   }, [id, router]);
 
   return (
-    <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }}>
-      <Table.Cell>
-        <LinkOverlay
-          as={Link}
-          href={'/invoices/view?id=' + id + (personal ? '&type=p' : '&type=g')}
-          className={styles.overlay}
-        >
-          {name}
-        </LinkOverlay>
-      </Table.Cell>
-      {showGroups && <Table.Cell>{gammaGroupId}</Table.Cell>}
-      <Table.Cell>{i18nService.formatDate(createdAt, false)}</Table.Cell>
-      {!personal && (
-        <Table.Cell>
-          {user?.firstName} &quot;{user?.nick}&quot; {user?.lastName}
-        </Table.Cell>
-      )}
-      <Table.Cell>{total.toFixed(2)} kr</Table.Cell>
-      <Table.Cell>
-        {sentAt !== null ? (
-          <Badge
-            colorPalette="green"
-            title={'Marked sent at ' + sentAt.toLocaleDateString()}
+    <Box>
+      {description && <InvoiceComment description={description} />}
+      <MenuRoot>
+        <MenuTrigger asChild>
+          <IconButton size="sm" variant="subtle" ml="0.25rem">
+            <HiDotsHorizontal />
+          </IconButton>
+        </MenuTrigger>
+        <MenuContent>
+          <MenuItem
+            value="edit"
+            cursor="pointer"
+            onClick={() => router.push('/invoices/view?id=' + id)}
           >
-            Sent
-          </Badge>
-        ) : (
-          <RequestStatusBadge b={status} locale={locale} />
-        )}
-      </Table.Cell>
-      <Table.Cell maxW="fit-content">
-        {description && <InvoiceComment description={description} />}
-
-        <MenuRoot>
-          <MenuTrigger asChild>
-            <IconButton size="sm" variant="subtle" ml="0.25rem">
-              <HiDotsHorizontal />
-            </IconButton>
-          </MenuTrigger>
-          <MenuContent>
-            <MenuItem
-              value="edit"
-              cursor="pointer"
-              onClick={() =>
-                router.push(
-                  (personal ? '/personal' : '/group') +
-                    '/invoices/view?id=' +
-                    id
-                )
-              }
-            >
-              {l.general.edit}
+            {l.general.edit}
+          </MenuItem>
+          {status === 'FINISHED' ? (
+            <MenuItem value="mark-not-sent" onClick={markUnpaid}>
+              {l.invoice.markNotSent}
             </MenuItem>
-            {isTreasurer && (
-              <>
-                {sentAt !== null ? (
-                  <MenuItem value="mark-not-sent" onClick={markUnpaid}>
-                    {l.invoice.markNotSent}
-                  </MenuItem>
-                ) : (
-                  <>
-                    <MenuItem value="mark-sent" onClick={markPaid}>
-                      {status === RequestStatus.APPROVED
-                        ? l.invoice.markSent
-                        : l.invoice.approveMarkSent}
-                    </MenuItem>
-                    {status !== RequestStatus.APPROVED && (
-                      <MenuItem value="approve" onClick={approve}>
-                        {l.invoice.approveSending}
-                      </MenuItem>
-                    )}
-                    {status !== RequestStatus.REJECTED && (
-                      <MenuItem value="deny" onClick={requestRevision}>
-                        {l.economy.requestRevision}
-                      </MenuItem>
-                    )}
-                  </>
-                )}
-                <Separator my="0.25rem" />
-              </>
-            )}
-            <MenuItem color="fg.error" value="delete" onClick={remove}>
-              {l.general.delete}
-            </MenuItem>
-          </MenuContent>
-        </MenuRoot>
-      </Table.Cell>
-    </LinkBox>
+          ) : (
+            <>
+              <MenuItem value="mark-sent" onClick={markPaid}>
+                {status === RequestStatus.APPROVED
+                  ? l.invoice.markSent
+                  : l.invoice.approveMarkSent}
+              </MenuItem>
+              {status !== RequestStatus.APPROVED && (
+                <MenuItem value="approve" onClick={approve}>
+                  {l.invoice.approveSending}
+                </MenuItem>
+              )}
+              {status !== RequestStatus.REJECTED && (
+                <MenuItem value="deny" onClick={requestRevision}>
+                  {l.economy.requestRevision}
+                </MenuItem>
+              )}
+            </>
+          )}
+          <Separator my="0.25rem" />
+          <MenuItem color="fg.error" value="delete" onClick={remove}>
+            {l.general.delete}
+          </MenuItem>
+        </MenuContent>
+      </MenuRoot>
+    </Box>
   );
 };
 
@@ -273,7 +379,7 @@ const RequestStatusBadge = ({
   b,
   locale
 }: {
-  b: RequestStatus;
+  b: InvoiceStatus;
   locale: string;
 }) => {
   const l = i18nService.getLocale(locale);
@@ -288,6 +394,30 @@ const RequestStatusBadge = ({
       return (
         <Badge colorPalette="yellow">{l.invoice.status.pendingRevised}</Badge>
       );
+    case 'FINISHED':
+      return <Badge colorPalette="green">{l.invoice.status.sent}</Badge>;
+  }
+};
+
+const RequestStatusText = ({
+  b,
+  locale
+}: {
+  b: InvoiceStatus;
+  locale: string;
+}) => {
+  const l = i18nService.getLocale(locale);
+  switch (b) {
+    case RequestStatus.PENDING:
+      return l.invoice.status.pending;
+    case RequestStatus.APPROVED:
+      return l.invoice.status.approved;
+    case RequestStatus.REJECTED:
+      return l.invoice.status.rejected;
+    case RequestStatus.PENDING_REVISED:
+      return l.invoice.status.pendingRevised;
+    case 'FINISHED':
+      return l.invoice.status.sent;
   }
 };
 

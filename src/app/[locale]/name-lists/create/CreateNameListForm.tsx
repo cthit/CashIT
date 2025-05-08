@@ -69,7 +69,7 @@ export default function CreateNameListForm({
   const [trackIndividual, setTrackIndividual] = useState<boolean>(
     nl?.tracked ?? false
   );
-  const [nameSource, setNameSource] = useState<'members' | 'custom'>(
+  const [nameSource, setNameSource] = useState<'members' | 'custom' | 'media'>(
     nl?.names.length ?? 0 > 0 ? 'custom' : 'members'
   );
   const [names, setNames] = useState<GroupNameItem[]>(
@@ -223,11 +223,12 @@ export default function CreateNameListForm({
             <SegmentedControl
               value={nameSource}
               onValueChange={(e) =>
-                setNameSource(e.value as 'members' | 'custom')
+                setNameSource(e.value as 'members' | 'custom' | 'media')
               }
               items={[
                 { label: l.nameLists.formatMembers, value: 'members' },
-                { label: l.nameLists.formatCustom, value: 'custom' }
+                { label: l.nameLists.formatCustom, value: 'custom' },
+                { label: 'Media', value: 'media' }
               ]}
             />
           </Field>

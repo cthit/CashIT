@@ -53,28 +53,7 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink
-            as={Link}
-            href={
-              '/group' +
-              (expense.gammaGroupId ? '?gid=' + expense.gammaGroupId : '')
-            }
-          >
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
-        <BreadcrumbLink
-          as={Link}
-          href={
-            '/expenses' +
-            (expense.gammaGroupId ? '?gid=' + expense.gammaGroupId : '')
-          }
-        >
+        <BreadcrumbLink as={Link} href={'/expenses'}>
           {l.categories.expenses}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
@@ -87,6 +66,7 @@ export default async function Page(props: {
         e={expense}
         locale={locale}
         readOnly={!canEdit}
+        groups={[]}
       />
     </>
   );

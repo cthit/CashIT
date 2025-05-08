@@ -121,6 +121,33 @@ export default class ExpenseService {
     });
   }
 
+  static async getForUserWithGroups(
+    gammaUserId: string,
+    groups: string[],
+    superGroups: string[]
+  ) {
+    return await prisma.expense.findMany({
+      where: {
+        OR: [
+          {
+            gammaUserId
+          },
+          {
+            gammaSuperGroupId: { in: superGroups }
+          },
+          {
+            gammaGroupId: { in: groups }
+          }
+        ]
+      },
+      include: {
+        receipts: {
+          include: { media: true }
+        }
+      }
+    });
+  }
+
   static async getPrettifiedForUser(gammaUserId: string) {
     const expenses = await this.getForUser(gammaUserId);
     const prettifiedExpenses = await Promise.all(

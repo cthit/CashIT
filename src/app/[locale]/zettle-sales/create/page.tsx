@@ -37,10 +37,7 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href={'/group?gid=' + gid}>
-          {group.prettyName}
-        </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href={'/zettle-sales?gid=' + gid}>
+        <BreadcrumbLink as={Link} href={'/zettle-sales'}>
           {l.home.zettleSales}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.zettleSales.create}</BreadcrumbCurrentLink>

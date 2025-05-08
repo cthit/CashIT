@@ -22,7 +22,7 @@ const Navigation = ({ locale }: { locale: string }) => {
         </Icon>{' '}
         {l.home.title}
       </NavigationLink>
-      <NavigationLink href="/bank-accounts">
+      <NavigationLink href="/groupless">
         <Icon size="md">
           <LiaUserAltSlashSolid />
         </Icon>{' '}

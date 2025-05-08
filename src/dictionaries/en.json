@@ -102,7 +102,7 @@
     "receiptsUpload": "Upload Receipts",
     "name": "Name",
     "date": "Date",
-    "groupId": "Group ID",
+    "group": "Group",
     "person": "Person",
     "amount": "Amount",
     "status": "Status",
