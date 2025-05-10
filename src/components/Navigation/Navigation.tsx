@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Icon, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Icon } from '@chakra-ui/react';
 import NavigationLink from './NavigationLink/NavigationLink';
 import i18nService from '@/services/i18nService';
 import {
@@ -9,7 +9,6 @@ import {
   PiReceipt,
   PiUsersThree
 } from 'react-icons/pi';
-import { LiaUserAltSlashSolid } from 'react-icons/lia';
 
 const Navigation = ({ locale }: { locale: string }) => {
   const l = i18nService.getLocale(locale);
@@ -25,7 +24,7 @@ const Navigation = ({ locale }: { locale: string }) => {
 
       <Box>
         <Heading as="h1" size="xl" mt="4" mb="0">
-          Redovisning
+          {l.categories.accounting}
         </Heading>
       </Box>
 
@@ -56,7 +55,7 @@ const Navigation = ({ locale }: { locale: string }) => {
 
       <Box>
         <Heading as="h1" size="xl" mt="4" mb="0">
-          Verktyg
+          {l.categories.tools}
         </Heading>
       </Box>
 
@@ -70,7 +69,7 @@ const Navigation = ({ locale }: { locale: string }) => {
         <Icon size="md">
           <PiReceipt />
         </Icon>{' '}
-        Receipt Creator
+        {l.categories.receiptCreator}
       </NavigationLink>
     </Flex>
   );

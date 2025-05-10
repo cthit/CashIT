@@ -33,7 +33,10 @@
     "expenses": "Expenses",
     "invoices": "Customer Invoices",
     "teambuilding": "Teambuilding",
-    "food": "Food"
+    "food": "Food",
+    "accounting": "Accounting",
+    "tools": "Tools",
+    "receiptCreator": "Receipt Creator"
   },
   "general": {
     "edit": "Edit",

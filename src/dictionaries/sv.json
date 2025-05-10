@@ -33,7 +33,10 @@
     "expenses": "Kostnader",
     "invoices": "Kundfakturor",
     "teambuilding": "Teambuilding",
-    "food": "Arbetsmat"
+    "food": "Arbetsmat",
+    "accounting": "Redovisning",
+    "tools": "Verktyg",
+    "receiptCreator": "Kvittoskapare"
   },
   "general": {
     "edit": "Redigera",
