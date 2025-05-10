@@ -57,8 +57,9 @@ export default class SessionService {
 
   static async getInvoices(s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await InvoiceService.getForUser(session?.user?.id!)
+      ? await InvoiceService.getForUserWithGroups(session?.user?.id!, groupIds, [])
       : [];
   }
 
@@ -72,8 +73,9 @@ export default class SessionService {
 
   static async getNameLists(s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await NameListService.getForUser(session?.user?.id!)
+      ? await NameListService.getForUserWithGroups(session?.user?.id!, groupIds, [])
       : [];
   }
 

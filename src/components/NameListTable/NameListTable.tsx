@@ -62,6 +62,8 @@ const NameListTable = ({
   groups: { group: GammaGroup; post: GammaPost }[];
   locale: string;
 }) => {
+  const l = i18nService.getLocale(locale);
+
   const rows = useMemo(() => {
     const groupsReverse = groups.reduce((acc, group) => {
       acc[group.group.id] = group;
@@ -74,8 +76,9 @@ const NameListTable = ({
           id: list.id,
           description: list.name,
           group: list.gammaGroupId
-            ? groupsReverse[list.gammaGroupId]?.group.prettyName ?? 'No group'
-            : 'No group',
+            ? groupsReverse[list.gammaGroupId]?.group.prettyName ??
+              l.group.noGroup
+            : l.group.noGroup,
           groupId: list.gammaGroupId,
           date: list.occurredAt,
           person: `${list.user?.firstName} "${list.user?.nick}" ${list.user?.lastName}`,
@@ -85,8 +88,6 @@ const NameListTable = ({
         } as NameListRow)
     );
   }, [e, groups, locale]);
-
-  const l = i18nService.getLocale(locale);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -192,7 +193,7 @@ const NameListTable = ({
                         '⇅')}
                   </Box>
                   {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} />
+                    <TableFilter column={header.column} locale={locale} />
                   ) : null}
                 </Table.ColumnHeader>
               );

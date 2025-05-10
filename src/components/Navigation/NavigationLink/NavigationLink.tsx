@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import Link, { LinkProps } from 'next/link';
 import { AnchorHTMLAttributes } from 'react';
 
@@ -8,15 +8,16 @@ const NavigationLink = ({
 }: LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>) => {
   return (
     <Link {...rest}>
-      <Box
-        width="100%"
+      <Flex
         p="1.5"
         borderRadius="md"
         _hover={{ bg: 'bg.muted' }}
         fontSize="md"
+        alignItems="center"
+        gap="1"
       >
         {children}
-      </Box>
+      </Flex>
     </Link>
   );
 };

@@ -19,16 +19,8 @@ export default async function Page(props: {
 
   const l = i18nService.getLocale(locale);
 
-  const group =
-    gid !== undefined
-      ? (await SessionService.getGroups()).find((g) => g.group.id === gid)
-          ?.group
-      : undefined;
-  if (gid !== undefined && group === undefined) {
-    notFound();
-  }
-
   const user = (await SessionService.getGammaUser())?.user;
+  const groups = await SessionService.getActiveGroups();
 
   return (
     <>
@@ -42,7 +34,7 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.economy.create}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <SendInvoiceForm locale={locale} gid={gid} user={user} />
+      <SendInvoiceForm locale={locale} groups={groups} user={user} />
     </>
   );
 }

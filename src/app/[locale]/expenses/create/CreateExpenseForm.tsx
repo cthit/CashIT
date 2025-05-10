@@ -67,7 +67,7 @@ export default function CreateExpenseForm({
   });
 
   const groupOptions = createListCollection({
-    items: [{ label: 'No group', value: '' }].concat(
+    items: [{ label: l.group.noGroup, value: '' }].concat(
       groups.map((group) => ({
         label: group.prettyName,
         value: group.id
@@ -170,7 +170,7 @@ export default function CreateExpenseForm({
             {l.expense.newDescription}
           </Text>
 
-          <Field label={'Group'} required>
+          <Field label={l.group.group} required>
             <SelectRoot
               collection={groupOptions}
               value={groupId !== undefined ? [groupId] : []}
@@ -179,7 +179,7 @@ export default function CreateExpenseForm({
             >
               <SelectLabel />
               <SelectTrigger>
-                <SelectValueText placeholder="Select a group" />
+                <SelectValueText placeholder={l.group.selectGroup} />
               </SelectTrigger>
               <SelectContent>
                 {groupOptions.items.map((item) => (

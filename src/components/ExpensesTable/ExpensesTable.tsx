@@ -90,6 +90,8 @@ const ExpensesTable = ({
   locale: string;
   treasurerPostId?: string;
 }) => {
+  const l = i18nService.getLocale(locale);
+
   const expenses = useMemo(() => {
     const groupsReverse = groups.reduce((acc, group) => {
       acc[group.group.id] = group;
@@ -103,8 +105,9 @@ const ExpensesTable = ({
         id: expense.id,
         description: expense.name,
         group: expense.gammaGroupId
-          ? groupsReverse[expense.gammaGroupId]?.group.prettyName ?? 'No group'
-          : 'No group',
+          ? groupsReverse[expense.gammaGroupId]?.group.prettyName ??
+            l.group.noGroup
+          : l.group.noGroup,
         date: expense.createdAt,
         type: ExpenseTypeText({
           type: expense.type,
@@ -124,8 +127,6 @@ const ExpensesTable = ({
       } as ExpenseRow;
     });
   }, [e, groups, locale]);
-
-  const l = i18nService.getLocale(locale);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -257,7 +258,7 @@ const ExpensesTable = ({
                         '⇅')}
                   </Box>
                   {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} />
+                    <TableFilter column={header.column} locale={locale} />
                   ) : null}
                 </Table.ColumnHeader>
               );

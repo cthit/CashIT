@@ -112,6 +112,31 @@ export default class InvoiceService {
     });
   }
 
+  static async getForUserWithGroups(
+    gammaUserId: string,
+    groups: string[],
+    superGroups: string[]
+  ) {
+    return await prisma.invoice.findMany({
+      where: {
+        OR: [
+          {
+            gammaUserId
+          },
+          {
+            gammaSuperGroupId: { in: superGroups }
+          },
+          {
+            gammaGroupId: { in: groups }
+          }
+        ]
+      },
+      include: {
+        items: true
+      }
+    });
+  }
+
   static async createForGroup(
     gammaSuperGroupId: string,
     gammaGroupId: string,

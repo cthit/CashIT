@@ -9,6 +9,7 @@ import { Box, Flex, Heading } from '@chakra-ui/react';
 import { Button } from '@/components/ui/button';
 import InvoicesTable from '@/components/InvoicesTable/InvoicesTable';
 import i18nService from '@/services/i18nService';
+import InvoiceService from '@/services/invoiceService';
 
 export default async function Page(props: {
   searchParams: Promise<{ gid?: string; sgid?: string; show?: string }>;
@@ -19,7 +20,10 @@ export default async function Page(props: {
 
   const groups = await SessionService.getGroups();
 
-  const invoices = await SessionService.getInvoices();
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const invoices = await (divisionTreasurer
+    ? InvoiceService.getAll()
+    : SessionService.getInvoices());
 
   return (
     <>
@@ -39,11 +43,7 @@ export default async function Page(props: {
         </Link>
       </Flex>
       <Box p="2" />
-      <InvoicesTable
-        e={invoices}
-        locale={locale}
-        groups={groups}
-      />
+      <InvoicesTable e={invoices} locale={locale} groups={groups} />
     </>
   );
 }

@@ -22,28 +22,13 @@ const Navigation = ({ locale }: { locale: string }) => {
         </Icon>{' '}
         {l.home.title}
       </NavigationLink>
-      <NavigationLink href="/groupless">
-        <Icon size="md">
-          <LiaUserAltSlashSolid />
-        </Icon>{' '}
-        {l.home.personal}
-      </NavigationLink>
 
       <Box>
         <Heading as="h1" size="xl" mt="4" mb="0">
-          {l.home.division}
+          Redovisning
         </Heading>
-        <Text color="fg.muted" textStyle="sm">
-          {l.home.divisionDescription}
-        </Text>
       </Box>
 
-      <NavigationLink href="/bank-accounts">
-        <Icon size="md">
-          <PiBank />
-        </Icon>{' '}
-        {l.bankAccounts.title}
-      </NavigationLink>
       <NavigationLink href="/expenses?show=all">
         <Icon size="md">
           <PiCoins />
@@ -67,6 +52,25 @@ const Navigation = ({ locale }: { locale: string }) => {
           <PiUsersThree />
         </Icon>{' '}
         {l.categories.nameLists}
+      </NavigationLink>
+
+      <Box>
+        <Heading as="h1" size="xl" mt="4" mb="0">
+          Verktyg
+        </Heading>
+      </Box>
+
+      <NavigationLink href="/bank-accounts">
+        <Icon size="md">
+          <PiBank />
+        </Icon>{' '}
+        {l.bankAccounts.title}
+      </NavigationLink>
+      <NavigationLink href="/receipt-creator">
+        <Icon size="md">
+          <PiReceipt />
+        </Icon>{' '}
+        Receipt Creator
       </NavigationLink>
     </Flex>
   );

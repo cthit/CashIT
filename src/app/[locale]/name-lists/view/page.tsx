@@ -47,6 +47,9 @@ export default async function Page(props: {
     notFound();
   }
 
+  const superGroups = await GammaService.getAllSuperGroups();
+  const groups = await SessionService.getActiveGroups();
+
   return (
     <>
       <BreadcrumbRoot>
@@ -59,7 +62,12 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{nameList.name}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <CreateNameListForm g={group} sg={sg} locale={locale} nl={nameList} />
+      <CreateNameListForm
+        superGroups={superGroups}
+        groups={groups}
+        locale={locale}
+        nl={nameList}
+      />
     </>
   );
 }

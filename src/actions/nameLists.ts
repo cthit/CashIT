@@ -64,6 +64,7 @@ export async function createPersonalNameList(
 
 export async function editNameList(
   id: number,
+  gammaGroupId: string | null,
   name: string,
   type: NameListType,
   names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -73,6 +74,7 @@ export async function editNameList(
 ) {
   await NameListService.edit(
     id,
+    gammaGroupId,
     name,
     type,
     names,

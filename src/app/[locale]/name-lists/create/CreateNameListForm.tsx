@@ -1,7 +1,7 @@
 'use client';
 
 import { pdf } from '@react-pdf/renderer';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Box,
   createListCollection,
@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
-import { GammaGroup, GammaGroupMember } from '@/types/gamma';
+import { GammaGroup, GammaGroupMember, GammaSuperGroup } from '@/types/gamma';
 import i18nService from '@/services/i18nService';
 import {
   SelectContent,
@@ -39,26 +39,76 @@ import NameListService from '@/services/nameListService';
 import FileService from '@/services/fileService';
 import NameListPdf from '@/components/NameListPdf/NameListPdf';
 
-interface GroupNameItem {
+export interface GroupNameItem {
   name: string;
   amount: string;
 }
 
+const sgToMembers = (
+  sg: { members: GammaGroupMember[] },
+  nl?: Awaited<ReturnType<typeof NameListService.getById>>
+) => {
+  return nl && sg
+    ? sg.members.map((m) => ({
+        id: m.user.id,
+        nick: m.user.firstName + ' ' + m.user.lastName,
+        amount:
+          nl.gammaNames
+            .find((n) => n.gammaUserId === m.user.id)
+            ?.cost.toString() ?? ''
+      }))
+    : sg?.members.map((m) => ({
+        id: m.user.id,
+        nick: m.user.firstName + ' ' + m.user.lastName,
+        amount: ''
+      })) ?? [];
+};
+
 export default function CreateNameListForm({
-  g,
-  sg,
+  superGroups,
   nl,
+  groups,
   locale
 }: {
-  g?: GammaGroup;
-  sg?: { members: GammaGroupMember[] };
+  superGroups: { members: GammaGroupMember[]; superGroup: GammaSuperGroup }[];
   nl?: Awaited<ReturnType<typeof NameListService.getById>>;
+  groups: GammaGroup[];
   locale: string;
 }) {
   const l = i18nService.getLocale(locale);
 
+  const groupOptions = createListCollection({
+    items: [{ label: l.group.noGroup, value: '' }].concat(
+      groups.map((group) => ({
+        label: group.prettyName,
+        value: group.id
+      }))
+    )
+  });
+
   const router = useRouter();
 
+  const superGroupsReverse = useMemo(
+    () =>
+      superGroups.reduce((acc, group) => {
+        acc[group.superGroup.id] = group;
+        return acc;
+      }, {} as Record<string, { members: GammaGroupMember[] }>),
+    [superGroups]
+  );
+
+  const groupToSuperGroup = useMemo(
+    () =>
+      groups.reduce((acc, group) => {
+        acc[group.id] = group.superGroup.id;
+        return acc;
+      }, {} as Record<string, string>),
+    [groups]
+  );
+
+  const [groupId, setGroupId] = useState<string | undefined>(
+    (nl?.gammaGroupId === null ? '' : nl?.gammaGroupId) ?? undefined
+  );
   const [name, setName] = useState<string>(nl?.name ?? '');
   const [date, setDate] = useState<string>(
     nl?.occurredAt ? i18nService.formatDate(nl.occurredAt, false) : ''
@@ -69,7 +119,7 @@ export default function CreateNameListForm({
   const [trackIndividual, setTrackIndividual] = useState<boolean>(
     nl?.tracked ?? false
   );
-  const [nameSource, setNameSource] = useState<'members' | 'custom' | 'media'>(
+  const [nameSource, setNameSource] = useState<'members' | 'custom'>(
     nl?.names.length ?? 0 > 0 ? 'custom' : 'members'
   );
   const [names, setNames] = useState<GroupNameItem[]>(
@@ -79,20 +129,9 @@ export default function CreateNameListForm({
     })) ?? []
   );
   const [groupNames, setGroupNames] = useState(
-    nl && sg
-      ? sg.members.map((m) => ({
-          id: m.user.id,
-          nick: m.user.nick,
-          amount:
-            nl.gammaNames
-              .find((n) => n.gammaUserId === m.user.id)
-              ?.cost.toString() ?? ''
-        }))
-      : sg?.members.map((m) => ({
-          id: m.user.id,
-          nick: m.user.nick,
-          amount: ''
-        })) ?? []
+    groupId
+      ? sgToMembers(superGroupsReverse[groupToSuperGroup[groupId] ?? ''], nl)
+      : []
   );
 
   const edited = nl !== undefined && nl !== null;
@@ -114,25 +153,24 @@ export default function CreateNameListForm({
       edited
         ? editNameList(
             nl.id,
+            (groupId === '' ? null : groupId) ?? nl.gammaGroupId,
             name,
             type,
             customNames,
             gammaNames,
             trackIndividual,
             new Date(date)
-          ).then(() =>
-            router.push(g ? `/name-lists?gid=${g.id}` : '/name-lists')
-          )
-        : g && sg !== undefined
+          ).then(() => router.push('/name-lists'))
+        : groupId !== '' && groupId !== undefined
         ? createNameListForGroup(
-            g.id,
+            groupId,
             name,
             type,
             customNames,
             gammaNames,
             trackIndividual,
             new Date(date)
-          ).then(() => router.push(`/name-lists?gid=${g.id}`))
+          ).then(() => router.push('/name-lists'))
         : createPersonalNameList(
             name,
             type,
@@ -146,8 +184,7 @@ export default function CreateNameListForm({
       edited,
       date,
       nl,
-      g,
-      sg,
+      groupId,
       groupNames,
       name,
       nameSource,
@@ -161,12 +198,18 @@ export default function CreateNameListForm({
   const exportPdf = useCallback(async () => {
     if (!nl) return;
 
-    const blob = await pdf(<NameListPdf nl={nl} locale={locale} />).toBlob();
+    const gammaNames = groupNames
+      .map((n) => ({ nick: n.nick, amount: +n.amount }))
+      .filter((n) => n.amount > 0);
+
+    const blob = await pdf(
+      <NameListPdf gammaNames={gammaNames} nl={nl} locale={locale} />
+    ).toBlob();
     FileService.saveToFile(
       `name-list-${nl.id}-${new Date().getTime()}.pdf`,
       blob
     );
-  }, [locale, nl]);
+  }, [groupNames, locale, nl]);
 
   const listTypes = createListCollection({
     items: [
@@ -195,6 +238,44 @@ export default function CreateNameListForm({
       <Box p="2.5" />
       <Fieldset.Root width={400}>
         <Fieldset.Content>
+          <Field label={l.group.group} required>
+            <SelectRoot
+              collection={groupOptions}
+              value={groupId !== undefined ? [groupId] : []}
+              onValueChange={({ value }) => {
+                const id = value?.[0];
+                setGroupId(id);
+
+                if (id === '') {
+                  setGroupNames([]);
+                  setNameSource('custom');
+                  return;
+                }
+
+                const superGroupId = groups.find((g) => g.id === id)?.superGroup
+                  .id;
+                setGroupNames(
+                  sgToMembers(
+                    superGroupsReverse[superGroupId ?? ''] ?? { members: [] },
+                    nl
+                  )
+                );
+              }}
+            >
+              <SelectLabel />
+              <SelectTrigger>
+                <SelectValueText placeholder={l.group.selectGroup} />
+              </SelectTrigger>
+              <SelectContent>
+                {groupOptions.items.map((item) => (
+                  <SelectItem key={item.value} item={item}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          </Field>
+
           <Field label={l.general.description} required>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
@@ -223,12 +304,15 @@ export default function CreateNameListForm({
             <SegmentedControl
               value={nameSource}
               onValueChange={(e) =>
-                setNameSource(e.value as 'members' | 'custom' | 'media')
+                setNameSource(e.value as 'members' | 'custom')
               }
               items={[
-                { label: l.nameLists.formatMembers, value: 'members' },
-                { label: l.nameLists.formatCustom, value: 'custom' },
-                { label: 'Media', value: 'media' }
+                {
+                  label: l.nameLists.formatMembers,
+                  value: 'members',
+                  disabled: groupId === ''
+                },
+                { label: l.nameLists.formatCustom, value: 'custom' }
               ]}
             />
           </Field>

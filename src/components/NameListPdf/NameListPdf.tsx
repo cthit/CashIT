@@ -1,6 +1,10 @@
 import i18nService from '@/services/i18nService';
 import NameListService from '@/services/nameListService';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+Font.registerEmojiSource({
+  format: 'png',
+  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
+});
 
 const styles = StyleSheet.create({
   doc: {
@@ -41,16 +45,18 @@ const styles = StyleSheet.create({
 // Create Document Component
 const NameListPdf = ({
   nl,
-  locale
+  locale,
+  gammaNames
 }: {
   nl: Awaited<ReturnType<typeof NameListService.getById>>;
   locale: string;
+  gammaNames: { nick: string; amount: number }[];
 }) => {
   if (nl === null) return null;
 
   const sum =
     (nl?.names.reduce((acc, name) => acc + name.cost, 0) ?? 0) +
-    (nl?.gammaNames.reduce((acc, name) => acc + name.cost, 0) ?? 0);
+    (gammaNames.reduce((acc, name) => acc + name.amount, 0) ?? 0);
   const typeStr = NameListService.prettifyType(nl.type, locale);
 
   return (
@@ -89,10 +95,10 @@ const NameListPdf = ({
               {nl.tracked && <Text>{name.cost.toFixed(2)}</Text>}
             </View>
           ))}
-          {nl.gammaNames.map((name) => (
-            <View key={name.gammaUserId} style={styles.head}>
-              <Text>{name.gammaUserId}</Text>
-              {nl.tracked && <Text>{name.cost.toFixed(2)}</Text>}
+          {gammaNames.map((name) => (
+            <View key={name.nick} style={styles.head}>
+              <Text>{name.nick}</Text>
+              {nl.tracked && <Text>{name.amount.toFixed(2)}</Text>}
             </View>
           ))}
           <View style={[styles.hr, { marginBottom: 15 }]} />

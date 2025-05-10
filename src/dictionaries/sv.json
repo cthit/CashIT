@@ -23,7 +23,10 @@
     "active": "Påstigen",
     "inactive": "Avstigen",
     "toolsResources": "Verktyg och resurser",
-    "economicalOperations": "Ekonomisk verksamhet"
+    "economicalOperations": "Ekonomisk verksamhet",
+    "group": "Grupp",
+    "noGroup": "Ingen grupp",
+    "selectGroup": "Välj en grupp"
   },
   "categories": {
     "nameLists": "Namnlistor",
@@ -37,7 +40,9 @@
     "delete": "Radera",
     "description": "Beskrivning",
     "comment": "Kommentar",
-    "download": "Ladda ner"
+    "download": "Ladda ner",
+    "all": "Alla",
+    "search": "Sök..."
   },
   "economy": {
     "name": "Namn",
@@ -133,6 +138,7 @@
     "membersNotFound": "Inga medlemmar hittades",
     "list": "Namnlistor",
     "listPersonal": "Mina namnlistor",
+    "noNicks": "Kom ihåg att inte använda nicks i namnlistor. Använd istället personens fullständiga namn.",
     "types": {
       "event": "Arrangemang",
       "workFood": "Arbetsmat",

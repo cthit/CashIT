@@ -23,7 +23,10 @@
     "active": "Active",
     "inactive": "Inactive",
     "toolsResources": "Tools and Resources",
-    "economicalOperations": "Economical Operations"
+    "economicalOperations": "Economical Operations",
+    "group": "Group",
+    "noGroup": "No group",
+    "selectGroup": "Select a group"
   },
   "categories": {
     "nameLists": "Name Lists",
@@ -37,7 +40,9 @@
     "delete": "Delete",
     "description": "Description",
     "comment": "Comment",
-    "download": "Download"
+    "download": "Download",
+    "all": "All",
+    "search": "Search..."
   },
   "economy": {
     "name": "Name",
@@ -133,6 +138,7 @@
     "membersNotFound": "No members found",
     "list": "Name lists",
     "listPersonal": "My name lists",
+    "noNicks": "Remember to not use nicks in the name lists. Use the full name of the person instead.",
     "types": {
       "event": "Event",
       "workFood": "Work Food",

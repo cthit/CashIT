@@ -54,6 +54,8 @@ const ZettleSalesTable = ({
   groups: { group: GammaGroup; post: GammaPost }[];
   locale: string;
 }) => {
+  const l = i18nService.getLocale(locale);
+
   const sales = useMemo(() => {
     const groupsReverse = groups.reduce((acc, group) => {
       acc[group.group.id] = group;
@@ -65,16 +67,15 @@ const ZettleSalesTable = ({
         id: sale.id,
         description: sale.name,
         group: sale.gammaGroupId
-          ? groupsReverse[sale.gammaGroupId]?.group.prettyName ?? 'No group'
-          : 'No group',
+          ? groupsReverse[sale.gammaGroupId]?.group.prettyName ??
+            l.group.noGroup
+          : l.group.noGroup,
         date: sale.saleDate,
         person: `${sale.user.firstName} "${sale.user.nick}" ${sale.user.lastName}`,
         total: sale.amount
       } as SaleRow;
     });
   }, [e, groups]);
-
-  const l = i18nService.getLocale(locale);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -166,7 +167,7 @@ const ZettleSalesTable = ({
                         '⇅')}
                   </Box>
                   {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} />
+                    <TableFilter column={header.column} locale={locale} />
                   ) : null}
                 </Table.ColumnHeader>
               );

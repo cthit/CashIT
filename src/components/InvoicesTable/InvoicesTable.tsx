@@ -86,6 +86,8 @@ const InvoicesTable = ({
   locale: string;
   groups: { group: GammaGroup; post: GammaPost }[];
 }) => {
+  const l = i18nService.getLocale(locale);
+
   const invoices = useMemo(() => {
     const groupsReverse = groups.reduce((acc, group) => {
       acc[group.group.id] = group;
@@ -99,8 +101,9 @@ const InvoicesTable = ({
         id: invoice.id,
         description: invoice.name,
         group: invoice.gammaGroupId
-          ? groupsReverse[invoice.gammaGroupId]?.group.prettyName ?? 'No group'
-          : 'No group',
+          ? groupsReverse[invoice.gammaGroupId]?.group.prettyName ??
+            l.group.noGroup
+          : l.group.noGroup,
         date: invoice.createdAt,
         person:
           invoice.user?.firstName +
@@ -115,8 +118,6 @@ const InvoicesTable = ({
       } as InvoiceRow;
     });
   }, [e, groups, locale]);
-
-  const l = i18nService.getLocale(locale);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -233,7 +234,7 @@ const InvoicesTable = ({
                         '⇅')}
                   </Box>
                   {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} />
+                    <TableFilter column={header.column} locale={locale} />
                   ) : null}
                 </Table.ColumnHeader>
               );

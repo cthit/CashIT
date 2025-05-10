@@ -1,16 +1,26 @@
 'use client';
 
+import i18nService from '@/services/i18nService';
 import { createListCollection, Input, NativeSelect } from '@chakra-ui/react';
 import { Column } from '@tanstack/react-table';
 import { useMemo } from 'react';
 
 declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData, TValue> {
     filterVariant?: 'range' | 'select' | 'text';
   }
 }
 
-const TableFilter = ({ column }: { column: Column<any, unknown> }) => {
+const TableFilter = ({
+  column,
+  locale
+}: {
+  column: Column<any, unknown>;
+  locale: string;
+}) => {
+  const l = i18nService.getLocale(locale);
+
   const columnFilterValue = column.getFilterValue();
   const { filterVariant } = column.columnDef.meta ?? {};
   const sortedUniqueValues = useMemo(
@@ -37,7 +47,7 @@ const TableFilter = ({ column }: { column: Column<any, unknown> }) => {
 
   return filterVariant === 'range' ? (
     <div>
-      <div className="flex space-x-2">
+      <div>
         {/* See faceted column filters example for min max values functionality */}
         <Input
           type="number"
@@ -65,9 +75,8 @@ const TableFilter = ({ column }: { column: Column<any, unknown> }) => {
         value={columnFilterValue?.toString()}
         bg="bg"
       >
-        <option value="">All</option>
+        <option value="">{l.general.all}</option>
         {selections.items.map((item) => (
-          //dynamically generated select options from faceted values feature
           <option value={item.value} key={item.value}>
             {item.label}
           </option>
@@ -76,13 +85,11 @@ const TableFilter = ({ column }: { column: Column<any, unknown> }) => {
     </NativeSelect.Root>
   ) : (
     <Input
-      className="w-36 border shadow rounded"
       onChange={(value) => column.setFilterValue(value.target.value)}
-      placeholder={`Search...`}
+      placeholder={l.general.search}
       type="text"
       value={(columnFilterValue ?? '') as string}
     />
-    // See faceted column filters example for datalist search suggestions
   );
 };
 

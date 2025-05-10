@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
-import { GammaUser } from '@/types/gamma';
+import { GammaGroup, GammaUser } from '@/types/gamma';
 import {
   createInvoiceForGroup,
   createPersonalInvoice,
@@ -71,14 +71,14 @@ const invoiceToForm = (item: Prisma.InvoiceItemGetPayload<{}>) =>
 
 export default function SendInvoiceForm({
   readOnly,
+  groups,
   locale,
-  gid,
   user,
   i
 }: {
   readOnly?: boolean;
+  groups: GammaGroup[];
   locale: string;
-  gid?: string;
   user?: GammaUser;
   i?: Prisma.InvoiceGetPayload<{ include: { items: true } }>;
 }) {
@@ -87,6 +87,16 @@ export default function SendInvoiceForm({
 
   const router = useRouter();
 
+  const groupOptions = createListCollection({
+    items: [{ label: l.group.noGroup, value: '' }].concat(
+      groups.map((group) => ({
+        label: group.prettyName,
+        value: group.id
+      }))
+    )
+  });
+
+  const [groupId, setGroupId] = useState<string | undefined>(undefined);
   const [name, setName] = useState<string>(i?.name ?? '');
   const [comments, setComments] = useState<string>(i?.description ?? '');
 
@@ -119,11 +129,11 @@ export default function SendInvoiceForm({
   const createExpense = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      gid
+      groupId
         ? (editing
             ? editInvoiceForGroup(
                 i.id,
-                gid,
+                groupId,
                 name,
                 customerName,
                 comments,
@@ -136,7 +146,7 @@ export default function SendInvoiceForm({
                 contractNumber
               )
             : createInvoiceForGroup(
-                gid,
+                groupId,
                 name,
                 customerName,
                 comments,
@@ -148,7 +158,7 @@ export default function SendInvoiceForm({
                 customerOrderReference,
                 contractNumber
               )
-          ).then(() => router.push(`/invoices?gid=${gid}`))
+          ).then(() => router.push('/invoices'))
         : (editing
             ? editPersonalInvoice(
                 i.id,
@@ -184,7 +194,7 @@ export default function SendInvoiceForm({
       customerOrderReference,
       customerReference,
       editing,
-      gid,
+      groupId,
       i,
       items,
       name,
@@ -200,6 +210,27 @@ export default function SendInvoiceForm({
       <Box p="2.5" />
       <Fieldset.Root maxW="md" size="lg">
         <Fieldset.Content mt="0.25rem">
+          <Field label={l.group.group} required>
+            <SelectRoot
+              collection={groupOptions}
+              value={groupId !== undefined ? [groupId] : []}
+              onValueChange={({ value }) => setGroupId(value?.[0])}
+              disabled={readOnly}
+            >
+              <SelectLabel />
+              <SelectTrigger>
+                <SelectValueText placeholder={l.group.selectGroup} />
+              </SelectTrigger>
+              <SelectContent>
+                {groupOptions.items.map((item) => (
+                  <SelectItem key={item.value} item={item}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          </Field>
+
           <Field
             disabled={readOnly}
             label={l.general.description}

@@ -99,6 +99,32 @@ export default class NameListService {
     });
   }
 
+  static async getForUserWithGroups(
+    gammaUserId: string,
+    groups: string[],
+    superGroups: string[]
+  ) {
+    return await prisma.nameList.findMany({
+      where: {
+        OR: [
+          {
+            gammaUserId
+          },
+          {
+            gammaSuperGroupId: { in: superGroups }
+          },
+          {
+            gammaGroupId: { in: groups }
+          }
+        ]
+      },
+      include: {
+        names: true,
+        gammaNames: true
+      }
+    });
+  }
+
   static async createForGroup(
     gammaSuperGroupId: string,
     gammaGroupId: string,
@@ -175,6 +201,7 @@ export default class NameListService {
 
   static async edit(
     id: number,
+    gammaGroupId: string | null,
     name: string,
     type: NameListType,
     names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -196,6 +223,7 @@ export default class NameListService {
       },
       data: {
         name,
+        gammaGroupId,
         type,
         names: {
           // IMPORTANT: Do not change the order of these operations
