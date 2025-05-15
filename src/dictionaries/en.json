@@ -58,6 +58,7 @@
     "amountTotal": "Total Amount",
     "status": "Status",
     "submit": "Submit",
+    "save": "Save",
     "create": "Create",
     "unpaid": "unpaid",
     "unpaidPlural": "unpaid",
@@ -191,5 +192,14 @@
   "userSettings": {
     "title": "User Settings",
     "forwardEmail": "Document Forward Email"
+  },
+  "receipt": {
+    "title": "Receipt Creator",
+    "nameHint": "Short description of the purchase",
+    "purchaser": "Purchaser",
+    "purchaserHint": "Name of the person who made the purchase",
+    "treasurer": "Treasurer",
+    "treasurerHint": "Name of the person who will approve or certify the purchase",
+    "products": "Products"
   }
 }

@@ -4,8 +4,9 @@ import {
   BreadcrumbRoot
 } from '@/components/ui/breadcrumb';
 import i18nService from '@/services/i18nService';
-import { Box, Heading } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import Link from 'next/link';
+import ReceiptCreateForm from './ReceiptCreateForm';
 
 export default async function Home(props: {
   params: Promise<{ locale: string }>;
@@ -22,12 +23,7 @@ export default async function Home(props: {
         <BreadcrumbCurrentLink>Receipt Creator</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <Box>
-        <Heading as="h1" size="xl" display="inline" mr="auto">
-          Receipt Creator
-        </Heading>
-      </Box>
-      <Box p="1" />
+      <ReceiptCreateForm locale={locale} />
     </>
   );
 }

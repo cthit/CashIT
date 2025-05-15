@@ -58,6 +58,7 @@
     "amountTotal": "Totalsumma",
     "status": "Status",
     "submit": "Skicka in",
+    "save": "Spara",
     "create": "Skapa",
     "unpaid": "obetald",
     "unpaidPlural": "obetalda",
@@ -191,5 +192,14 @@
   "userSettings": {
     "title": "Användarinställningar",
     "forwardEmail": "Mail för vidarebefordran av dokument"
+  },
+  "receipt": {
+    "title": "Kvittoskapare",
+    "nameHint": "Kort beskrivning av kvittot",
+    "purchaser": "Inköpare",
+    "purchaserHint": "Namn på den som gjort inköpet",
+    "treasurer": "Kassör",
+    "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet",
+    "products": "Produkter"
   }
 }
