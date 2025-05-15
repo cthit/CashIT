@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import ZettleSaleService from '@/services/zettleSaleService';
 import ZettleSalesTable from '@/components/ZettleSalesTable/ZettleSalesTable';
 import i18nService from '@/services/i18nService';
+import { HiPlus } from 'react-icons/hi';
+import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
   searchParams: Promise<{ gid?: string; show?: string }>;
@@ -20,7 +22,13 @@ export default async function Page(props: {
 
   const groups = await SessionService.getGroups();
 
-  const sales = await ZettleSaleService.getAllPrettified();
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const sales = await GammaService.includeUserInfo(
+    await (divisionTreasurer
+      ? ZettleSaleService.getAll()
+      : SessionService.getZettleSales())
+  );
+
   return (
     <>
       <BreadcrumbRoot>
@@ -35,7 +43,9 @@ export default async function Page(props: {
           {l.home.zettleSales}
         </Heading>
         <Link href={'/zettle-sales/create'}>
-          <Button colorPalette="cyan">{l.zettleSales.create}</Button>
+          <Button colorPalette="cyan">
+            <HiPlus /> {l.zettleSales.create}
+          </Button>
         </Link>
       </Flex>
       <Box p="2" />

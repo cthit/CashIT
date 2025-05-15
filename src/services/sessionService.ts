@@ -7,6 +7,7 @@ import ExpenseService from './expenseService';
 import InvoiceService from './invoiceService';
 import NameListService from './nameListService';
 import BankAccountService from './bankAccountService';
+import ZettleSaleService from './zettleSaleService';
 
 /**
  * Service for handling the session of the current user
@@ -59,7 +60,11 @@ export default class SessionService {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await InvoiceService.getForUserWithGroups(session?.user?.id!, groupIds, [])
+      ? await InvoiceService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
       : [];
   }
 
@@ -67,7 +72,11 @@ export default class SessionService {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await ExpenseService.getForUserWithGroups(session?.user?.id!, groupIds, [])
+      ? await ExpenseService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
       : [];
   }
 
@@ -75,7 +84,23 @@ export default class SessionService {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await NameListService.getForUserWithGroups(session?.user?.id!, groupIds, [])
+      ? await NameListService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
+      : [];
+  }
+
+  static async getZettleSales(s?: Session | null) {
+    const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
+    return session?.user?.id
+      ? await ZettleSaleService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
       : [];
   }
 

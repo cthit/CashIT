@@ -1,5 +1,4 @@
 import prisma from '@/prisma';
-import GammaService from './gammaService';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 
 export default class ExpenseService {
@@ -31,17 +30,6 @@ export default class ExpenseService {
     });
   }
 
-  static async getAllPrettified() {
-    const expenses = await this.getAll();
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
-  }
-
   static async getForSuperGroup(gammaSuperGroupId: string) {
     const expenses = await prisma.expense.findMany({
       where: {
@@ -54,17 +42,6 @@ export default class ExpenseService {
       }
     });
     return expenses;
-  }
-
-  static async getPrettifiedForSuperGroup(gammaSuperGroupId: string) {
-    const expenses = await this.getForSuperGroup(gammaSuperGroupId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async getForGroup(gammaGroupId: string) {
@@ -93,17 +70,6 @@ export default class ExpenseService {
       }
     });
     return expense;
-  }
-
-  static async getPrettifiedForGroup(gammaGroupId: string) {
-    const expenses = await this.getForGroup(gammaGroupId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async getForUser(gammaUserId: string) {
@@ -146,17 +112,6 @@ export default class ExpenseService {
         }
       }
     });
-  }
-
-  static async getPrettifiedForUser(gammaUserId: string) {
-    const expenses = await this.getForUser(gammaUserId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async createForGroup(

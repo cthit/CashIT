@@ -58,10 +58,9 @@ import TableFilter from '../TableFilter/TableFilter';
 
 const columnHelper = createColumnHelper<ExpenseRow>();
 
-type Expense = Omit<
-  Awaited<ReturnType<typeof ExpenseService.getPrettifiedForGroup>>[number],
-  'user'
-> & { user?: GammaUser };
+type Expense = Awaited<
+  ReturnType<typeof ExpenseService.getForGroup>
+>[number] & { user?: GammaUser };
 
 type ExpenseStatus = RequestStatus | 'FINISHED';
 

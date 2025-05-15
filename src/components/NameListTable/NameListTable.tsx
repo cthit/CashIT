@@ -34,10 +34,9 @@ import {
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
 
-type NameList = Omit<
-  Awaited<ReturnType<typeof NameListService.getPrettifiedForGroup>>[number],
-  'user'
-> & { user?: GammaUser };
+type NameList = Awaited<
+  ReturnType<typeof NameListService.getForGroup>
+>[number] & { user?: GammaUser };
 
 const columnHelper = createColumnHelper<NameListRow>();
 

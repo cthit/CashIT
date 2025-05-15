@@ -1,5 +1,4 @@
 import prisma from '@/prisma';
-import GammaService from './gammaService';
 import { InvoiceItemVat, Prisma, RequestStatus } from '@prisma/client';
 
 export default class InvoiceService {
@@ -30,17 +29,6 @@ export default class InvoiceService {
     });
   }
 
-  static async getAllPrettified() {
-    const expenses = await this.getAll();
-    const prettified = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettified;
-  }
-
   static async getForSuperGroup(gammaSuperGroupId: string) {
     const expenses = await prisma.invoice.findMany({
       where: {
@@ -51,17 +39,6 @@ export default class InvoiceService {
       }
     });
     return expenses;
-  }
-
-  static async getPrettifiedForSuperGroup(gammaSuperGroupId: string) {
-    const expenses = await this.getForSuperGroup(gammaSuperGroupId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async getById(id: number) {
@@ -86,17 +63,6 @@ export default class InvoiceService {
       }
     });
     return expenses;
-  }
-
-  static async getPrettifiedForGroup(gammaGroupId: string) {
-    const expenses = await this.getForGroup(gammaGroupId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async getForUser(gammaUserId: string) {

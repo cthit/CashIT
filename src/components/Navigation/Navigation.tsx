@@ -28,25 +28,25 @@ const Navigation = ({ locale }: { locale: string }) => {
         </Heading>
       </Box>
 
-      <NavigationLink href="/expenses?show=all">
+      <NavigationLink href="/expenses">
         <Icon size="md">
           <PiCoins />
         </Icon>{' '}
         {l.categories.expenses}
       </NavigationLink>
-      <NavigationLink href="/invoices?show=all">
+      <NavigationLink href="/invoices">
         <Icon size="md">
           <PiReceipt />
         </Icon>{' '}
         {l.categories.invoices}
       </NavigationLink>
-      <NavigationLink href="/zettle-sales?show=all">
+      <NavigationLink href="/zettle-sales">
         <Icon size="md">
           <PiCashRegister />
         </Icon>{' '}
         {l.home.zettleSales}
       </NavigationLink>
-      <NavigationLink href="/name-lists?show=all">
+      <NavigationLink href="/name-lists">
         <Icon size="md">
           <PiUsersThree />
         </Icon>{' '}

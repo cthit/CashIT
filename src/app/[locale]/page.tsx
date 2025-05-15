@@ -54,7 +54,7 @@ export default async function Home(props: {
                   maxW="20rem"
                   height="max-content"
                 >
-                  <Link href="/expenses?show=all">
+                  <Link href="/expenses">
                     <Flex
                       justifyContent="space-between"
                       alignItems="center"
@@ -100,7 +100,7 @@ export default async function Home(props: {
                   maxW="20rem"
                   height="max-content"
                 >
-                  <Link href="/invoices?show=all">
+                  <Link href="/invoices">
                     <Flex
                       justifyContent="space-between"
                       alignItems="center"

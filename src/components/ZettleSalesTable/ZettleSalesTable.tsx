@@ -18,7 +18,7 @@ import { EmptyState } from '../ui/empty-state';
 import styles from './ZettleSalesTable.module.css';
 import ZettleSaleService from '@/services/zettleSaleService';
 import { deleteZettleSale } from '@/actions/zettleSales';
-import { GammaGroup, GammaPost } from '@/types/gamma';
+import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
 import {
   ColumnFiltersState,
   createColumnHelper,
@@ -35,6 +35,10 @@ import TableFilter from '../TableFilter/TableFilter';
 
 const columnHelper = createColumnHelper<SaleRow>();
 
+type ZettleSale = Awaited<
+  ReturnType<typeof ZettleSaleService.getForGroup>
+>[number] & { user?: GammaUser };
+
 interface SaleRow {
   id: number;
   description: string;
@@ -50,7 +54,7 @@ const ZettleSalesTable = ({
   groups,
   locale
 }: {
-  e: Awaited<ReturnType<typeof ZettleSaleService.getPrettifiedForGroup>>;
+  e: ZettleSale[];
   groups: { group: GammaGroup; post: GammaPost }[];
   locale: string;
 }) => {
@@ -71,7 +75,7 @@ const ZettleSalesTable = ({
             l.group.noGroup
           : l.group.noGroup,
         date: sale.saleDate,
-        person: `${sale.user.firstName} "${sale.user.nick}" ${sale.user.lastName}`,
+        person: `${sale.user?.firstName} "${sale.user?.nick}" ${sale.user?.lastName}`,
         total: sale.amount
       } as SaleRow;
     });

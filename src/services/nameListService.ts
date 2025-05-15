@@ -1,5 +1,4 @@
 import prisma from '@/prisma';
-import GammaService from './gammaService';
 import { NameListType, Prisma } from '@prisma/client';
 import i18nService from './i18nService';
 
@@ -13,17 +12,6 @@ export default class NameListService {
     });
   }
 
-  static async getAllPrettified() {
-    const names = await this.getAll();
-    const prettified = await Promise.all(
-      names.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettified;
-  }
-
   static async getForSuperGroup(gammaSuperGroupId: string) {
     const expenses = await prisma.nameList.findMany({
       where: {
@@ -35,17 +23,6 @@ export default class NameListService {
       }
     });
     return expenses;
-  }
-
-  static async getPrettifiedForSuperGroup(gammaSuperGroupId: string) {
-    const expenses = await this.getForSuperGroup(gammaSuperGroupId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async getById(id: number) {
@@ -72,17 +49,6 @@ export default class NameListService {
       }
     });
     return expenses;
-  }
-
-  static async getPrettifiedForGroup(gammaGroupId: string) {
-    const expenses = await this.getForGroup(gammaGroupId);
-    const prettifiedExpenses = await Promise.all(
-      expenses.map(async (e) => ({
-        ...e,
-        user: (await GammaService.getUser(e.gammaUserId)).user
-      }))
-    );
-    return prettifiedExpenses;
   }
 
   static async getForUser(gammaUserId: string) {

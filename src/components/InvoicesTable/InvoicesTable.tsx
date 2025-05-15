@@ -56,10 +56,9 @@ import {
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
 
-type Invoice = Omit<
-  Awaited<ReturnType<typeof InvoiceService.getPrettifiedForGroup>>[number],
-  'user'
-> & { user?: GammaUser };
+type Invoice = Awaited<
+  ReturnType<typeof InvoiceService.getForGroup>
+>[number] & { user?: GammaUser };
 
 const columnHelper = createColumnHelper<InvoiceRow>();
 

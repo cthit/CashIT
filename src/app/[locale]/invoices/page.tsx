@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import InvoicesTable from '@/components/InvoicesTable/InvoicesTable';
 import i18nService from '@/services/i18nService';
 import InvoiceService from '@/services/invoiceService';
+import { HiPlus } from 'react-icons/hi';
+import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
   searchParams: Promise<{ gid?: string; sgid?: string; show?: string }>;
@@ -21,9 +23,11 @@ export default async function Page(props: {
   const groups = await SessionService.getGroups();
 
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
-  const invoices = await (divisionTreasurer
-    ? InvoiceService.getAll()
-    : SessionService.getInvoices());
+  const invoices = await GammaService.includeUserInfo(
+    await (divisionTreasurer
+      ? InvoiceService.getAll()
+      : SessionService.getInvoices())
+  );
 
   return (
     <>
@@ -39,7 +43,9 @@ export default async function Page(props: {
           {l.categories.invoices}
         </Heading>
         <Link href={'/invoices/create'}>
-          <Button colorPalette="cyan">{l.invoice.new}</Button>
+          <Button colorPalette="cyan">
+            <HiPlus /> {l.invoice.new}
+          </Button>
         </Link>
       </Flex>
       <Box p="2" />
