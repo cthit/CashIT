@@ -48,7 +48,7 @@ export default async function Page(props: {
   }
 
   const superGroups = await GammaService.getAllSuperGroups();
-  const groups = await SessionService.getActiveGroups();
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   return (
     <>

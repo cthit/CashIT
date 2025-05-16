@@ -16,7 +16,7 @@ export default async function Page(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const groups = await SessionService.getActiveGroups();
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   return (
     <>

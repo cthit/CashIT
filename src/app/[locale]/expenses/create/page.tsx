@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { Box } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
@@ -18,7 +17,7 @@ export default async function Page(props: {
 
   const l = i18nService.getLocale(locale);
 
-  const groups = await SessionService.getActiveGroups();
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   return (
     <>
@@ -26,10 +25,7 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink
-          as={Link}
-          href={'/expenses'}
-        >
+        <BreadcrumbLink as={Link} href={'/expenses'}>
           {l.categories.expenses}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.economy.create}</BreadcrumbCurrentLink>

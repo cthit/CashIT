@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import SessionService from '@/services/sessionService';
 import Link from 'next/link';
 import {

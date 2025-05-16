@@ -43,6 +43,8 @@ export default async function Page(props: {
     notFound();
   }
 
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
+
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit =
     divisionTreasurer || group || user?.id === expense.gammaUserId;
@@ -66,7 +68,7 @@ export default async function Page(props: {
         e={expense}
         locale={locale}
         readOnly={!canEdit}
-        groups={[]}
+        groups={groups}
       />
     </>
   );
