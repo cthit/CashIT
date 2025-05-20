@@ -4,7 +4,7 @@ import {
 } from '@/app/[locale]/receipt-creator/ReceiptCreateForm';
 import i18nService from '@/services/i18nService';
 import InvoiceService from '@/services/invoiceService';
-import NameListService from '@/services/nameListService';
+import { InvoiceItemVat } from '@prisma/client';
 import {
   Document,
   Page,
@@ -32,6 +32,23 @@ const styles = StyleSheet.create({
   section: {
     margin: 10,
     padding: 10
+  },
+  row: {
+    alignItems: 'center',
+    flexDirection: 'row'
+  },
+  signArea: {
+    justifyContent: 'space-around',
+    flexDirection: 'row'
+  },
+  signature: {
+    marginTop: 50
+  },
+  signName: {
+    marginTop: 25
+  },
+  signColumn: {
+    width: '40%'
   },
   head: {
     justifyContent: 'space-between',
@@ -89,44 +106,133 @@ const ReceiptPdf = ({
               Beskrivning
             </Text>
             <Text>{name}</Text>
-            <Text style={[styles.dataTitle, { marginTop: 15 }]}>Inköpare</Text>
-            <Text>{purchaser}</Text>
-            <Text style={[styles.dataTitle, { marginTop: 15 }]}>Kassör</Text>
-            <Text>{treasurer}</Text>
           </View>
           <View>
             <Text style={styles.dataTitle}>
-              Exporterad {i18nService.formatDate(new Date())}
+              Skapad {i18nService.formatDate(new Date())}
             </Text>
           </View>
         </View>
         <View style={styles.section}>
-          <View style={styles.head}>
-            <Text>Vara</Text>
-            <Text>Kostnad (kr)</Text>
+          <View style={styles.row}>
+            <Text style={{ width: '40%' }}>Vara</Text>
+            <Text style={{ width: '15%', textAlign: 'right' }}>Antal</Text>
+            <Text style={{ width: '15%', textAlign: 'right' }}>Á pris</Text>
+            <Text style={{ width: '15%', textAlign: 'right' }}>Moms</Text>
+            <Text style={{ width: '15%', textAlign: 'right' }}>Belopp</Text>
           </View>
           <View style={styles.hr} />
           {invoiceItems.map((item, index) => (
-            <View key={index} style={styles.head}>
-              <Text>{item.name}</Text>
-              <Text>{item.amount.toFixed(2)}</Text>
+            <View key={index} style={styles.row}>
+              <Text style={{ width: '40%' }}>{item.name}</Text>
+              <Text style={{ width: '15%', textAlign: 'right' }}>
+                {item.count.toFixed(2)}
+              </Text>
+              <Text style={{ width: '15%', textAlign: 'right' }}>
+                {item.amount.toFixed(2)}
+              </Text>
+              <Text style={{ width: '15%', textAlign: 'right' }}>
+                {vatToText(item.vat)}
+              </Text>
+              <Text style={{ width: '15%', textAlign: 'right' }}>
+                {(item.count * item.amount * vatToNumber(item.vat)).toFixed(2)}
+              </Text>
             </View>
           ))}
           <View style={[styles.hr, { marginBottom: 15 }]} />
-          <Text style={[styles.dataTitle, { textAlign: 'right' }]}>
-            Antal varor
-          </Text>
-          <Text style={{ textAlign: 'right' }}>{invoiceItems.length}</Text>
           <Text
             style={[styles.dataTitle, { marginTop: 10, textAlign: 'right' }]}
           >
-            Totalt
+            Summa utan moms
+          </Text>
+          <Text style={{ textAlign: 'right' }}>
+            {items
+              .reduce((acc, item) => acc + +item.count * +item.amount, 0)
+              .toFixed(2)}{' '}
+            kr
+          </Text>
+          <Text
+            style={[styles.dataTitle, { marginTop: 10, textAlign: 'right' }]}
+          >
+            Moms
+          </Text>
+          <Text style={{ textAlign: 'right' }}>
+            {items
+              .reduce(
+                (acc, item) =>
+                  acc +
+                  +item.count * +item.amount * vatToNumber(item.vat) -
+                  +item.count * +item.amount,
+                0
+              )
+              .toFixed(2)}{' '}
+            kr
+          </Text>
+          <Text
+            style={[styles.dataTitle, { marginTop: 10, textAlign: 'right' }]}
+          >
+            Summa totalt
           </Text>
           <Text style={{ textAlign: 'right' }}>{sum.toFixed(2)} kr</Text>
+        </View>
+        <View style={styles.signArea}>
+          <View style={styles.signColumn}>
+            <View style={styles.signature}>
+              <View style={styles.hr} />
+              <Text style={styles.dataTitle}>Kassör signatur</Text>
+            </View>
+            <View style={styles.signName}>
+              <Text>{treasurer}</Text>
+              <View style={styles.hr} />
+              <Text style={styles.dataTitle}>Kassör, namnförtydligande</Text>
+            </View>
+          </View>
+
+          <View style={styles.signColumn}>
+            <View style={styles.signature}>
+              <View style={styles.hr} />
+              <Text style={styles.dataTitle}>Inköpare signatur</Text>
+            </View>
+            <View style={styles.signName}>
+              <Text>{purchaser}</Text>
+              <View style={styles.hr} />
+              <Text style={styles.dataTitle}>Inköpare, namnförtydligande</Text>
+            </View>
+          </View>
         </View>
       </Page>
     </Document>
   );
+};
+
+const vatToText = (vat: InvoiceItemVat) => {
+  switch (vat) {
+    case InvoiceItemVat.VAT_0:
+      return '0%';
+    case InvoiceItemVat.VAT_6:
+      return '6%';
+    case InvoiceItemVat.VAT_12:
+      return '12%';
+    case InvoiceItemVat.VAT_25:
+      return '25%';
+    default:
+      return '';
+  }
+};
+
+const vatToNumber = (vat: InvoiceItemVat) => {
+  switch (vat) {
+    case InvoiceItemVat.VAT_0:
+      return 1.0;
+    case InvoiceItemVat.VAT_6:
+      return 1.6;
+    case InvoiceItemVat.VAT_12:
+      return 1.12;
+    case InvoiceItemVat.VAT_25:
+      return 1.25;
+    default:
+      return 1.0;
+  }
 };
 
 export default ReceiptPdf;

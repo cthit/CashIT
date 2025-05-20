@@ -20,7 +20,7 @@ export default async function Home(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Receipt Creator</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>{l.receipt.title}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
       <ReceiptCreateForm locale={locale} />
