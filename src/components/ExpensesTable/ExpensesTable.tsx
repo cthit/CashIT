@@ -55,6 +55,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
+import TablePagination from '../TablePagination/TablePagination';
 
 const columnHelper = createColumnHelper<ExpenseRow>();
 
@@ -230,6 +231,11 @@ const ExpensesTable = ({
     state: {
       sorting,
       columnFilters
+    },
+    initialState: {
+      pagination: {
+        pageSize: 15
+      }
     }
   });
 
@@ -276,15 +282,16 @@ const ExpensesTable = ({
           </LinkBox>
         ))}
       </Table.Body>
-      {table.getRowModel().rows.length === 0 && (
-        <Table.Caption>
+      <Table.Caption>
+        {table.getRowModel().rows.length === 0 && (
           <EmptyState
             icon={<PiCoins />}
             title={l.expense.listNotFound}
             description={l.expense.listNotFoundDesc}
           />
-        </Table.Caption>
-      )}
+        )}
+        <TablePagination table={table} />
+      </Table.Caption>
     </Table.Root>
   );
 };

@@ -32,6 +32,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
+import TablePagination from '../TablePagination/TablePagination';
 
 const columnHelper = createColumnHelper<SaleRow>();
 
@@ -144,6 +145,11 @@ const ZettleSalesTable = ({
     state: {
       sorting,
       columnFilters
+    },
+    initialState: {
+      pagination: {
+        pageSize: 15
+      }
     }
   });
 
@@ -190,15 +196,16 @@ const ZettleSalesTable = ({
           </LinkBox>
         ))}
       </Table.Body>
-      {e.length === 0 && (
-        <Table.Caption>
+      <Table.Caption>
+        {e.length === 0 && (
           <EmptyState
             icon={<PiCoins />}
             title={l.zettleSales.listNotFound}
             description={l.zettleSales.listNotFoundDesc}
           />
-        </Table.Caption>
-      )}
+        )}
+        <TablePagination table={table} />
+      </Table.Caption>
     </Table.Root>
   );
 };

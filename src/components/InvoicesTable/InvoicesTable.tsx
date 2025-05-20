@@ -55,6 +55,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
+import TablePagination from '../TablePagination/TablePagination';
 
 type Invoice = Awaited<
   ReturnType<typeof InvoiceService.getForGroup>
@@ -206,6 +207,11 @@ const InvoicesTable = ({
     state: {
       sorting,
       columnFilters
+    },
+    initialState: {
+      pagination: {
+        pageSize: 15
+      }
     }
   });
 
@@ -252,15 +258,16 @@ const InvoicesTable = ({
           </LinkBox>
         ))}
       </Table.Body>
-      {table.getRowModel().rows.length === 0 && (
-        <Table.Caption>
+      <Table.Caption>
+        {table.getRowModel().rows.length === 0 && (
           <EmptyState
             icon={<PiFileX />}
             title={l.invoice.listNotFound}
             description={l.invoice.listNotFoundDesc}
           />
-        </Table.Caption>
-      )}
+        )}
+        <TablePagination table={table} />
+      </Table.Caption>
     </Table.Root>
   );
 };

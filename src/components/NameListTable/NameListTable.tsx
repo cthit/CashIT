@@ -33,6 +33,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
+import TablePagination from '../TablePagination/TablePagination';
 
 type NameList = Awaited<
   ReturnType<typeof NameListService.getForGroup>
@@ -165,6 +166,11 @@ const NameListTable = ({
     state: {
       sorting,
       columnFilters
+    },
+    initialState: {
+      pagination: {
+        pageSize: 15
+      }
     }
   });
 
@@ -211,15 +217,16 @@ const NameListTable = ({
           </LinkBox>
         ))}
       </Table.Body>
-      {table.getRowModel().rows.length === 0 && (
-        <Table.Caption>
+      <Table.Caption>
+        {table.getRowModel().rows.length === 0 && (
           <EmptyState
             icon={<PiUserList />}
             title={l.nameLists.listNotFound}
             description={l.nameLists.listNotFoundDesc}
           />
-        </Table.Caption>
-      )}
+        )}
+        <TablePagination table={table} />
+      </Table.Caption>
     </Table.Root>
   );
 };
