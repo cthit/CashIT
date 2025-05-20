@@ -37,7 +37,7 @@ export default function UserSettingsForm({
       </Fieldset.Root>
       <Box p="4" />
       <Button variant="surface" type="submit">
-        {l.economy.submit}
+        {l.economy.save}
       </Button>
     </form>
   );
