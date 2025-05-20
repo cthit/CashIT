@@ -9,9 +9,11 @@ import {
   PiReceipt,
   PiUsersThree
 } from 'react-icons/pi';
+import SessionService from '@/services/sessionService';
 
-const Navigation = ({ locale }: { locale: string }) => {
+const Navigation = async ({ locale }: { locale: string }) => {
   const l = i18nService.getLocale(locale);
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
 
   return (
     <Flex gap="0.25rem" direction="column">
@@ -59,12 +61,14 @@ const Navigation = ({ locale }: { locale: string }) => {
         </Heading>
       </Box>
 
-      <NavigationLink href="/bank-accounts">
-        <Icon size="md">
-          <PiBank />
-        </Icon>{' '}
-        {l.bankAccounts.title}
-      </NavigationLink>
+      {divisionTreasurer && (
+        <NavigationLink href="/bank-accounts">
+          <Icon size="md">
+            <PiBank />
+          </Icon>{' '}
+          {l.bankAccounts.title}
+        </NavigationLink>
+      )}
       <NavigationLink href="/receipt-creator">
         <Icon size="md">
           <PiReceipt />
