@@ -25,6 +25,15 @@ export default async function Home(props: {
 
   return (
     <>
+      <Heading as="h1" size="xl">
+        Welcome to CashIT!
+      </Heading>
+      <Text>
+        This service is in beta and is subject to change. Please report any bugs
+        or issues to Goose or on{' '}
+        <Link href="https://github.com/cthit/CashIT/issues">GitHub</Link>.
+        Please see the menu on the left for navigation.
+      </Text>
       {(bankAccounts.length > 0 || divisionTreasurer) && (
         <>
           <Box>
