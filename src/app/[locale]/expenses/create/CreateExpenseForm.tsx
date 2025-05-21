@@ -281,8 +281,8 @@ export default function CreateExpenseForm({
 
           {!readOnly && (
             <Field>
-              <Button variant="surface" type="submit">
-                {l.economy.submit}
+              <Button colorPalette="cyan" type="submit">
+                {e ? l.general.save : l.economy.create}
               </Button>
             </Field>
           )}

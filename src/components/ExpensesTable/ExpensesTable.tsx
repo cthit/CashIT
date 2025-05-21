@@ -7,7 +7,8 @@ import {
   markExpenseAsUnpaid,
   deleteExpense,
   requestExpenseRevision,
-  approveExpense
+  approveExpense,
+  forwardExpenseToEmail
 } from '@/actions/expenses';
 import ExpenseService from '@/services/expenseService';
 import {
@@ -34,7 +35,7 @@ import {
   PopoverTitle,
   PopoverTrigger
 } from '@/components/ui/popover';
-import { HiDotsHorizontal } from 'react-icons/hi';
+import { HiCheck, HiDotsHorizontal } from 'react-icons/hi';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 import { PiChatFill, PiCoins, PiPaperclip } from 'react-icons/pi';
 import Link from 'next/link';
@@ -56,6 +57,12 @@ import {
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
 import TablePagination from '../TablePagination/TablePagination';
+import {
+  HiBanknotes,
+  HiPaperAirplane,
+  HiTrash,
+  HiXMark
+} from 'react-icons/hi2';
 
 const columnHelper = createColumnHelper<ExpenseRow>();
 
@@ -83,12 +90,14 @@ const ExpensesTable = ({
   e,
   groups,
   locale,
-  treasurerPostId
+  treasurerPostId,
+  allEditable = false
 }: {
   e: Expense[];
   groups: { group: GammaGroup; post: GammaPost }[];
   locale: string;
   treasurerPostId?: string;
+  allEditable?: boolean;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -199,6 +208,7 @@ const ExpensesTable = ({
             locale={locale}
             gammaGroup={group}
             treasurerPostId={treasurerPostId}
+            editable={allEditable}
           />
         );
       }
@@ -303,13 +313,15 @@ const ExpenseActions = ({
   receipts,
   locale,
   gammaGroup,
-  treasurerPostId
+  treasurerPostId,
+  editable = false
 }: ExpenseRow & {
   locale: string;
   gammaGroup?: { group: GammaGroup; post: GammaPost };
   treasurerPostId?: string;
+  editable?: boolean;
 }) => {
-  const isTreasurer = gammaGroup?.post.id === treasurerPostId;
+  const isTreasurer = editable || gammaGroup?.post.id === treasurerPostId;
   const l = i18nService.getLocale(locale);
   const router = useRouter();
 
@@ -337,6 +349,14 @@ const ExpenseActions = ({
     });
   }, [id, router]);
 
+  const approveForward = useCallback(() => {
+    approveExpense(id)
+      .then(() => forwardExpenseToEmail(id))
+      .then(() => {
+        router.refresh();
+      });
+  }, [id, router]);
+
   const requestRevision = useCallback(() => {
     requestExpenseRevision(id).then(() => {
       router.refresh();
@@ -355,41 +375,34 @@ const ExpenseActions = ({
           </IconButton>
         </MenuTrigger>
         <MenuContent>
-          <MenuItem
-            value="edit"
-            cursor="pointer"
-            onClick={() => router.push('/expenses/view?id=' + id)}
-          >
-            {l.general.edit}
-          </MenuItem>
           {isTreasurer && (
             <>
-              <Separator my="0.25rem" />
-              {/* FIXME: Link proper method and set proper labels */}
-              <MenuItem value="forward" onClick={markPaid}>
-                {status === RequestStatus.APPROVED
-                  ? 'Forward'
-                  : 'Approve and forward'}
+              <MenuItem value="forward" onClick={approveForward}>
+                <HiPaperAirplane />
+                {status === 'FINISHED'
+                  ? l.expense.forward
+                  : l.expense.approveForward}
               </MenuItem>
               {status === 'FINISHED' ? (
                 <MenuItem value="mark-unpaid" onClick={markUnpaid}>
-                  {l.expense.markUnpaid}
+                  <HiBanknotes /> {l.expense.markUnpaid}
                 </MenuItem>
               ) : (
                 <>
                   <MenuItem value="mark-paid" onClick={markPaid}>
+                    <HiBanknotes />{' '}
                     {status === RequestStatus.APPROVED
                       ? l.expense.markPaid
                       : l.expense.approveMarkPaid}
                   </MenuItem>
                   {status !== RequestStatus.APPROVED && (
                     <MenuItem value="approve" onClick={approve}>
-                      {l.expense.approvePayment}
+                      <HiCheck /> {l.expense.approvePayment}
                     </MenuItem>
                   )}
                   {status !== RequestStatus.REJECTED && (
                     <MenuItem value="deny" onClick={requestRevision}>
-                      {l.economy.requestRevision}
+                      <HiXMark /> {l.economy.requestRevision}
                     </MenuItem>
                   )}
                 </>
@@ -398,7 +411,7 @@ const ExpenseActions = ({
             </>
           )}
           <MenuItem color="fg.error" value="delete" onClick={remove}>
-            {l.general.delete}
+            <HiTrash /> {l.general.delete}
           </MenuItem>
         </MenuContent>
       </MenuRoot>

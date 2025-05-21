@@ -90,6 +90,10 @@ const ReceiptPdf = ({
   const invoiceItems = items.map((i) => formToInvoiceItem(i));
 
   const sum = InvoiceService.calculateSumForItems(invoiceItems);
+  const sumNoVat = invoiceItems.reduce(
+    (acc, item) => acc + +item.count * +item.amount,
+    0
+  );
 
   return (
     <Document>
@@ -145,28 +149,14 @@ const ReceiptPdf = ({
           >
             Summa utan moms
           </Text>
-          <Text style={{ textAlign: 'right' }}>
-            {items
-              .reduce((acc, item) => acc + +item.count * +item.amount, 0)
-              .toFixed(2)}{' '}
-            kr
-          </Text>
+          <Text style={{ textAlign: 'right' }}>{sumNoVat.toFixed(2)} kr</Text>
           <Text
             style={[styles.dataTitle, { marginTop: 10, textAlign: 'right' }]}
           >
             Moms
           </Text>
           <Text style={{ textAlign: 'right' }}>
-            {items
-              .reduce(
-                (acc, item) =>
-                  acc +
-                  +item.count * +item.amount * vatToNumber(item.vat) -
-                  +item.count * +item.amount,
-                0
-              )
-              .toFixed(2)}{' '}
-            kr
+            {(sum - sumNoVat).toFixed(2)} kr
           </Text>
           <Text
             style={[styles.dataTitle, { marginTop: 10, textAlign: 'right' }]}
@@ -225,7 +215,7 @@ const vatToNumber = (vat: InvoiceItemVat) => {
     case InvoiceItemVat.VAT_0:
       return 1.0;
     case InvoiceItemVat.VAT_6:
-      return 1.6;
+      return 1.06;
     case InvoiceItemVat.VAT_12:
       return 1.12;
     case InvoiceItemVat.VAT_25:

@@ -114,8 +114,8 @@ export default function CreateZettleSaleForm({
           </Field>
 
           <Field>
-            <Button variant="surface" type="submit">
-              {l.economy.submit}
+            <Button colorPalette="cyan" type="submit">
+              {l.general.save}
             </Button>
           </Field>
         </Fieldset.Content>

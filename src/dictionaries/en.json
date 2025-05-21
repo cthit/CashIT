@@ -45,7 +45,11 @@
     "comment": "Comment",
     "download": "Download",
     "all": "All",
-    "search": "Search..."
+    "search": "Search...",
+    "save": "Save",
+    "create": "Create",
+    "export": "Export",
+    "import": "Import"
   },
   "economy": {
     "name": "Name",
@@ -58,13 +62,18 @@
     "amountTotal": "Total Amount",
     "status": "Status",
     "submit": "Submit",
-    "save": "Save",
     "create": "Create",
     "unpaid": "unpaid",
     "unpaidPlural": "unpaid",
     "notSent": "not sent",
     "notSentPlural": "not sent",
-    "requestRevision": "Request Revision"
+    "requestRevision": "Request Revision",
+    "products": "Products",
+    "product": "Product",
+    "priceEach": "Price Each",
+    "vat": "VAT",
+    "count": "Count",
+    "addProduct": "Add product"
   },
   "invoice": {
     "listNotFound": "No invoices found",
@@ -84,7 +93,6 @@
     "subscriptionNumber": "Subscription Number",
     "customerOrderReference": "Customer Order Reference",
     "contractNumber": "Contract Number",
-    "products": "Invoice Products",
     "determinedWhenSent": "Determined when it is sent",
     "status": {
       "pending": "Awaiting Approval",
@@ -119,7 +127,8 @@
     "markUnpaid": "Mark as unpaid",
     "approveMarkPaid": "Approve and mark as paid",
     "approvePayment": "Approve for payment",
-    "forward": "Forward to scanner"
+    "forward": "Forward to scanner",
+    "approveForward": "Approve and forward to scanner"
   },
   "zettleSales": {
     "listNotFound": "No sales found",
@@ -199,7 +208,6 @@
     "purchaser": "Purchaser",
     "purchaserHint": "Name of the person who made the purchase",
     "treasurer": "Treasurer",
-    "treasurerHint": "Name of the person who will approve or certify the purchase",
-    "products": "Products"
+    "treasurerHint": "Name of the person who will approve or certify the purchase"
   }
 }

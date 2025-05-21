@@ -34,6 +34,7 @@ import {
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
 import TablePagination from '../TablePagination/TablePagination';
+import { HiTrash } from 'react-icons/hi2';
 
 type NameList = Awaited<
   ReturnType<typeof NameListService.getForGroup>
@@ -249,15 +250,8 @@ const NameListActions = ({ id, locale }: { id: number; locale: string }) => {
         </IconButton>
       </MenuTrigger>
       <MenuContent>
-        <MenuItem
-          value="edit"
-          cursor="pointer"
-          onClick={() => router.push('/name-lists/view?id=' + id)}
-        >
-          {l.general.edit}
-        </MenuItem>
         <MenuItem color="fg.error" value="delete" onClick={remove}>
-          {l.general.delete} <MenuItemCommand>D</MenuItemCommand>
+          <HiTrash /> {l.general.delete}
         </MenuItem>
       </MenuContent>
     </MenuRoot>

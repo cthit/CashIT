@@ -53,6 +53,7 @@ export default async function Page(props: {
         e={expenses}
         locale={locale}
         treasurerPostId={process.env.TREASURER_POST_ID}
+        allEditable={divisionTreasurer}
       />
       <Box p="4" />
     </>

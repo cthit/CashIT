@@ -45,7 +45,11 @@
     "comment": "Kommentar",
     "download": "Ladda ner",
     "all": "Alla",
-    "search": "Sök..."
+    "search": "Sök...",
+    "save": "Spara",
+    "create": "Skapa",
+    "export": "Exportera",
+    "import": "Importera"
   },
   "economy": {
     "name": "Namn",
@@ -58,13 +62,18 @@
     "amountTotal": "Totalsumma",
     "status": "Status",
     "submit": "Skicka in",
-    "save": "Spara",
     "create": "Skapa",
     "unpaid": "obetald",
     "unpaidPlural": "obetalda",
     "notSent": "ej skickad",
     "notSentPlural": "ej skickade",
-    "requestRevision": "Begär ändring"
+    "requestRevision": "Begär ändring",
+    "products": "Artiklar",
+    "product": "Artikel",
+    "priceEach": "Á pris",
+    "vat": "Moms",
+    "count": "Antal",
+    "addProduct": "Lägg till artikel"
   },
   "invoice": {
     "listNotFound": "Inga kundfakturor hittades",
@@ -83,7 +92,6 @@
     "subscriptionNumber": "Abonnemangsnummer",
     "customerOrderReference": "Er orderreferens",
     "contractNumber": "Kontraktsnummer",
-    "products": "Artiklar",
     "determinedWhenSent": "Bestäms vid utskick",
     "status": {
       "pending": "Inväntar godkännande",
@@ -119,7 +127,8 @@
     "markUnpaid": "Markera som obetald",
     "approveMarkPaid": "Godkänn och markera som betald",
     "approvePayment": "Godkänn för betalning",
-    "forward": "Skicka vidare till scanner"
+    "forward": "Skicka vidare till scanner",
+    "approveForward": "Godkänn och skicka vidare till scanner"
   },
   "zettleSales": {
     "listNotFound": "Inga försäljningar hittades",
@@ -199,7 +208,6 @@
     "purchaser": "Inköpare",
     "purchaserHint": "Namn på den som gjort inköpet",
     "treasurer": "Kassör",
-    "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet",
-    "products": "Produkter"
+    "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet"
   }
 }

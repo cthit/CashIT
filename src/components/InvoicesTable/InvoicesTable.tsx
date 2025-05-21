@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/popover';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { RequestStatus } from '@prisma/client';
-import { PiChatFill, PiFileX } from 'react-icons/pi';
+import { PiChatFill, PiFileX, PiReceipt } from 'react-icons/pi';
 import InvoiceService from '@/services/invoiceService';
 import { EmptyState } from '../ui/empty-state';
 import Link from 'next/link';
@@ -56,6 +56,7 @@ import {
 } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
 import TablePagination from '../TablePagination/TablePagination';
+import { HiCheck, HiTrash, HiXMark } from 'react-icons/hi2';
 
 type Invoice = Awaited<
   ReturnType<typeof InvoiceService.getForGroup>
@@ -323,39 +324,33 @@ const InvoiceActions = ({
           </IconButton>
         </MenuTrigger>
         <MenuContent>
-          <MenuItem
-            value="edit"
-            cursor="pointer"
-            onClick={() => router.push('/invoices/view?id=' + id)}
-          >
-            {l.general.edit}
-          </MenuItem>
           {status === 'FINISHED' ? (
             <MenuItem value="mark-not-sent" onClick={markUnpaid}>
-              {l.invoice.markNotSent}
+              <PiReceipt /> {l.invoice.markNotSent}
             </MenuItem>
           ) : (
             <>
               <MenuItem value="mark-sent" onClick={markPaid}>
+                <PiReceipt />{' '}
                 {status === RequestStatus.APPROVED
                   ? l.invoice.markSent
                   : l.invoice.approveMarkSent}
               </MenuItem>
               {status !== RequestStatus.APPROVED && (
                 <MenuItem value="approve" onClick={approve}>
-                  {l.invoice.approveSending}
+                  <HiCheck /> {l.invoice.approveSending}
                 </MenuItem>
               )}
               {status !== RequestStatus.REJECTED && (
                 <MenuItem value="deny" onClick={requestRevision}>
-                  {l.economy.requestRevision}
+                  <HiXMark /> {l.economy.requestRevision}
                 </MenuItem>
               )}
             </>
           )}
           <Separator my="0.25rem" />
           <MenuItem color="fg.error" value="delete" onClick={remove}>
-            {l.general.delete}
+            <HiTrash /> {l.general.delete}
           </MenuItem>
         </MenuContent>
       </MenuRoot>
