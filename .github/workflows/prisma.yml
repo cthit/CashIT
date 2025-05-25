@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - "./prisma/**/*.*"
+      - "prisma/**"
   pull_request:
     branches: [main]
     paths:
-      - "./prisma/**/*.*"
+      - "prisma/**"
 
 jobs:
   check-migrations:
