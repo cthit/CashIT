@@ -55,4 +55,4 @@ jobs:
             --from-migrations prisma/migrations \
             --to-schema-datamodel prisma/schema.prisma \
             --shadow-database-url "$SHADOW_DATABASE_URL" \
-            --script
+            --exit-code
