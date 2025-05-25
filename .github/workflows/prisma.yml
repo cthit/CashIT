@@ -48,9 +48,6 @@ jobs:
         env:
           SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shadowdb
         run: |
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS shadowdb;"
-          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE shadowdb;"
-
           prisma migrate diff \
             --from-migrations prisma/migrations \
             --to-schema-datamodel prisma/schema.prisma \
