@@ -40,17 +40,17 @@ jobs:
       - run: yarn global add prisma@6.6.0
 
       - name: Validate Prisma schema
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
         run: prisma validate
 
       - name: Check for migration drift
         env:
           SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shadowdb
         run: |
-          # Create the shadow database manually
           PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS shadowdb;"
           PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE shadowdb;"
 
-          # Run the diff check
           prisma migrate diff \
             --from-migrations prisma/migrations \
             --to-schema-datamodel prisma/schema.prisma \
