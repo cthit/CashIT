@@ -23,21 +23,33 @@
     "active": "Påstigen",
     "inactive": "Avstigen",
     "toolsResources": "Verktyg och resurser",
-    "economicalOperations": "Ekonomisk verksamhet"
+    "economicalOperations": "Ekonomisk verksamhet",
+    "group": "Grupp",
+    "noGroup": "Ingen grupp",
+    "selectGroup": "Välj en grupp"
   },
   "categories": {
     "nameLists": "Namnlistor",
     "expenses": "Kostnader",
     "invoices": "Kundfakturor",
     "teambuilding": "Teambuilding",
-    "food": "Arbetsmat"
+    "food": "Arbetsmat",
+    "accounting": "Redovisning",
+    "tools": "Verktyg",
+    "receiptCreator": "Kvittoskapare"
   },
   "general": {
     "edit": "Redigera",
     "delete": "Radera",
     "description": "Beskrivning",
     "comment": "Kommentar",
-    "download": "Ladda ner"
+    "download": "Ladda ner",
+    "all": "Alla",
+    "search": "Sök...",
+    "save": "Spara",
+    "create": "Skapa",
+    "export": "Exportera",
+    "import": "Importera"
   },
   "economy": {
     "name": "Namn",
@@ -55,7 +67,13 @@
     "unpaidPlural": "obetalda",
     "notSent": "ej skickad",
     "notSentPlural": "ej skickade",
-    "requestRevision": "Begär ändring"
+    "requestRevision": "Begär ändring",
+    "products": "Artiklar",
+    "product": "Artikel",
+    "priceEach": "Á pris",
+    "vat": "Moms",
+    "count": "Antal",
+    "addProduct": "Lägg till artikel"
   },
   "invoice": {
     "listNotFound": "Inga kundfakturor hittades",
@@ -74,7 +92,6 @@
     "subscriptionNumber": "Abonnemangsnummer",
     "customerOrderReference": "Er orderreferens",
     "contractNumber": "Kontraktsnummer",
-    "products": "Artiklar",
     "determinedWhenSent": "Bestäms vid utskick",
     "status": {
       "pending": "Inväntar godkännande",
@@ -101,7 +118,7 @@
     "receipts": "Bildunderlag",
     "receiptsUpload": "Ladda upp",
     "name": "Namn",
-    "groupId": "Grupp-ID",
+    "group": "Grupp",
     "date": "Datum",
     "person": "Person",
     "amount": "Summa",
@@ -110,7 +127,8 @@
     "markUnpaid": "Markera som obetald",
     "approveMarkPaid": "Godkänn och markera som betald",
     "approvePayment": "Godkänn för betalning",
-    "forward": "Vidarebefordra kostnad"
+    "forward": "Skicka vidare till scanner",
+    "approveForward": "Godkänn och skicka vidare till scanner"
   },
   "zettleSales": {
     "listNotFound": "Inga försäljningar hittades",
@@ -133,6 +151,7 @@
     "membersNotFound": "Inga medlemmar hittades",
     "list": "Namnlistor",
     "listPersonal": "Mina namnlistor",
+    "noNicks": "Kom ihåg att inte använda nicks i namnlistor. Använd istället personens fullständiga namn.",
     "types": {
       "event": "Arrangemang",
       "workFood": "Arbetsmat",
@@ -161,8 +180,34 @@
   },
   "bankAccounts": {
     "title": "Bankkonton",
+    "details": "Kontoinformation",
+    "accountDetails": "Information för konto",
+    "transactions": "Transaktioner",
+    "transactionsTitle": "Transaktioner för konto",
+    "transactionsEmpty": "Inga transaktioner hittades",
+    "transactionsEmptyDesc": "Justera dina filter eller vänta på att transaktioner uppdateras",
     "updated": "Uppdaterad",
     "liquidityTotal": "Total likviditet",
-    "refresh": "Uppdatera bankkonton"
+    "refresh": "Uppdatera bankkonton",
+    "balance": "Saldo",
+    "bookedBalance": "Bokfört saldo",
+    "availableBalance": "Tillgängligt saldo",
+    "transactionBooked": "Bokförd",
+    "transactionPending": "Reserverad",
+    "transactionDate": "Transaktionsdatum",
+    "bookDate": "Bokföringsdatum",
+    "reference": "Reference"
+  },
+  "userSettings": {
+    "title": "Användarinställningar",
+    "forwardEmail": "Mail för vidarebefordran av dokument"
+  },
+  "receipt": {
+    "title": "Kvittoskapare",
+    "nameHint": "Kort beskrivning av kvittot",
+    "purchaser": "Inköpare",
+    "purchaserHint": "Namn på den som gjort inköpet",
+    "treasurer": "Kassör",
+    "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet"
   }
 }

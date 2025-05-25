@@ -1,15 +1,14 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
-import i18nService from '@/services/i18nService';
+import { HiOutlineLogout } from 'react-icons/hi';
+import { IconButton } from '@chakra-ui/react';
 
-const LogoutButton = ({ locale }: { locale: string }) => {
-  const l = i18nService.getLocale(locale);
+const LogoutButton = () => {
   return (
-    <Button variant="surface" size="sm" onClick={() => signOut()}>
-      {l.header.logout}
-    </Button>
+    <IconButton variant="ghost" size="md" onClick={() => signOut()}>
+      <HiOutlineLogout />
+    </IconButton>
   );
 };
 

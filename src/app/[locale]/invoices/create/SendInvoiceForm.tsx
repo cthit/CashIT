@@ -8,14 +8,14 @@ import {
   Separator,
   Textarea,
   Heading,
-  Card,
   createListCollection,
   IconButton,
-  Text
+  Text,
+  Table
 } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
-import { GammaUser } from '@/types/gamma';
+import { GammaGroup, GammaUser } from '@/types/gamma';
 import {
   createInvoiceForGroup,
   createPersonalInvoice,
@@ -35,6 +35,7 @@ import {
 import { HiPlus, HiTrash } from 'react-icons/hi';
 import InvoiceService from '@/services/invoiceService';
 import i18nService from '@/services/i18nService';
+import { InputGroup } from '@/components/ui/input-group';
 
 type FormInvoiceItem = {
   id?: string;
@@ -71,14 +72,14 @@ const invoiceToForm = (item: Prisma.InvoiceItemGetPayload<{}>) =>
 
 export default function SendInvoiceForm({
   readOnly,
+  groups,
   locale,
-  gid,
   user,
   i
 }: {
   readOnly?: boolean;
+  groups: GammaGroup[];
   locale: string;
-  gid?: string;
   user?: GammaUser;
   i?: Prisma.InvoiceGetPayload<{ include: { items: true } }>;
 }) {
@@ -87,6 +88,16 @@ export default function SendInvoiceForm({
 
   const router = useRouter();
 
+  const groupOptions = createListCollection({
+    items: [{ label: l.group.noGroup, value: '' }].concat(
+      groups.map((group) => ({
+        label: group.prettyName,
+        value: group.id
+      }))
+    )
+  });
+
+  const [groupId, setGroupId] = useState<string | undefined>(undefined);
   const [name, setName] = useState<string>(i?.name ?? '');
   const [comments, setComments] = useState<string>(i?.description ?? '');
 
@@ -119,11 +130,11 @@ export default function SendInvoiceForm({
   const createExpense = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      gid
+      groupId
         ? (editing
             ? editInvoiceForGroup(
                 i.id,
-                gid,
+                groupId,
                 name,
                 customerName,
                 comments,
@@ -136,7 +147,7 @@ export default function SendInvoiceForm({
                 contractNumber
               )
             : createInvoiceForGroup(
-                gid,
+                groupId,
                 name,
                 customerName,
                 comments,
@@ -148,7 +159,7 @@ export default function SendInvoiceForm({
                 customerOrderReference,
                 contractNumber
               )
-          ).then(() => router.push(`/invoices?gid=${gid}`))
+          ).then(() => router.push('/invoices'))
         : (editing
             ? editPersonalInvoice(
                 i.id,
@@ -184,7 +195,7 @@ export default function SendInvoiceForm({
       customerOrderReference,
       customerReference,
       editing,
-      gid,
+      groupId,
       i,
       items,
       name,
@@ -200,6 +211,27 @@ export default function SendInvoiceForm({
       <Box p="2.5" />
       <Fieldset.Root maxW="md" size="lg">
         <Fieldset.Content mt="0.25rem">
+          <Field label={l.group.group} required>
+            <SelectRoot
+              collection={groupOptions}
+              value={groupId !== undefined ? [groupId] : []}
+              onValueChange={({ value }) => setGroupId(value?.[0])}
+              disabled={readOnly}
+            >
+              <SelectLabel />
+              <SelectTrigger>
+                <SelectValueText placeholder={l.group.selectGroup} />
+              </SelectTrigger>
+              <SelectContent>
+                {groupOptions.items.map((item) => (
+                  <SelectItem key={item.value} item={item}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          </Field>
+
           <Field
             disabled={readOnly}
             label={l.general.description}
@@ -291,112 +323,126 @@ export default function SendInvoiceForm({
         </Fieldset.Content>
       </Fieldset.Root>
 
-      <Fieldset.Root maxW="md" size="lg">
-        <Fieldset.Legend>
-          {l.invoice.products}{' '}
-          <IconButton
-            disabled={readOnly}
-            variant="subtle"
-            size="sm"
-            onClick={() =>
-              setItems([
-                ...items,
-                { name: '', amount: '', count: '', vat: InvoiceItemVat.VAT_0 }
-              ])
-            }
-          >
-            <HiPlus />
-          </IconButton>
-        </Fieldset.Legend>
+      <Fieldset.Root size="lg">
         <Fieldset.Content mt="0.25rem">
-          <Separator />
+          <Table.Root>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>Artikel</Table.ColumnHeader>
+                <Table.ColumnHeader>Antal</Table.ColumnHeader>
+                <Table.ColumnHeader>Á pris</Table.ColumnHeader>
+                <Table.ColumnHeader>Moms</Table.ColumnHeader>
+                <Table.ColumnHeader />
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {items.map((item, index) => (
+                <Table.Row key={index}>
+                  <Table.Cell py="1">
+                    <Field required>
+                      <Input
+                        value={item.name}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[index].name = e.target.value;
+                          setItems(newItems);
+                        }}
+                      />
+                    </Field>
+                  </Table.Cell>
 
-          {items.map((item, index) => (
-            <Card.Root key={index}>
-              <Card.Body>
-                <Field label="Product" disabled={readOnly} required>
-                  <Input
-                    value={item.name}
-                    onChange={(e) => {
-                      const newItems = [...items];
-                      newItems[index].name = e.target.value;
-                      setItems(newItems);
-                    }}
-                  />
-                </Field>
+                  <Table.Cell py="1">
+                    <Field invalid={isNaN(+item.count)} required>
+                      <Input
+                        value={item.count}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[index].count = e.target.value;
+                          setItems(newItems);
+                        }}
+                      />
+                    </Field>
+                  </Table.Cell>
 
-                <Field
-                  disabled={readOnly}
-                  label="Price (each)"
-                  invalid={isNaN(+item.amount)}
-                  required
-                >
-                  <Input
-                    value={item.amount}
-                    onChange={(e) => {
-                      const newItems = [...items];
-                      newItems[index].amount = e.target.value;
-                      setItems(newItems);
-                    }}
-                  />
-                </Field>
+                  <Table.Cell py="1">
+                    <Field invalid={isNaN(+item.amount)} required>
+                      <InputGroup endElement="kr" width="100%">
+                        <Input
+                          value={item.amount}
+                          onChange={(e) => {
+                            const newItems = [...items];
+                            newItems[index].amount = e.target.value;
+                            setItems(newItems);
+                          }}
+                        />
+                      </InputGroup>
+                    </Field>
+                  </Table.Cell>
 
-                <Field
-                  disabled={readOnly}
-                  label="Amount"
-                  invalid={isNaN(+item.count)}
-                  required
-                >
-                  <Input
-                    value={item.count}
-                    onChange={(e) => {
-                      const newItems = [...items];
-                      newItems[index].count = e.target.value;
-                      setItems(newItems);
-                    }}
-                  />
-                </Field>
+                  <Table.Cell py="1">
+                    <Field required>
+                      <SelectRoot
+                        collection={vatTypes}
+                        value={[item.vat]}
+                        onValueChange={({ value }) => {
+                          const newItems = [...items];
+                          newItems[index].vat = value?.[0] as InvoiceItemVat;
+                          setItems(newItems);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValueText placeholder="Select a type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {vatTypes.items.map((item) => (
+                            <SelectItem key={item.value} item={item}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectRoot>
+                    </Field>
+                  </Table.Cell>
 
-                <Field disabled={readOnly} label="VAT" required>
-                  <SelectRoot
-                    collection={vatTypes}
-                    value={[item.vat]}
-                    onValueChange={({ value }) => {
-                      const newItems = [...items];
-                      newItems[index].vat = value?.[0] as InvoiceItemVat;
-                      setItems(newItems);
-                    }}
-                  >
-                    <SelectLabel />
-                    <SelectTrigger>
-                      <SelectValueText placeholder="Select a type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vatTypes.items.map((item) => (
-                        <SelectItem key={item.value} item={item}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </SelectRoot>
-                </Field>
-                <IconButton
-                  disabled={readOnly}
-                  variant="subtle"
-                  size="sm"
-                  onClick={() => {
-                    const newItems = [...items];
-                    newItems.splice(index, 1);
-                    setItems(newItems);
-                  }}
-                >
-                  <HiTrash />
-                </IconButton>
-              </Card.Body>
-            </Card.Root>
-          ))}
+                  <Table.Cell py="1">
+                    <IconButton
+                      variant="subtle"
+                      size="sm"
+                      onClick={() => {
+                        const newItems = [...items];
+                        newItems.splice(index, 1);
+                        setItems(newItems);
+                      }}
+                    >
+                      <HiTrash />
+                    </IconButton>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+            <Table.Caption>
+              <Button
+                variant="subtle"
+                float="right"
+                mt="1"
+                onClick={() =>
+                  setItems([
+                    ...items,
+                    {
+                      name: '',
+                      amount: '',
+                      count: '',
+                      vat: InvoiceItemVat.VAT_25
+                    }
+                  ])
+                }
+              >
+                <HiPlus /> Lägg till artikel
+              </Button>
+            </Table.Caption>
+          </Table.Root>
 
-          <Text>
+          <Text textAlign="right">
             Total:{' '}
             {InvoiceService.calculateSumForItems(
               items.map((i) => formToInvoiceItem(i))
@@ -404,13 +450,13 @@ export default function SendInvoiceForm({
             kr
           </Text>
 
-          <Field>
+          <Field alignItems="end">
             <Button
-              variant="surface"
               type="submit"
-              disabled={readOnly || items.length === 0}
+              disabled={items.length === 0}
+              colorPalette="cyan"
             >
-              {l.economy.submit}
+              {i ? l.general.save : l.economy.submit}
             </Button>
           </Field>
         </Fieldset.Content>

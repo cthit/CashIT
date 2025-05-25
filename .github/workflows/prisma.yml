@@ -1,0 +1,58 @@
+name: Prisma
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "prisma/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "prisma/**"
+
+jobs:
+  check-migrations:
+    name: Verify schema
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16.0-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: yarn global add prisma@6.6.0
+
+      - name: Validate Prisma schema
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+        run: prisma validate
+
+      - name: Check for migration drift
+        env:
+          SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shadowdb
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS shadowdb;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE shadowdb;"
+
+          prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url "$SHADOW_DATABASE_URL" \
+            --exit-code

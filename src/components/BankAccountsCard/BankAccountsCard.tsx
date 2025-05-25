@@ -1,5 +1,5 @@
 import i18nService from '@/services/i18nService';
-import { Box, Flex, Heading, Separator, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Separator, Span, Text } from '@chakra-ui/react';
 import { Prisma } from '@prisma/client';
 import Link from 'next/link';
 import { MdOutlineArrowForwardIos } from 'react-icons/md';
@@ -15,13 +15,25 @@ export default function BankAccountsCard({
 }) {
   const l = i18nService.getLocale(locale);
 
+  const refreshedAt = accounts[0]?.refreshedAt;
+  const refreshWarning =
+    accounts.length === 0
+      ? true
+      : new Date().getTime() - refreshedAt.getTime() > 1000 * 60 * 60 * 12;
+
   const title = (
     <>
       <Heading>{l.bankAccounts.title}</Heading>
       {accounts.length > 0 && (
-        <Text textStyle="sm" color="fg.muted">
+        <Text
+          textStyle="sm"
+          color="fg.muted"
+          title={i18nService.formatDate(refreshedAt)}
+        >
           {l.bankAccounts.updated}{' '}
-          {i18nService.formatDate(accounts[0]?.refreshedAt)}
+          <Span color={refreshWarning ? 'fg.error' : undefined}>
+            {i18nService.formatRelative(refreshedAt, locale)}
+          </Span>
         </Text>
       )}
     </>
@@ -58,7 +70,11 @@ export default function BankAccountsCard({
           <Box p="2">
             {accounts.map((a) => (
               <Flex justifyContent="space-between" key={a.id}>
-                <Text>{a.name}</Text>
+                <Text>
+                  <Link href={'/bank-accounts/view?id=' + a.goCardlessId}>
+                    {a.name}
+                  </Link>
+                </Text>
                 <Text>{i18nService.formatNumber(a.balanceAvailable)}</Text>
               </Flex>
             ))}

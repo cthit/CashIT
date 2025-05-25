@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import SessionService from '@/services/sessionService';
 import Link from 'next/link';
 import {
@@ -19,16 +18,8 @@ export default async function Page(props: {
 
   const l = i18nService.getLocale(locale);
 
-  const group =
-    gid !== undefined
-      ? (await SessionService.getGroups()).find((g) => g.group.id === gid)
-          ?.group
-      : undefined;
-  if (gid !== undefined && group === undefined) {
-    notFound();
-  }
-
   const user = (await SessionService.getGammaUser())?.user;
+  const groups = await SessionService.getActiveGroups();
 
   return (
     <>
@@ -36,25 +27,13 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink as={Link} href={'/group?gid=' + gid}>
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
-        <BreadcrumbLink
-          as={Link}
-          href={'/invoices' + (gid ? '?gid=' + gid : '')}
-        >
+        <BreadcrumbLink as={Link} href={'/invoices'}>
           {l.categories.invoices}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.economy.create}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <SendInvoiceForm locale={locale} gid={gid} user={user} />
+      <SendInvoiceForm locale={locale} groups={groups} user={user} />
     </>
   );
 }

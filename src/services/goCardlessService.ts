@@ -1,9 +1,8 @@
-import NodeCache from 'node-cache';
 import prisma from '@/prisma';
+import cache from '@/cache';
 
 const secretId = process.env.GOCARDLESS_SECRET_ID;
 const secretKey = process.env.GOCARDLESS_SECRET_KEY;
-const cache = new NodeCache({ stdTTL: 0, checkperiod: 0 });
 
 interface RequisitionRequest {
   redirect: string;
@@ -49,6 +48,26 @@ interface AccountDetails {
   };
 }
 
+interface AccountTransaction {
+  transactionId?: string;
+  creditorName?: string;
+  creditorAccount?: {
+    iban?: string;
+  };
+  transactionAmount: {
+    amount: string;
+    currency: string;
+  };
+  bookingDate?: string;
+  valueDate?: string;
+  remittanceInformationUnstructured?: string;
+  remittanceInformationUnstructuredArray?: string[];
+  remittanceInformationStructured?: string;
+  remittanceInformationStructuredArray?: string[];
+  internalTransactionId?: string;
+  additionalInformation?: string;
+}
+
 export default class GoCardlessService {
   static apiUrl = 'https://bankaccountdata.gocardless.com/api/v2';
 
@@ -70,7 +89,7 @@ export default class GoCardlessService {
         .then((j) => JSON.stringify(j))
         .catch(() => response.statusText);
       throw new Error(
-        `GoCardless request failed with status ${response.status}`,
+        `GoCardless token creation request failed with status ${response.status}`,
         {
           cause: errorData
         }
@@ -92,9 +111,12 @@ export default class GoCardlessService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => response.statusText);
+      const errorData = await response
+        .json()
+        .then((j) => JSON.stringify(j))
+        .catch(() => response.statusText);
       throw new Error(
-        `GoCardless request failed with status ${response.status}`,
+        `GoCardless token refresh request failed with status ${response.status}`,
         {
           cause: errorData
         }
@@ -163,7 +185,7 @@ export default class GoCardlessService {
         .then((j) => JSON.stringify(j))
         .catch(() => response.statusText);
       throw new Error(
-        `GoCardless request failed with status ${response.status}`,
+        `GoCardless account balance request for ID ${id} failed with status ${response.status}`,
         {
           cause: errorData
         }
@@ -179,7 +201,38 @@ export default class GoCardlessService {
     }[];
   }
 
-  static async registerBankAccount(id: string, requisitionId: string) {
+  static async getBankAccountTransactions(id: string) {
+    const response = await fetch(
+      this.apiUrl + '/accounts/' + id + '/transactions/',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + (await this.getToken()).access,
+          accept: 'application/json'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .then((j) => JSON.stringify(j))
+        .catch(() => response.statusText);
+      throw new Error(
+        `GoCardless account transaction history request for ID ${id} failed with status ${response.status}`,
+        {
+          cause: errorData
+        }
+      );
+    }
+
+    return (await response.json()).transactions as {
+      booked: AccountTransaction[];
+      pending: AccountTransaction[];
+    };
+  }
+
+  static async getBankAccountDetails(id: string) {
     const response = await fetch(
       this.apiUrl + '/accounts/' + id + '/details/',
       {
@@ -190,7 +243,25 @@ export default class GoCardlessService {
       }
     );
 
-    const account = ((await response.json()) as AccountDetails).account;
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .then((j) => JSON.stringify(j))
+        .catch(() => response.statusText);
+      throw new Error(
+        `GoCardless account details request for ID ${id} failed with status ${response.status}`,
+        {
+          cause: errorData
+        }
+      );
+    }
+
+    return (await response.json()) as AccountDetails;
+  }
+
+  static async registerBankAccount(id: string, requisitionId: string) {
+    const account = (await this.getBankAccountDetails(id)).account;
+
     await prisma.bankAccount.create({
       data: {
         name: account.name ?? account.product,
@@ -223,7 +294,7 @@ export default class GoCardlessService {
         .then((j) => JSON.stringify(j))
         .catch(() => response.statusText);
       throw new Error(
-        `GoCardless request failed with status ${response.status}`,
+        `GoCardless requisition creation request failed with status ${response.status}`,
         {
           cause: errorData
         }
@@ -243,6 +314,19 @@ export default class GoCardlessService {
         Authorization: 'Bearer ' + (await this.getToken()).access
       }
     });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .then((j) => JSON.stringify(j))
+        .catch(() => response.statusText);
+      throw new Error(
+        `GoCardless requisition list request failed with status ${response.status}`,
+        {
+          cause: errorData
+        }
+      );
+    }
 
     return (await response.json()) as {
       count: number;

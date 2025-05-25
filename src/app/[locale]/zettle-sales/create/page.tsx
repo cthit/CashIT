@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { Box } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
@@ -17,19 +16,7 @@ export default async function Page(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const { gid } = await props.searchParams;
-  if (gid === undefined) {
-    notFound();
-  }
-
-  const group =
-    gid !== undefined
-      ? (await SessionService.getGroups()).find((g) => g.group.id === gid)
-          ?.group
-      : undefined;
-  if (group === undefined) {
-    notFound();
-  }
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   return (
     <>
@@ -37,16 +24,13 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href={'/group?gid=' + gid}>
-          {group.prettyName}
-        </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href={'/zettle-sales?gid=' + gid}>
+        <BreadcrumbLink as={Link} href={'/zettle-sales'}>
           {l.home.zettleSales}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.zettleSales.create}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <CreateZettleSaleForm gid={group.id} locale={locale} />
+      <CreateZettleSaleForm groups={groups} locale={locale} />
     </>
   );
 }

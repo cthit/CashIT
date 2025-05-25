@@ -23,21 +23,33 @@
     "active": "Active",
     "inactive": "Inactive",
     "toolsResources": "Tools and Resources",
-    "economicalOperations": "Economical Operations"
+    "economicalOperations": "Economical Operations",
+    "group": "Group",
+    "noGroup": "No group",
+    "selectGroup": "Select a group"
   },
   "categories": {
     "nameLists": "Name Lists",
     "expenses": "Expenses",
     "invoices": "Customer Invoices",
     "teambuilding": "Teambuilding",
-    "food": "Food"
+    "food": "Food",
+    "accounting": "Accounting",
+    "tools": "Tools",
+    "receiptCreator": "Receipt Creator"
   },
   "general": {
     "edit": "Edit",
     "delete": "Delete",
     "description": "Description",
     "comment": "Comment",
-    "download": "Download"
+    "download": "Download",
+    "all": "All",
+    "search": "Search...",
+    "save": "Save",
+    "create": "Create",
+    "export": "Export",
+    "import": "Import"
   },
   "economy": {
     "name": "Name",
@@ -55,7 +67,13 @@
     "unpaidPlural": "unpaid",
     "notSent": "not sent",
     "notSentPlural": "not sent",
-    "requestRevision": "Request Revision"
+    "requestRevision": "Request Revision",
+    "products": "Products",
+    "product": "Product",
+    "priceEach": "Price Each",
+    "vat": "VAT",
+    "count": "Count",
+    "addProduct": "Add product"
   },
   "invoice": {
     "listNotFound": "No invoices found",
@@ -75,7 +93,6 @@
     "subscriptionNumber": "Subscription Number",
     "customerOrderReference": "Customer Order Reference",
     "contractNumber": "Contract Number",
-    "products": "Invoice Products",
     "determinedWhenSent": "Determined when it is sent",
     "status": {
       "pending": "Awaiting Approval",
@@ -102,7 +119,7 @@
     "receiptsUpload": "Upload Receipts",
     "name": "Name",
     "date": "Date",
-    "groupId": "Group ID",
+    "group": "Group",
     "person": "Person",
     "amount": "Amount",
     "status": "Status",
@@ -110,7 +127,8 @@
     "markUnpaid": "Mark as unpaid",
     "approveMarkPaid": "Approve and mark as paid",
     "approvePayment": "Approve for payment",
-    "forward": "Forward Expense"
+    "forward": "Forward to scanner",
+    "approveForward": "Approve and forward to scanner"
   },
   "zettleSales": {
     "listNotFound": "No sales found",
@@ -133,6 +151,7 @@
     "membersNotFound": "No members found",
     "list": "Name lists",
     "listPersonal": "My name lists",
+    "noNicks": "Remember to not use nicks in the name lists. Use the full name of the person instead.",
     "types": {
       "event": "Event",
       "workFood": "Work Food",
@@ -161,8 +180,34 @@
   },
   "bankAccounts": {
     "title": "Bank Accounts",
+    "details": "Account Details",
+    "accountDetails": "Details for account",
+    "transactions": "Transactions",
+    "transactionsTitle": "Transactions for account",
+    "transactionsEmpty": "No transactions found",
+    "transactionsEmptyDesc": "Adjust your filters or wait for transactions to refresh",
     "updated": "Updated",
     "liquidityTotal": "Total liquidity",
-    "refresh": "Refresh bank accounts"
+    "refresh": "Refresh bank accounts",
+    "balance": "Balance",
+    "bookedBalance": "Booked balance",
+    "availableBalance": "Available balance",
+    "transactionBooked": "Booked",
+    "transactionPending": "Pending",
+    "transactionDate": "Transaction date",
+    "bookDate": "Booking date",
+    "reference": "Reference"
+  },
+  "userSettings": {
+    "title": "User Settings",
+    "forwardEmail": "Document Forward Email"
+  },
+  "receipt": {
+    "title": "Receipt Creator",
+    "nameHint": "Short description of the purchase",
+    "purchaser": "Purchaser",
+    "purchaserHint": "Name of the person who made the purchase",
+    "treasurer": "Treasurer",
+    "treasurerHint": "Name of the person who will approve or certify the purchase"
   }
 }

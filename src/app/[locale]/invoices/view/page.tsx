@@ -19,14 +19,10 @@ export default async function Page(props: {
   const l = i18nService.getLocale(locale);
 
   const { id } = await props.searchParams;
-  if (id === undefined) {
-    notFound();
-  }
+  if (id === undefined) notFound();
 
   const invoice = await InvoiceService.getById(+id);
-  if (invoice === null) {
-    notFound();
-  }
+  if (invoice === null) notFound();
   const personal = invoice.gammaGroupId === null;
 
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
@@ -44,7 +40,11 @@ export default async function Page(props: {
 
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit =
-    divisionTreasurer || group || user?.id === invoice.gammaUserId;
+    divisionTreasurer ||
+    group !== undefined ||
+    user?.id === invoice.gammaUserId;
+
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   return (
     <>
@@ -52,35 +52,15 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink
-            as={Link}
-            href={
-              '/group' +
-              (invoice.gammaGroupId ? '?gid=' + invoice.gammaGroupId : '')
-            }
-          >
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
-        <BreadcrumbLink
-          as={Link}
-          href={
-            '/invoices' +
-            (invoice.gammaGroupId ? '?gid=' + invoice.gammaGroupId : '')
-          }
-        >
+        <BreadcrumbLink as={Link} href={'/invoices'}>
           {l.categories.invoices}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
       <SendInvoiceForm
-        gid={invoice.gammaGroupId ?? undefined}
+        readOnly={!canEdit}
+        groups={groups}
         i={invoice}
         locale={locale}
         user={user}

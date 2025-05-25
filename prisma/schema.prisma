@@ -157,22 +157,41 @@ model ZettleSale {
 }
 
 model BankAccount {
-  id                      Int                   @id @default(autoincrement())
-  goCardlessId            String                @unique
-  requisition             GoCardlessRequisition @relation(fields: [requisitionId], references: [id])
+  id                      Int                      @id @default(autoincrement())
+  goCardlessId            String                   @unique
+  requisition             GoCardlessRequisition    @relation(fields: [requisitionId], references: [id])
   requisitionId           Int
   name                    String
   iban                    String
-  balanceBooked           Float                 @db.DoublePrecision
-  balanceAvailable        Float                 @db.DoublePrecision
-  createdAt               DateTime              @default(now())
-  updatedAt               DateTime              @updatedAt
-  refreshedAt             DateTime              @default(now())
+  balanceBooked           Float                    @db.DoublePrecision
+  balanceAvailable        Float                    @db.DoublePrecision
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  refreshedAt             DateTime                 @default(now())
   gammaSuperGroupAccesses String[]
+  transactions            BankAccountTransaction[]
+}
+
+model BankAccountTransaction {
+  id           Int         @id @default(autoincrement())
+  goCardlessId String?     @unique
+  account      BankAccount @relation(fields: [accountId], references: [id])
+  accountId    Int
+  amount       Float       @db.DoublePrecision
+  type         String?
+  reference    String?
+  valueDate    DateTime?   @db.Date
+  bookingDate  DateTime?   @db.Date
+  createdAt    DateTime    @default(now())
 }
 
 model GoCardlessRequisition {
   id           Int           @id @default(autoincrement())
   goCardlessId String        @unique
   bankAccounts BankAccount[]
+}
+
+model User {
+  gammaUserId  String  @id
+  forwardEmail String?
 }

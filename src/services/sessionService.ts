@@ -7,6 +7,7 @@ import ExpenseService from './expenseService';
 import InvoiceService from './invoiceService';
 import NameListService from './nameListService';
 import BankAccountService from './bankAccountService';
+import ZettleSaleService from './zettleSaleService';
 
 /**
  * Service for handling the session of the current user
@@ -57,22 +58,49 @@ export default class SessionService {
 
   static async getInvoices(s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await InvoiceService.getForUser(session?.user?.id!)
+      ? await InvoiceService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
       : [];
   }
 
   static async getExpenses(s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await ExpenseService.getForUser(session?.user?.id!)
+      ? await ExpenseService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
       : [];
   }
 
   static async getNameLists(s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
-      ? await NameListService.getForUser(session?.user?.id!)
+      ? await NameListService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
+      : [];
+  }
+
+  static async getZettleSales(s?: Session | null) {
+    const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
+    return session?.user?.id
+      ? await ZettleSaleService.getForUserWithGroups(
+          session?.user?.id!,
+          groupIds,
+          []
+        )
       : [];
   }
 
@@ -82,6 +110,17 @@ export default class SessionService {
       ? await DivisionGroupService.getUserActiveGroupsWithPosts(
           session?.user?.id!
         )
+      : [];
+  }
+
+  static async getTreasurerGroups(s?: Session | null) {
+    const session = s ?? (await SessionService.getSession());
+    return session?.user?.id
+      ? (
+          await DivisionGroupService.getUserActiveGroupsWithPosts(
+            session?.user?.id!
+          )
+        ).filter((g) => g.post.id === process.env.TREASURER_POST_ID)
       : [];
   }
 

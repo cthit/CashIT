@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Text } from '@chakra-ui/react';
+import { Box, Button, Heading, IconButton, Text } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -15,6 +15,7 @@ import GoCardlessService from '@/services/goCardlessService';
 import AddPermissionForm from './AddPermissionForm';
 import GammaService from '@/services/gammaService';
 import DeleteAccountButton from './DeleteAccountButton';
+import { HiPlus } from 'react-icons/hi';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -52,6 +53,13 @@ export default async function Page(props: {
 
       <Heading as="h1" size="xl" display="inline" mr="auto">
         Accounts
+        {localRequisitions.length > 0 && (
+          <Link href="/bank-accounts/add-account">
+            {' '}<IconButton variant="surface" size="sm">
+              <HiPlus />
+            </IconButton>
+          </Link>
+        )}
       </Heading>
       {accounts.length > 0 && (
         <ul>
@@ -64,15 +72,10 @@ export default async function Page(props: {
         </ul>
       )}
       {accounts.length === 0 && <Text>No accounts found</Text>}
-      {localRequisitions.length > 0 && (
-        <Link href="/bank-accounts/add-account">
-          <Button variant="surface">Add Account</Button>
-        </Link>
-      )}
       <Box p="2" />
 
       <Heading as="h1" size="xl" display="inline" mr="auto">
-        Account Permissions
+        Account Access
       </Heading>
       {accounts.length > 0 && (
         <ul>
@@ -92,7 +95,7 @@ export default async function Page(props: {
           ))}
         </ul>
       )}
-      {accountPermissions.length === 0 && <Text>No accesses found</Text>}
+      {accountPermissions.length === 0 && <Text>No accesses set</Text>}
       {accounts.length > 0 && (
         <>
           <Box p="2" />

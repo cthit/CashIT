@@ -47,40 +47,27 @@ export default async function Page(props: {
     notFound();
   }
 
+  const superGroups = await GammaService.getAllSuperGroups();
+  const groups = (await SessionService.getGroups()).map((g) => g.group);
+
   return (
     <>
       <BreadcrumbRoot>
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {group ? (
-          <BreadcrumbLink
-            as={Link}
-            href={
-              '/group' +
-              (nameList.gammaGroupId ? '?gid=' + nameList.gammaGroupId : '')
-            }
-          >
-            {group.prettyName}
-          </BreadcrumbLink>
-        ) : (
-          <BreadcrumbLink as={Link} href="/groupless">
-            {l.home.personal}
-          </BreadcrumbLink>
-        )}
-        <BreadcrumbLink
-          as={Link}
-          href={
-            '/name-lists' +
-            (nameList.gammaGroupId ? '?gid=' + nameList.gammaGroupId : '')
-          }
-        >
+        <BreadcrumbLink as={Link} href={'/name-lists'}>
           {l.nameLists.list}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{nameList.name}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <CreateNameListForm g={group} sg={sg} locale={locale} nl={nameList} />
+      <CreateNameListForm
+        superGroups={superGroups}
+        groups={groups}
+        locale={locale}
+        nl={nameList}
+      />
     </>
   );
 }

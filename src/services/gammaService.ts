@@ -54,6 +54,15 @@ export default class GammaService {
     const activeGroups = await this.getAllSuperGroups();
     return activeGroups.find((group) => group.superGroup.id === sgid);
   }
+
+  static async includeUserInfo<T extends { gammaUserId: string }>(data: T[]) {
+    return Promise.all(
+      data.map(async (d) => ({
+        ...d,
+        user: (await GammaService.getUser(d.gammaUserId)).user
+      }))
+    );
+  }
 }
 
 const gammaGetRequest = async <T>(path: string): Promise<T> => {
