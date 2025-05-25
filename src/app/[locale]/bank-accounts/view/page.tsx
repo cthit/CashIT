@@ -6,6 +6,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import BankAccountService from '@/services/bankAccountService';
 import i18nService from '@/services/i18nService';
+import SessionService from '@/services/sessionService';
 import { Box, Heading, Span, Table, Text } from '@chakra-ui/react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -28,6 +29,18 @@ export default async function Page(props: {
   if (account === null) {
     notFound();
   }
+
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const activeGroups = await SessionService.getActiveGroups();
+  if (
+    !divisionTreasurer &&
+    !account.gammaSuperGroupAccesses.some((id) =>
+      activeGroups.some((g) => g.superGroup.id === id)
+    )
+  ) {
+    notFound();
+  }
+
   const refreshWarning =
     new Date().getTime() - account.refreshedAt.getTime() > 1000 * 60 * 60 * 12;
 
