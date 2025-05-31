@@ -150,11 +150,18 @@ export default class GoCardlessService {
       cachedToken.time + cachedToken.res.access_expires - 60 <
       Date.now() / 1000
     ) {
-      console.log('Access token expired');
+      console.log('Access token expired, will refresh');
 
-      const newToken = await GoCardlessService.refreshToken(
+      const newAccess = await GoCardlessService.refreshToken(
         cachedToken.res.refresh
       );
+
+      const newToken: AccessToken = {
+        access: newAccess.access,
+        access_expires: newAccess.access_expires,
+        refresh: cachedToken.res.refresh,
+        refresh_expires: cachedToken.res.refresh_expires
+      };
       cache.set('gocardless-token', { res: newToken, time: Date.now() / 1000 });
 
       return newToken;

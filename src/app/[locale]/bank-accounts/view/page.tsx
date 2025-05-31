@@ -97,7 +97,7 @@ export default async function Page(props: {
         </Table.Header>
         <Table.Body>
           {account.transactions.map((t) => (
-            <Table.Row key={t.goCardlessId}>
+            <Table.Row key={t.id}>
               <Table.Cell>
                 {t.valueDate && i18nService.formatDate(t.valueDate, false)}
               </Table.Cell>

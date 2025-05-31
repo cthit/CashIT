@@ -39,9 +39,7 @@ const Header = async ({ locale }: { locale: string }) => {
               <Drawer.Positioner>
                 <Drawer.Content pt="4">
                   <Drawer.Body>
-                    <Drawer.CloseTrigger asChild>
-                      <Navigation locale={locale} />
-                    </Drawer.CloseTrigger>
+                    <Navigation locale={locale} />
                   </Drawer.Body>
 
                   <Drawer.CloseTrigger asChild>
@@ -59,7 +57,7 @@ const Header = async ({ locale }: { locale: string }) => {
             <Link href="/">CashIT</Link>
           </Heading>
           <Span color="fg.muted" fontSize="sm">
-            beta v0.4.0
+            beta v0.4.1
           </Span>
         </Box>
       </Flex>
