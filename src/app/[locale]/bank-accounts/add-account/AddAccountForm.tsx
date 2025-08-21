@@ -18,81 +18,42 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
 export default function AddAccountForm({
-  requisitions,
+  requisition,
   accounts
 }: {
-  requisitions: Requisition[];
+  requisition: Requisition;
   accounts: Prisma.BankAccountGetPayload<{}>[];
 }) {
   const router = useRouter();
-  const [reqId, setReqId] = useState<string | undefined>();
   const [accId, setAccId] = useState<string | undefined>();
 
   const submit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
 
-      if (accId && reqId) {
-        await registerBankAccount(accId, reqId);
+      if (accId && requisition.id) {
+        await registerBankAccount(accId, requisition.id);
         router.push('/bank-accounts');
       }
     },
-    [accId, reqId, router]
+    [accId, requisition, router]
   );
 
-  const reqs = useMemo(
-    () =>
-      createListCollection({
-        items: requisitions.map((r) => {
-          return {
-            label: r.reference,
-            value: r.id
-          };
-        })
-      }),
-    [requisitions]
-  );
-
-  const selectedRequisition = useMemo(
-    () => requisitions.find((r) => r.id === reqId),
-    [reqId, requisitions]
-  );
   const requisitionAccounts = useMemo(
     () =>
       createListCollection({
         items:
-          selectedRequisition?.accounts?.filter(
+          requisition?.accounts?.filter(
             (a) => !accounts.find((b) => b.goCardlessId === a)
           ) ?? []
       }),
-    [selectedRequisition, accounts]
+    [requisition, accounts]
   );
+
+  console.log('Requisition Accounts:', requisition.accounts);
 
   return (
     <form onSubmit={submit}>
-      <Field label="Requisition" required>
-        <SelectRoot
-          collection={reqs}
-          value={reqId ? [reqId] : []}
-          onValueChange={({ value }) => {
-            setReqId(value?.[0]);
-            setAccId(undefined);
-          }}
-        >
-          <SelectLabel />
-          <SelectTrigger>
-            <SelectValueText placeholder="Select a requisition" />
-          </SelectTrigger>
-          <SelectContent>
-            {reqs.items.map((item) => (
-              <SelectItem key={item.value} item={item}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </SelectRoot>
-      </Field>
-
       <Field label="Account ID" required>
         <SelectRoot
           collection={requisitionAccounts}
@@ -116,7 +77,7 @@ export default function AddAccountForm({
 
       <Box p="2" />
 
-      <Button variant="surface" type="submit" disabled={!accId || !reqId}>
+      <Button variant="surface" type="submit" disabled={!accId}>
         Submit
       </Button>
     </form>

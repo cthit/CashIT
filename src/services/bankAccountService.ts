@@ -3,6 +3,11 @@ import GoCardlessService from './goCardlessService';
 import { Prisma } from '@prisma/client';
 
 export default class BankAccountService {
+  /**
+   * Gets all locally registered bank accounts
+   * @param groups Gamma super groups to filter by. No filtering applied if not provided
+   * @returns List of bank accounts
+   */
   static async getAll(groups?: string[]) {
     return await prisma.bankAccount.findMany({
       where: groups
@@ -18,6 +23,11 @@ export default class BankAccountService {
     });
   }
 
+  /**
+   * Gets locally registered bank account by GoCardless ID
+   * @param goCardlessId ID of the GoCardless bank account
+   * @returns Locally registered bank account or null if not found
+   */
   static async getByGoCardlessId(goCardlessId: string) {
     return await prisma.bankAccount.findUnique({
       where: {
@@ -34,6 +44,9 @@ export default class BankAccountService {
     });
   }
 
+  /**
+   * Refreshes all locally registered bank accounts from the GoCardless API and updates their information in the database
+   */
   static async refreshAll() {
     const accounts = await BankAccountService.getAll();
 
@@ -46,6 +59,10 @@ export default class BankAccountService {
     );
   }
 
+  /**
+   * Refreshes a locally registered bank account from the GoCardless API and updates its information in the database
+   * @param id ID of the bank account
+   */
   static async refresh(id: number) {
     const account = await prisma.bankAccount.findUnique({
       where: {
@@ -111,6 +128,12 @@ export default class BankAccountService {
       });
   }
 
+  /**
+   * Sets Gamma super group access for a locally stored GoCardless bank account
+   * @param goCardlessId ID of the GoCardless bank account
+   * @param groups Gamma super groups to allow access for
+   * @returns Updated bank account
+   */
   static async setAccess(goCardlessId: string, groups: string[]) {
     return await prisma.bankAccount.update({
       where: {
@@ -122,6 +145,11 @@ export default class BankAccountService {
     });
   }
 
+  /**
+   * Removes a GoCardless bank account from local storage
+   * @param goCardlessId ID of the GoCardless bank account
+   * @returns Deleted bank account
+   */
   static async remove(goCardlessId: string) {
     return await prisma.bankAccount.delete({
       where: {

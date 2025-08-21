@@ -174,6 +174,11 @@ export default class GoCardlessService {
     await GoCardlessService.getToken();
   }
 
+  /**
+   * Gets account balance from GoCardless API
+   * @param id GoCardless bank account ID
+   * @returns Balances for the given account
+   */
   static async getBankAccountBalance(id: string) {
     const response = await fetch(
       this.apiUrl + '/accounts/' + id + '/balances/',
@@ -208,6 +213,11 @@ export default class GoCardlessService {
     }[];
   }
 
+  /**
+   * Gets account transaction history from GoCardless API
+   * @param id GoCardless bank account ID
+   * @returns Transaction history for the given account
+   */
   static async getBankAccountTransactions(id: string) {
     const response = await fetch(
       this.apiUrl + '/accounts/' + id + '/transactions/',
@@ -239,6 +249,11 @@ export default class GoCardlessService {
     };
   }
 
+  /**
+   * Gets account details from GoCardless API
+   * @param id GoCardless bank account ID
+   * @returns Account details for the given account
+   */
   static async getBankAccountDetails(id: string) {
     const response = await fetch(
       this.apiUrl + '/accounts/' + id + '/details/',
@@ -266,6 +281,11 @@ export default class GoCardlessService {
     return (await response.json()) as AccountDetails;
   }
 
+  /**
+   * Register GoCardless bank account in local database
+   * @param id GoCardless bank account ID
+   * @param requisitionId GoCardless requisition ID
+   */
   static async registerBankAccount(id: string, requisitionId: string) {
     const account = (await this.getBankAccountDetails(id)).account;
 
@@ -285,6 +305,11 @@ export default class GoCardlessService {
     });
   }
 
+  /**
+   * Create GoCardless requisition
+   * @param r GoCardless requisition request
+   * @returns Created GoCardless requisition
+   */
   static async createRequisition(r: RequisitionRequest) {
     const response = await fetch(this.apiUrl + '/requisitions/', {
       method: 'POST',
@@ -308,12 +333,13 @@ export default class GoCardlessService {
       );
     }
 
-    return (await response.json()) as {
-      balance: number;
-      currency: string;
-    };
+    return (await response.json()) as Requisition;
   }
 
+  /**
+   * Gets requisition list from GoCardless API. Limited to 100 results per request.
+   * @returns Requisition list for the given account
+   */
   static async getRequisitions() {
     const response = await fetch(this.apiUrl + '/requisitions/', {
       method: 'GET',
@@ -336,13 +362,17 @@ export default class GoCardlessService {
     }
 
     return (await response.json()) as {
-      count: number;
-      next: string;
-      previous: string;
+      count: number; // Total number of requisitions
+      next: string; // URL for next page
+      previous: string; // URL for previous page
       results: Requisition[];
     };
   }
 
+  /**
+   * Registers a GoCardless requisition in the local database
+   * @param id GoCardless requisition ID
+   */
   static async registerRequisition(id: string) {
     await prisma.goCardlessRequisition.create({
       data: {
@@ -351,7 +381,15 @@ export default class GoCardlessService {
     });
   }
 
+  /**
+   * Gets local GoCardless requisitions and their locally registered bank accounts
+   * @returns List of GoCardless requisitions
+   */
   static async getRegisteredRequisitions() {
-    return await prisma.goCardlessRequisition.findMany();
+    return await prisma.goCardlessRequisition.findMany({
+      include: {
+        bankAccounts: true
+      }
+    });
   }
 }
