@@ -26,7 +26,7 @@ export interface Requisition {
   id: string;
   created: string;
   redirect: string;
-  status: string;
+  status: RequisitionStatus;
   institution_id: string;
   reference: string;
   accounts: string[];
@@ -35,6 +35,17 @@ export interface Requisition {
   account_selection: boolean;
   redirect_immediate: boolean;
 }
+
+// Sorted by sequence for each possible status
+type RequisitionStatus =
+  | 'CR' // Created
+  | 'GC' // Giving Consent
+  | 'UA' // Undergoing Authentication
+  | 'RJ' // Rejected
+  | 'SA' // Selecting Accounts
+  | 'GA' // Granting Access
+  | 'LN' // Linked
+  | 'EX'; // Expired
 
 interface AccountDetails {
   account: {
@@ -66,6 +77,20 @@ interface AccountTransaction {
   remittanceInformationStructuredArray?: string[];
   internalTransactionId?: string;
   additionalInformation?: string;
+}
+
+interface Institution {
+  id: string;
+  name: string;
+  bic?: string;
+  transaction_total_days?: string;
+  max_access_valid_for_days?: string;
+  countries: string[];
+  logo: string;
+}
+
+interface GetInstitutionsRequest {
+  country?: string;
 }
 
 export default class GoCardlessService {
@@ -391,5 +416,59 @@ export default class GoCardlessService {
         bankAccounts: true
       }
     });
+  }
+
+  /**
+   * Gets local GoCardless requisitions with current status from API
+   * @returns List of GoCardless requisitions with status
+   */
+  static async getRegisteredRequisitionsWithStatus() {
+    const localRequisitions = await this.getRegisteredRequisitions();
+    const remoteRequisitions = (await this.getRequisitions()).results;
+    
+    // Merge local data with remote status
+    return localRequisitions.map(localReq => {
+      const remoteReq = remoteRequisitions.find(r => r.id === localReq.goCardlessId);
+      return {
+        ...localReq,
+        status: remoteReq?.status || 'EX', // Default to expired if not found
+        bank: remoteReq?.institution_id || 'Unknown',
+        bankCountries: ['SE'], // Default for now
+        createdAt: remoteReq?.created || new Date().toISOString()
+      };
+    });
+  }
+
+  /**
+   * Gets a list of all available financial institutions
+   * @param r Filter options
+   * @returns List of financial institutions
+   */
+  static async getInstitutions(r: GetInstitutionsRequest = { country: 'SE' }) {
+    const params = new URLSearchParams();
+    Object.entries(r).forEach(([key, value]) => {
+      params.append(key, value);
+    });
+    const response = await fetch(this.apiUrl + '/institutions/?' + params.toString(), {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + (await this.getToken()).access
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .then((j) => JSON.stringify(j))
+        .catch(() => response.statusText);
+      throw new Error(
+        `GoCardless institution list request failed with status ${response.status}`,
+        {
+          cause: errorData
+        }
+      );
+    }
+
+    return (await response.json()) as Institution[];
   }
 }

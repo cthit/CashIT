@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { refreshBankAccount } from '@/actions/bankAccounts';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiRefresh } from 'react-icons/hi';
+import { IconButton } from '@chakra-ui/react';
 
-export default function RefreshAccountButton({ 
+export default function RefreshAccountButton({
   accountId,
   size = 'sm',
   variant = 'ghost'
-}: { 
+}: {
   accountId: number;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'ghost' | 'outline' | 'solid';
@@ -31,14 +31,14 @@ export default function RefreshAccountButton({
   }, [accountId, router]);
 
   return (
-    <Button
+    <IconButton
+      margin='0'
       size={size}
       variant={variant}
       onClick={handleRefresh}
       disabled={refreshing}
     >
       <HiRefresh />
-      {refreshing ? 'Refreshing...' : 'Refresh'}
-    </Button>
+    </IconButton>
   );
 }

@@ -46,3 +46,24 @@ export async function recreateRequisition(id: string) {
     reference: `cashit-${refId}`
   });
 }
+
+export async function createNewRequisition(institutionId: string) {
+  const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
+  if (!isDivisionTreasurer) {
+    throw new Error('User is not a division treasurer');
+  }
+
+  const baseUrl = process.env.BASE_URL;
+  if (!baseUrl) {
+    throw new Error('BASE_URL is not defined');
+  }
+
+  const refId =
+    Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
+
+  return await GoCardlessService.createRequisition({
+    redirect: `${baseUrl}/bank-accounts/finalize-connect`,
+    institution_id: institutionId,
+    reference: `cashit-${refId}`
+  });
+}

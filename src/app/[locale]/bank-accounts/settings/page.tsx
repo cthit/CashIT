@@ -6,13 +6,15 @@ import {
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
 import i18nService from '@/services/i18nService';
+import BankAccountService from '@/services/bankAccountService';
 import SessionService from '@/services/sessionService';
 import { notFound } from 'next/navigation';
-import GoCardlessService from '@/services/goCardlessService';
-import AddRequisitionForm from './AddRequisitionForm';
+import GammaService from '@/services/gammaService';
+import AddPermissionForm from '../AddPermissionForm';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ account?: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!divisionTreasurer) {
@@ -22,12 +24,10 @@ export default async function Page(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const localRequisitions = await GoCardlessService.getRegisteredRequisitions();
-  const requisitions = (await GoCardlessService.getRequisitions()).results;
-  const institutions = await GoCardlessService.getInstitutions();
-  const unusedRequisitions = requisitions.filter(
-    (r) => !localRequisitions.find((lr) => lr.goCardlessId === r.id) && r.status !== 'EX'
-  );
+  const accounts = await BankAccountService.getAll();
+  const groups = await GammaService.getAllSuperGroups();
+
+  const { account: selectedAccountId } = await props.searchParams;
 
   return (
     <>
@@ -35,17 +35,22 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink  as={Link} href="/bank-accounts">
-        {l.bankAccounts.title}
+        <BreadcrumbLink as={Link} href="/bank-accounts">
+          {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Add Connection</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>Account Settings</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
-      <Heading as="h1" size="xl" display="inline" mr="auto">
-        Add Connection
+      <Heading as="h1" size="xl" mb="6">
+        Bank Account Settings
       </Heading>
-      <AddRequisitionForm requisitions={unusedRequisitions} institutions={institutions} />
+
+      <AddPermissionForm 
+        accounts={accounts} 
+        groups={groups}
+        selectedAccountId={selectedAccountId}
+      />
     </>
   );
 }

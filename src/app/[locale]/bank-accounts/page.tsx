@@ -1,11 +1,4 @@
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  VStack,
-  HStack
-} from '@chakra-ui/react';
+import { Box, Flex, Heading, Text, VStack, HStack } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -33,7 +26,8 @@ export default async function Page(props: {
   const l = i18nService.getLocale(locale);
 
   const accounts = await BankAccountService.getAll();
-  const localRequisitions = await GoCardlessService.getRegisteredRequisitions();
+  const localRequisitions =
+    await GoCardlessService.getRegisteredRequisitionsWithStatus();
   const groups = await GammaService.getAllSuperGroups();
 
   // Calculate totals
@@ -65,35 +59,15 @@ export default async function Page(props: {
         </Flex>
 
         <Box p={4} bg="bg.subtle" rounded="md" borderWidth="1px">
-          <Heading size="md" mb={3}>
-            Total Balances
-          </Heading>
-          <HStack gap={8}>
-            <VStack align="start" gap={1}>
-              <Text fontSize="sm" color="fg.muted">
-                Available Balance
-              </Text>
+          <Heading size="md">Total Available Balance</Heading>
+            <VStack align="start" gap={0}>
               <Text fontSize="2xl" fontWeight="bold" color="green.600">
                 {new Intl.NumberFormat('sv-SE').format(totalAvailable)}
               </Text>
-            </VStack>
-            <VStack align="start" gap={1}>
               <Text fontSize="sm" color="fg.muted">
-                Booked Balance
-              </Text>
-              <Text fontSize="2xl" fontWeight="bold">
-                {new Intl.NumberFormat('sv-SE').format(totalBooked)}
+                Booked: {new Intl.NumberFormat('sv-SE').format(totalBooked)}
               </Text>
             </VStack>
-            <VStack align="start" gap={1}>
-              <Text fontSize="sm" color="fg.muted">
-                Total Accounts
-              </Text>
-              <Text fontSize="2xl" fontWeight="bold">
-                {accounts.length}
-              </Text>
-            </VStack>
-          </HStack>
         </Box>
 
         <RequisitionsList
