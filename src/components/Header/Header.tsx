@@ -57,7 +57,7 @@ const Header = async ({ locale }: { locale: string }) => {
             <Link href="/">CashIT</Link>
           </Heading>
           <Span color="fg.muted" fontSize="sm">
-            beta v0.4.1
+            beta v0.5.0
           </Span>
         </Box>
       </Flex>
