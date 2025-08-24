@@ -30,6 +30,7 @@ import {
 } from '@/actions/bankAccounts';
 import { registerRequisition } from '@/actions/goCardless';
 import { Requisition } from '@/services/goCardlessService';
+import BankAccountService from '@/services/bankAccountService';
 
 interface AccountDetails {
   account: {
@@ -43,15 +44,9 @@ interface AccountDetails {
   };
 }
 
-interface ExistingAccount {
-  id: number;
-  name: string;
-  iban: string;
-  goCardlessId: string;
-}
-
 interface BankAccountConnectManagerProps {
   requisition: Requisition;
+  existingAccounts: Awaited<ReturnType<typeof BankAccountService.getAll>>
 }
 
 type AccountAction = 'nothing' | 'register' | 'merge';
@@ -67,9 +62,8 @@ interface AccountState {
 }
 
 export default function BankAccountConnectManager({
-  requisition
+  requisition, existingAccounts
 }: BankAccountConnectManagerProps) {
-  const [existingAccounts, setExistingAccounts] = useState<ExistingAccount[]>([]);
   const [accountStates, setAccountStates] = useState<Record<string, AccountState>>(
     requisition.accounts.reduce((acc, accountId) => ({
       ...acc,
@@ -105,12 +99,6 @@ export default function BankAccountConnectManager({
       }, 2000);
       return;
     }
-
-    // Load existing accounts
-    fetch('/api/bank-accounts')
-      .then(res => res.json())
-      .then(accounts => setExistingAccounts(accounts))
-      .catch(_error => console.error('Error loading existing accounts:', _error));
 
     requisition.accounts.forEach(accountId => {
       getCachedAccountDetails(accountId)

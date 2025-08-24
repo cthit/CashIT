@@ -10,6 +10,7 @@ import SessionService from '@/services/sessionService';
 import { notFound, redirect } from 'next/navigation';
 import GoCardlessService from '@/services/goCardlessService';
 import BankAccountConnectManager from './BankAccountConnectManager';
+import BankAccountService from '@/services/bankAccountService';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -40,6 +41,8 @@ export default async function Page(props: {
     redirect('/bank-accounts/connect?error=' + encodeURIComponent('Requisition not found'));
   }
 
+  const existingAccounts = await BankAccountService.getAll();
+
   return (
     <>
       <BreadcrumbRoot>
@@ -60,7 +63,7 @@ export default async function Page(props: {
         Finalize Bank Connection
       </Heading>
 
-      <BankAccountConnectManager requisition={requisition} />
+      <BankAccountConnectManager requisition={requisition} existingAccounts={existingAccounts} />
     </>
   );
 }
