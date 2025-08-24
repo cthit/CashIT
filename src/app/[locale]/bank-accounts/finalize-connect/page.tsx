@@ -9,8 +9,8 @@ import i18nService from '@/services/i18nService';
 import SessionService from '@/services/sessionService';
 import { notFound, redirect } from 'next/navigation';
 import GoCardlessService from '@/services/goCardlessService';
-import BankAccountConnectManager from './BankAccountConnectManager';
-import BankAccountService from '@/services/bankAccountService';
+import BankAccountManager from '@/components/BankAccountManager/BankAccountManager';
+import { getExistingBankAccounts } from '@/actions/bankAccounts';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -30,7 +30,10 @@ export default async function Page(props: {
   }
 
   if (!ref) {
-    redirect('/bank-accounts/connect?error=' + encodeURIComponent('No reference provided'));
+    redirect(
+      '/bank-accounts/connect?error=' +
+        encodeURIComponent('No reference provided')
+    );
   }
 
   // Find the requisition by reference
@@ -38,10 +41,13 @@ export default async function Page(props: {
   const requisition = allRequisitions.find((r) => r.reference === ref);
 
   if (!requisition) {
-    redirect('/bank-accounts/connect?error=' + encodeURIComponent('Requisition not found'));
+    redirect(
+      '/bank-accounts/connect?error=' +
+        encodeURIComponent('Requisition not found')
+    );
   }
 
-  const existingAccounts = await BankAccountService.getAll();
+  const existingAccounts = await getExistingBankAccounts();
 
   return (
     <>
@@ -63,7 +69,11 @@ export default async function Page(props: {
         Finalize Bank Connection
       </Heading>
 
-      <BankAccountConnectManager requisition={requisition} existingAccounts={existingAccounts} />
+      <BankAccountManager
+        mode="connect"
+        requisition={requisition}
+        existingAccounts={existingAccounts}
+      />
     </>
   );
 }

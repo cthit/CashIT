@@ -49,7 +49,7 @@ export default async function Page(props: {
       <Heading as="h1" size="xl" display="inline" mr="auto">
         Reconnect Accounts
       </Heading>
-      <p>Create a new requisition and add transfer accounts?</p>
+      <p>Create a new requisition and transfer accounts?</p>
       <RecreateRequisitionButton id={requisition.id} />
     </>
   );

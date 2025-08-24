@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Text, VStack, HStack } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text, VStack } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,

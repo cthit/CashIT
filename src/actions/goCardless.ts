@@ -9,6 +9,9 @@ export async function registerRequisition(id: string) {
     throw new Error('User is not a division treasurer');
   }
 
+  const existing = await GoCardlessService.getRegisteredRequisitions();
+  if (existing.some((r) => r.goCardlessId === id)) return;
+
   return await GoCardlessService.registerRequisition(id);
 }
 

@@ -12,7 +12,7 @@ import GoCardlessService from '@/services/goCardlessService';
 import { getExistingBankAccounts } from '@/actions/bankAccounts';
 import { registerRequisition } from '@/actions/goCardless';
 import prisma from '@/prisma';
-import BankAccountReconnectManager from '@/components/BankAccountReconnectManager/BankAccountReconnectManager';
+import BankAccountManager from '@/components/BankAccountManager/BankAccountManager';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -49,7 +49,6 @@ export default async function Page(props: {
     throw new Error('Failed to register requisition');
   }
 
-  // Get existing bank accounts to check for duplicates and for merge options
   const existingAccounts = await getExistingBankAccounts();
 
   const { locale } = await props.params;
@@ -72,7 +71,8 @@ export default async function Page(props: {
         Finalize Reconnection
       </Heading>
 
-      <BankAccountReconnectManager
+      <BankAccountManager
+        mode="reconnect"
         accounts={requisition.accounts}
         requisitionId={requisition.id}
         existingAccounts={existingAccounts}
