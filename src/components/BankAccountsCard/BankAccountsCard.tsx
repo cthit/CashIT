@@ -106,7 +106,7 @@ export default function BankAccountsCard({
               <Text color="fg.muted" fontWeight="medium">
                 {l.bankAccounts.liquidityTotal}
               </Text>
-              <Text fontSize="lg" fontWeight="bold">
+              <Text fontSize="lg" fontWeight="bold" color="green.600">
                 {i18nService.formatNumber(
                   accounts.reduce((a, b) => a + b.balanceAvailable, 0)
                 )}
