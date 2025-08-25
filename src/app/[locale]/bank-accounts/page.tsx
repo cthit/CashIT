@@ -1,4 +1,4 @@
-import { Box, Button, Heading, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text, VStack } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -6,16 +6,13 @@ import {
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
 import i18nService from '@/services/i18nService';
-import UpdateAccountsButton from './UpdateAccountsButton';
-import BankAccountsCard from '@/components/BankAccountsCard/BankAccountsCard';
 import BankAccountService from '@/services/bankAccountService';
 import SessionService from '@/services/sessionService';
 import { notFound } from 'next/navigation';
 import GoCardlessService from '@/services/goCardlessService';
-import AddPermissionForm from './AddPermissionForm';
 import GammaService from '@/services/gammaService';
-import DeleteAccountButton from './DeleteAccountButton';
-import { HiPlus } from 'react-icons/hi';
+import RequisitionsList from './RequisitionsList';
+import UpdateAccountsButton from './UpdateAccountsButton';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -29,13 +26,19 @@ export default async function Page(props: {
   const l = i18nService.getLocale(locale);
 
   const accounts = await BankAccountService.getAll();
-  const accountPermissions = accounts.filter(
-    (a) => a.gammaSuperGroupAccesses.length > 0
-  );
-
-  const localRequisitions = await GoCardlessService.getRegisteredRequisitions();
-
+  const localRequisitions =
+    await GoCardlessService.getRegisteredRequisitionsWithStatus();
   const groups = await GammaService.getAllSuperGroups();
+
+  // Calculate totals
+  const totalAvailable = accounts.reduce(
+    (sum, account) => sum + account.balanceAvailable,
+    0
+  );
+  const totalBooked = accounts.reduce(
+    (sum, account) => sum + account.balanceBooked,
+    0
+  );
 
   return (
     <>
@@ -46,79 +49,33 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.bankAccounts.title}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <BankAccountsCard accounts={accounts} locale={locale} />
-      <Box p="2" />
-      <UpdateAccountsButton locale={locale} />
-      <Box p="2" />
 
-      <Heading as="h1" size="xl" display="inline" mr="auto">
-        Accounts
-        {localRequisitions.length > 0 && (
-          <Link href="/bank-accounts/add-account">
-            {' '}<IconButton variant="surface" size="sm">
-              <HiPlus />
-            </IconButton>
-          </Link>
-        )}
-      </Heading>
-      {accounts.length > 0 && (
-        <ul>
-          {accounts.map((account) => (
-            <li key={account.id}>
-              {account.name}{' '}
-              <DeleteAccountButton goCardlessId={account.goCardlessId} />
-            </li>
-          ))}
-        </ul>
-      )}
-      {accounts.length === 0 && <Text>No accounts found</Text>}
-      <Box p="2" />
+      <VStack gap={6} align="stretch">
+        <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
+          <Heading as="h1" size="xl">
+            {l.bankAccounts.title}
+          </Heading>
+          <UpdateAccountsButton locale={locale} />
+        </Flex>
 
-      <Heading as="h1" size="xl" display="inline" mr="auto">
-        Account Access
-      </Heading>
-      {accounts.length > 0 && (
-        <ul>
-          {accountPermissions.map((a) => (
-            <li key={a.id}>
-              <Heading size="sm">{a.name}</Heading>
-              <ul>
-                {a.gammaSuperGroupAccesses.map((b) => (
-                  <li key={b}>
-                    <Text color="subtle" fontSize="sm">
-                      {b}
-                    </Text>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
-      {accountPermissions.length === 0 && <Text>No accesses set</Text>}
-      {accounts.length > 0 && (
-        <>
-          <Box p="2" />
-          <AddPermissionForm groups={groups} accounts={accounts} />
-        </>
-      )}
-      <Box p="2" />
+        <Box p={4} bg="bg.subtle" rounded="md" borderWidth="1px">
+          <Heading size="md">Total Available Balance</Heading>
+            <VStack align="start" gap={0}>
+              <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                {new Intl.NumberFormat('sv-SE').format(totalAvailable)}
+              </Text>
+              <Text fontSize="sm" color="fg.muted">
+                Booked: {new Intl.NumberFormat('sv-SE').format(totalBooked)}
+              </Text>
+            </VStack>
+        </Box>
 
-      <Heading as="h1" size="xl" display="inline" mr="auto">
-        GoCardless Requisitions
-      </Heading>
-      {localRequisitions.length > 0 && (
-        <ul>
-          {localRequisitions.map((req) => (
-            <li key={req.id}>{req.goCardlessId}</li>
-          ))}
-        </ul>
-      )}
-      {localRequisitions.length === 0 && <Text>No requisitions found</Text>}
-      <Box p="2" />
-      <Link href="/bank-accounts/add-requisition">
-        <Button variant="surface">Add Requisition</Button>
-      </Link>
+        <RequisitionsList
+          requisitions={localRequisitions}
+          groups={groups}
+          locale={locale}
+        />
+      </VStack>
     </>
   );
 }

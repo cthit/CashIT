@@ -13,21 +13,35 @@ import {
 } from '@/components/ui/select';
 import { Box, createListCollection, Heading } from '@chakra-ui/react';
 import { Prisma } from '@prisma/client';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { setBankAccountAccess } from '@/actions/bankAccounts';
 
 export default function AddPermissionForm({
   accounts,
-  groups
+  groups,
+  selectedAccountId
 }: {
   accounts: Prisma.BankAccountGetPayload<{}>[];
-  groups: { superGroup: GammaSuperGroup }[];
+  groups: { superGroup: GammaSuperGroup; members: any[]; hasBanner: boolean; hasAvatar: boolean; }[];
+  selectedAccountId?: string;
 }) {
   const router = useRouter();
 
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [accId, setAccId] = useState<string | undefined>();
+  const [accId, setAccId] = useState<string | undefined>(selectedAccountId);
+
+  // Load current permissions when account is selected
+  useEffect(() => {
+    if (accId) {
+      const account = accounts.find(a => a.goCardlessId === accId);
+      if (account) {
+        setSelectedGroups(account.gammaSuperGroupAccesses);
+      }
+    } else {
+      setSelectedGroups([]);
+    }
+  }, [accId, accounts]);
 
   const submit = useCallback(
     async (event: React.FormEvent) => {
@@ -35,7 +49,7 @@ export default function AddPermissionForm({
 
       if (accId) {
         await setBankAccountAccess(accId, selectedGroups);
-        router.refresh();
+        router.push('/bank-accounts');
       }
     },
     [accId, router, selectedGroups]

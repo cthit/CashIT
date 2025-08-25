@@ -24,8 +24,9 @@ export default async function Page(props: {
 
   const localRequisitions = await GoCardlessService.getRegisteredRequisitions();
   const requisitions = (await GoCardlessService.getRequisitions()).results;
+  const institutions = await GoCardlessService.getInstitutions();
   const unusedRequisitions = requisitions.filter(
-    (r) => !localRequisitions.find((lr) => lr.goCardlessId === r.id)
+    (r) => !localRequisitions.find((lr) => lr.goCardlessId === r.id) && r.status !== 'EX'
   );
 
   return (
@@ -37,14 +38,14 @@ export default async function Page(props: {
         <BreadcrumbLink  as={Link} href="/bank-accounts">
         {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Add Requisition</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>Add Connection</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
       <Heading as="h1" size="xl" display="inline" mr="auto">
-        Add Requisition
+        Add Connection
       </Heading>
-      <AddRequisitionForm requisitions={unusedRequisitions} />
+      <AddRequisitionForm requisitions={unusedRequisitions} institutions={institutions} />
     </>
   );
 }

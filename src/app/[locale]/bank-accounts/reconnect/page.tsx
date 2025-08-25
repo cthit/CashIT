@@ -9,8 +9,7 @@ import i18nService from '@/services/i18nService';
 import SessionService from '@/services/sessionService';
 import { notFound } from 'next/navigation';
 import GoCardlessService from '@/services/goCardlessService';
-import BankAccountService from '@/services/bankAccountService';
-import AddAccountForm from './AddAccountForm';
+import RecreateRequisitionButton from './RecreateRequisitionButton';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -28,8 +27,6 @@ export default async function Page(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const accounts = await BankAccountService.getAll();
-
   const requisitions = (await GoCardlessService.getRequisitions()).results;
   const requisition = requisitions.find((r) => r.id === requisitionId);
   if (!requisition) {
@@ -45,14 +42,15 @@ export default async function Page(props: {
         <BreadcrumbLink  as={Link} href="/bank-accounts">
         {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Add Bank Account</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>Reconnect Accounts</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
       <Heading as="h1" size="xl" display="inline" mr="auto">
-        Add Bank Account
+        Reconnect Accounts
       </Heading>
-      <AddAccountForm requisition={requisition} accounts={accounts} />
+      <p>Create a new requisition and transfer accounts?</p>
+      <RecreateRequisitionButton id={requisition.id} />
     </>
   );
 }

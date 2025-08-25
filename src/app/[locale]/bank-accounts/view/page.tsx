@@ -71,14 +71,16 @@ export default async function Page(props: {
 
       <Box p="2" />
 
-      <Text>
-        {l.bankAccounts.availableBalance}:{' '}
-        {i18nService.formatNumber(account.balanceAvailable)}
-      </Text>
-      <Text>
-        {l.bankAccounts.bookedBalance}:{' '}
-        {i18nService.formatNumber(account.balanceBooked)}
-      </Text>
+      <Box p={4} bg="bg.subtle" rounded="md" borderWidth="1px">
+        <Heading size="md">{l.bankAccounts.availableBalance}</Heading>
+        <Text fontSize="2xl" fontWeight="bold" color="green.600">
+          {i18nService.formatNumber(account.balanceAvailable)}
+        </Text>
+        <Text fontSize="sm" color="fg.muted">
+          {l.bankAccounts.bookedBalance}:{' '}
+          {i18nService.formatNumber(account.balanceBooked)}
+        </Text>
+      </Box>
 
       <Box p="2" />
 

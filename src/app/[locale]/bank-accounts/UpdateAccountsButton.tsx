@@ -5,6 +5,7 @@ import { refreshAllBankAccounts } from '@/actions/bankAccounts';
 import { useCallback, useState } from 'react';
 import i18nService from '@/services/i18nService';
 import { useRouter } from 'next/navigation';
+import { HiRefresh } from 'react-icons/hi';
 
 export default function UpdateAccountsButton({ locale }: { locale: string }) {
   const l = i18nService.getLocale(locale);
@@ -25,7 +26,7 @@ export default function UpdateAccountsButton({ locale }: { locale: string }) {
       onClick={updateBankAccounts}
       disabled={refreshing}
     >
-      {l.bankAccounts.refresh}
+      <HiRefresh /> {refreshing ? 'Refreshing' : l.bankAccounts.refresh}
     </Button>
   );
 }
