@@ -15,9 +15,7 @@ import {
   Badge,
   IconButton,
   Separator,
-  Table,
   Text,
-  LinkBox,
   LinkOverlay,
   Box
 } from '@chakra-ui/react';
@@ -42,11 +40,15 @@ import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { EmptyState } from '../ui/empty-state';
 import styles from './ExpensesTable.module.css';
-import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
 import {
-  ColumnFiltersState,
+  GammaGroup,
+  GammaPost,
+  GammaUser,
+  GammaSuperGroup,
+  GammaGroupMember
+} from '@/types/gamma';
+import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -55,14 +57,14 @@ import {
   SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import TableFilter from '../TableFilter/TableFilter';
-import TablePagination from '../TablePagination/TablePagination';
+import { initializeFilters } from '../TableFilter/TableFilter';
 import {
   HiBanknotes,
   HiPaperAirplane,
   HiTrash,
   HiXMark
 } from 'react-icons/hi2';
+import CashitTable from '../CashitTable/CashitTable';
 
 const columnHelper = createColumnHelper<ExpenseRow>();
 
@@ -86,26 +88,46 @@ interface ExpenseRow {
   receipts: Expense['receipts'];
 }
 
+const cellWidths: Record<string, string> = {
+  actions: '9rem',
+  amount: '8rem',
+  type: '8rem',
+  date: '8rem',
+  description: '20%'
+};
+
 const ExpensesTable = ({
   e,
   groups,
   locale,
   treasurerPostId,
-  allEditable = false
+  allEditable = false,
+  superGroups
 }: {
   e: Expense[];
   groups: { group: GammaGroup; post: GammaPost }[];
   locale: string;
   treasurerPostId?: string;
   allEditable?: boolean;
+  superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
 }) => {
   const l = i18nService.getLocale(locale);
 
   const expenses = useMemo(() => {
-    const groupsReverse = groups.reduce((acc, group) => {
-      acc[group.group.id] = group;
-      return acc;
-    }, {} as Record<string, { group: GammaGroup; post: GammaPost }>);
+    const superGroupsReverse =
+      superGroups?.reduce((acc, sg) => {
+        acc[sg.superGroup.id] = sg.superGroup;
+        return acc;
+      }, {} as Record<string, GammaSuperGroup>) ?? {};
+
+    const getGroupDisplayName = (superGroupId: string | null): string => {
+      if (!superGroupId) return l.group.noGroup;
+
+      const superGroup = superGroupId ? superGroupsReverse[superGroupId] : null;
+      if (superGroup) return superGroup.prettyName;
+
+      return l.group.unknownGroup;
+    };
 
     return e.map((expense) => {
       const status: ExpenseStatus =
@@ -113,21 +135,13 @@ const ExpensesTable = ({
       return {
         id: expense.id,
         description: expense.name,
-        group: expense.gammaGroupId
-          ? groupsReverse[expense.gammaGroupId]?.group.prettyName ??
-            l.group.noGroup
-          : l.group.noGroup,
+        group: getGroupDisplayName(expense.gammaSuperGroupId),
         date: expense.createdAt,
         type: ExpenseTypeText({
           type: expense.type,
           locale
         }),
-        person:
-          expense.user?.firstName +
-          ' "' +
-          expense.user?.nick +
-          '" ' +
-          expense.user?.lastName,
+        person: expense.user?.firstName + ' ' + expense.user?.lastName,
         amount: expense.amount,
         status: status,
         statusText: RequestStatusText({ b: status, locale: locale }),
@@ -135,85 +149,105 @@ const ExpensesTable = ({
         groupId: expense.gammaGroupId
       } as ExpenseRow;
     });
-  }, [e, groups, locale]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, locale]);
 
-  const defaultColumns = [
-    columnHelper.accessor('description', {
-      header: l.general.description,
-      cell: (info) => (
-        <LinkOverlay
-          as={Link}
-          href={'/expenses/view?id=' + info.row.original.id}
-          className={styles.overlay}
-        >
-          {info.getValue()}
-        </LinkOverlay>
-      )
-    }),
-    columnHelper.accessor('group', {
-      header: l.expense.group,
-      cell: (info) => info.getValue(),
-      meta: {
-        filterVariant: 'select'
-      }
-    }),
-    columnHelper.accessor('date', {
-      header: l.expense.date,
-      cell: (info) => info.getValue().toLocaleDateString()
-    }),
-    columnHelper.accessor('type', {
-      header: l.expense.type,
-      cell: (info) => info.getValue(),
-      meta: {
-        filterVariant: 'select'
-      }
-    }),
-    columnHelper.accessor('person', {
-      header: l.expense.person,
-      cell: (info) => info.getValue()
-    }),
-    columnHelper.accessor('amount', {
-      header: l.expense.amount,
-      cell: (info) => info.getValue().toFixed(2) + ' kr'
-    }),
-    columnHelper.accessor('statusText', {
-      header: l.expense.status,
-      cell: (info) => (
-        <RequestStatusBadge b={info.row.original.status} locale={locale} />
-      ),
-      meta: {
-        filterVariant: 'select'
-      },
-      sortingFn: (rowA, rowB) => {
-        const statusA = rowA.original.status as ExpenseStatus;
-        const statusB = rowB.original.status as ExpenseStatus;
-        const order = [
-          RequestStatus.PENDING,
-          RequestStatus.PENDING_REVISED,
-          RequestStatus.APPROVED,
-          RequestStatus.REJECTED,
-          'FINISHED'
-        ];
-        return order.indexOf(statusA) - order.indexOf(statusB);
-      }
-    }),
-    columnHelper.display({
-      id: 'actions',
-      cell: (info) => {
-        const expense = info.row.original;
-        const group = groups.find((g) => g.group.id === expense.groupId);
-        return (
-          <ExpenseActions
-            {...expense}
-            locale={locale}
-            gammaGroup={group}
-            treasurerPostId={treasurerPostId}
-            editable={allEditable}
-          />
-        );
-      }
-    })
-  ];
+  const defaultColumns = useMemo(
+    () => [
+      columnHelper.accessor('description', {
+        header: l.general.description,
+        cell: (info) => (
+          <LinkOverlay
+            as={Link}
+            href={'/expenses/view?id=' + info.row.original.id}
+            className={styles.overlay}
+          >
+            {info.getValue()}
+          </LinkOverlay>
+        )
+      }),
+      columnHelper.accessor('group', {
+        header: l.expense.group,
+        cell: (info) => info.getValue(),
+        filterFn: 'arrIncludesSome',
+        meta: {
+          filterVariant: 'select'
+        }
+      }),
+      columnHelper.accessor('date', {
+        header: l.expense.date,
+        cell: (info) => info.getValue().toLocaleDateString()
+      }),
+      columnHelper.accessor('type', {
+        header: l.expense.type,
+        cell: (info) => info.getValue(),
+        filterFn: 'arrIncludesSome',
+        meta: {
+          filterVariant: 'select'
+        }
+      }),
+      columnHelper.accessor('person', {
+        header: l.expense.person,
+        cell: (info) => info.getValue()
+      }),
+      columnHelper.accessor('amount', {
+        header: l.expense.amount,
+        cell: (info) => info.getValue().toFixed(2) + ' kr'
+      }),
+      columnHelper.accessor('statusText', {
+        header: l.expense.status,
+        cell: (info) => (
+          <RequestStatusBadge b={info.row.original.status} locale={locale} />
+        ),
+        meta: {
+          filterVariant: 'select',
+          defaultExcludeSelect: [l.requests.status.paid]
+        },
+        filterFn: 'arrIncludesSome',
+        sortingFn: (rowA, rowB) => {
+          const statusA = rowA.original.status as ExpenseStatus;
+          const statusB = rowB.original.status as ExpenseStatus;
+          const order = [
+            RequestStatus.PENDING,
+            RequestStatus.PENDING_REVISED,
+            RequestStatus.APPROVED,
+            RequestStatus.REJECTED,
+            'FINISHED'
+          ];
+          return order.indexOf(statusA) - order.indexOf(statusB);
+        }
+      }),
+      columnHelper.display({
+        id: 'actions',
+        cell: (info) => {
+          const expense = info.row.original;
+          const group = groups.find((g) => g.group.id === expense.groupId);
+          return (
+            <ExpenseActions
+              {...expense}
+              locale={locale}
+              gammaGroup={group}
+              treasurerPostId={treasurerPostId}
+              editable={allEditable}
+            />
+          );
+        }
+      })
+    ],
+    [
+      l.general.description,
+      l.expense.group,
+      l.expense.date,
+      l.expense.type,
+      l.expense.person,
+      l.expense.amount,
+      l.expense.status,
+      l.requests.status.paid,
+      locale,
+      groups,
+      treasurerPostId,
+      allEditable
+    ]
+  );
 
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -226,7 +260,9 @@ const ExpensesTable = ({
     }
   ]);
 
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = useState(() =>
+    initializeFilters(defaultColumns, expenses)
+  );
 
   const table = useReactTable({
     columns: defaultColumns,
@@ -250,59 +286,18 @@ const ExpensesTable = ({
   });
 
   return (
-    <Table.Root>
-      <Table.Header>
-        <Table.Row>
-          {table.getHeaderGroups().map((headerGroup) =>
-            headerGroup.headers.map((header) => {
-              return (
-                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
-                  <Box
-                    onClick={header.column.getToggleSortingHandler()}
-                    cursor={header.column.getCanSort() ? 'pointer' : undefined}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    {header.column.getCanSort() &&
-                      ({
-                        asc: '▴',
-                        desc: '▾'
-                      }[header.column.getIsSorted() as string] ??
-                        '⇅')}
-                  </Box>
-                  {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} locale={locale} />
-                  ) : null}
-                </Table.ColumnHeader>
-              );
-            })
-          )}
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {table.getRowModel().rows.map((row) => (
-          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <Table.Cell key={cell.id} py="1" textOverflow="ellipsis">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Table.Cell>
-            ))}
-          </LinkBox>
-        ))}
-      </Table.Body>
-      <Table.Caption>
-        {table.getRowModel().rows.length === 0 && (
-          <EmptyState
-            icon={<PiCoins />}
-            title={l.expense.listNotFound}
-            description={l.expense.listNotFoundDesc}
-          />
-        )}
-        <TablePagination table={table} />
-      </Table.Caption>
-    </Table.Root>
+    <CashitTable
+      table={table}
+      cellWidths={cellWidths}
+      locale={locale}
+      emptyStateComponent={
+        <EmptyState
+          icon={<PiCoins />}
+          title={l.expense.listNotFound}
+          description={l.expense.listNotFoundDesc}
+        />
+      }
+    />
   );
 };
 

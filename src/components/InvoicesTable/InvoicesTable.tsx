@@ -13,10 +13,8 @@ import {
   Badge,
   Box,
   IconButton,
-  LinkBox,
   LinkOverlay,
   Separator,
-  Table,
   Text
 } from '@chakra-ui/react';
 import {
@@ -41,11 +39,10 @@ import { EmptyState } from '../ui/empty-state';
 import Link from 'next/link';
 import styles from './InvoicesTable.module.css';
 import i18nService from '@/services/i18nService';
-import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
+import { GammaGroupMember, GammaSuperGroup, GammaUser } from '@/types/gamma';
 import {
   ColumnFiltersState,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -54,9 +51,8 @@ import {
   SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import TableFilter from '../TableFilter/TableFilter';
-import TablePagination from '../TablePagination/TablePagination';
 import { HiCheck, HiTrash, HiXMark } from 'react-icons/hi2';
+import CashitTable from '../CashitTable/CashitTable';
 
 type Invoice = Awaited<
   ReturnType<typeof InvoiceService.getForGroup>
@@ -81,19 +77,29 @@ interface InvoiceRow {
 const InvoicesTable = ({
   e,
   locale,
-  groups
+  superGroups
 }: {
   e: Invoice[];
   locale: string;
-  groups: { group: GammaGroup; post: GammaPost }[];
+  superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
 }) => {
   const l = i18nService.getLocale(locale);
 
   const invoices = useMemo(() => {
-    const groupsReverse = groups.reduce((acc, group) => {
-      acc[group.group.id] = group;
-      return acc;
-    }, {} as Record<string, { group: GammaGroup; post: GammaPost }>);
+    const superGroupsReverse =
+      superGroups?.reduce((acc, sg) => {
+        acc[sg.superGroup.id] = sg.superGroup;
+        return acc;
+      }, {} as Record<string, GammaSuperGroup>) ?? {};
+
+    const getGroupDisplayName = (superGroupId: string | null): string => {
+      if (!superGroupId) return l.group.noGroup;
+
+      const superGroup = superGroupId ? superGroupsReverse[superGroupId] : null;
+      if (superGroup) return superGroup.prettyName;
+
+      return l.group.unknownGroup;
+    };
 
     return e.map((invoice) => {
       const status: InvoiceStatus =
@@ -101,10 +107,7 @@ const InvoicesTable = ({
       return {
         id: invoice.id,
         description: invoice.name,
-        group: invoice.gammaGroupId
-          ? groupsReverse[invoice.gammaGroupId]?.group.prettyName ??
-            l.group.noGroup
-          : l.group.noGroup,
+        group: getGroupDisplayName(invoice.gammaSuperGroupId),
         date: invoice.createdAt,
         person:
           invoice.user?.firstName +
@@ -118,7 +121,7 @@ const InvoicesTable = ({
         groupId: invoice.gammaGroupId
       } as InvoiceRow;
     });
-  }, [e, groups, locale]);
+  }, [e, l.group.noGroup, l.group.unknownGroup, locale, superGroups]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -217,59 +220,18 @@ const InvoicesTable = ({
   });
 
   return (
-    <Table.Root>
-      <Table.Header>
-        <Table.Row>
-          {table.getHeaderGroups().map((headerGroup) =>
-            headerGroup.headers.map((header) => {
-              return (
-                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
-                  <Box
-                    onClick={header.column.getToggleSortingHandler()}
-                    cursor={header.column.getCanSort() ? 'pointer' : undefined}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    {header.column.getCanSort() &&
-                      ({
-                        asc: '▴',
-                        desc: '▾'
-                      }[header.column.getIsSorted() as string] ??
-                        '⇅')}
-                  </Box>
-                  {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} locale={locale} />
-                  ) : null}
-                </Table.ColumnHeader>
-              );
-            })
-          )}
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {table.getRowModel().rows.map((row) => (
-          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <Table.Cell key={cell.id} py="1" textOverflow="ellipsis">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Table.Cell>
-            ))}
-          </LinkBox>
-        ))}
-      </Table.Body>
-      <Table.Caption>
-        {table.getRowModel().rows.length === 0 && (
-          <EmptyState
-            icon={<PiFileX />}
-            title={l.invoice.listNotFound}
-            description={l.invoice.listNotFoundDesc}
-          />
-        )}
-        <TablePagination table={table} />
-      </Table.Caption>
-    </Table.Root>
+    <CashitTable
+      table={table}
+      emptyStateComponent={
+        <EmptyState
+          icon={<PiFileX />}
+          title={l.invoice.listNotFound}
+          description={l.invoice.listNotFoundDesc}
+        />
+      }
+      locale={locale}
+      cellWidths={{}}
+    />
   );
 };
 

@@ -26,7 +26,8 @@
     "economicalOperations": "Ekonomisk verksamhet",
     "group": "Grupp",
     "noGroup": "Ingen grupp",
-    "selectGroup": "Välj en grupp"
+    "selectGroup": "Välj en grupp",
+    "unknownGroup": "Okänd grupp"
   },
   "categories": {
     "nameLists": "Namnlistor",

@@ -20,7 +20,7 @@ export default async function Page(props: {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
-  const groups = await SessionService.getGroups();
+  const superGroups = await GammaService.getAllSuperGroups();
 
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const sales = await GammaService.includeUserInfo(
@@ -49,7 +49,7 @@ export default async function Page(props: {
         </Link>
       </Flex>
       <Box p="2" />
-      <ZettleSalesTable e={sales} groups={groups} locale={locale} />
+      <ZettleSalesTable e={sales} superGroups={superGroups} locale={locale} />
     </>
   );
 }

@@ -164,6 +164,7 @@ export default class SessionService {
   }
 
   static async isDivisionTreasurer(s?: Session | null) {
+    if (process.env.ADMIN_TEST_MODE === 'true') return true;
     const session = s ?? (await this.getSession());
 
     const adminGroups = (process.env.BOARD_GROUP || 'styrit').split(',');

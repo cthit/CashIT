@@ -26,7 +26,8 @@
     "economicalOperations": "Economical Operations",
     "group": "Group",
     "noGroup": "No group",
-    "selectGroup": "Select a group"
+    "selectGroup": "Select a group",
+    "unknownGroup": "Unknown group"
   },
   "categories": {
     "nameLists": "Name Lists",

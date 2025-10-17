@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { IconButton, Table, LinkBox, LinkOverlay, Box } from '@chakra-ui/react';
+import { IconButton, LinkOverlay } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -18,11 +18,10 @@ import { EmptyState } from '../ui/empty-state';
 import styles from './ZettleSalesTable.module.css';
 import ZettleSaleService from '@/services/zettleSaleService';
 import { deleteZettleSale } from '@/actions/zettleSales';
-import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
+import { GammaGroupMember, GammaSuperGroup, GammaUser } from '@/types/gamma';
 import {
   ColumnFiltersState,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -31,8 +30,7 @@ import {
   SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import TableFilter from '../TableFilter/TableFilter';
-import TablePagination from '../TablePagination/TablePagination';
+import CashitTable from '../CashitTable/CashitTable';
 
 const columnHelper = createColumnHelper<SaleRow>();
 
@@ -52,35 +50,42 @@ interface SaleRow {
 
 const ZettleSalesTable = ({
   e,
-  groups,
+  superGroups,
   locale
 }: {
   e: ZettleSale[];
-  groups: { group: GammaGroup; post: GammaPost }[];
+  superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
 }) => {
   const l = i18nService.getLocale(locale);
 
   const sales = useMemo(() => {
-    const groupsReverse = groups.reduce((acc, group) => {
-      acc[group.group.id] = group;
-      return acc;
-    }, {} as Record<string, { group: GammaGroup; post: GammaPost }>);
+    const superGroupsReverse =
+      superGroups?.reduce((acc, sg) => {
+        acc[sg.superGroup.id] = sg.superGroup;
+        return acc;
+      }, {} as Record<string, GammaSuperGroup>) ?? {};
+
+    const getGroupDisplayName = (superGroupId: string | null): string => {
+      if (!superGroupId) return l.group.noGroup;
+
+      const superGroup = superGroupId ? superGroupsReverse[superGroupId] : null;
+      if (superGroup) return superGroup.prettyName;
+
+      return l.group.unknownGroup;
+    };
 
     return e.map((sale) => {
       return {
         id: sale.id,
         description: sale.name,
-        group: sale.gammaGroupId
-          ? groupsReverse[sale.gammaGroupId]?.group.prettyName ??
-            l.group.noGroup
-          : l.group.noGroup,
+        group: getGroupDisplayName(sale.gammaSuperGroupId),
         date: sale.saleDate,
         person: `${sale.user?.firstName} "${sale.user?.nick}" ${sale.user?.lastName}`,
         total: sale.amount
       } as SaleRow;
     });
-  }, [e, groups]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -154,59 +159,18 @@ const ZettleSalesTable = ({
   });
 
   return (
-    <Table.Root>
-      <Table.Header>
-        <Table.Row>
-          {table.getHeaderGroups().map((headerGroup) =>
-            headerGroup.headers.map((header) => {
-              return (
-                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
-                  <Box
-                    onClick={header.column.getToggleSortingHandler()}
-                    cursor={header.column.getCanSort() ? 'pointer' : undefined}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    {header.column.getCanSort() &&
-                      ({
-                        asc: '▴',
-                        desc: '▾'
-                      }[header.column.getIsSorted() as string] ??
-                        '⇅')}
-                  </Box>
-                  {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} locale={locale} />
-                  ) : null}
-                </Table.ColumnHeader>
-              );
-            })
-          )}
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {table.getRowModel().rows.map((row) => (
-          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <Table.Cell key={cell.id} py="1" textOverflow="ellipsis">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Table.Cell>
-            ))}
-          </LinkBox>
-        ))}
-      </Table.Body>
-      <Table.Caption>
-        {e.length === 0 && (
-          <EmptyState
-            icon={<PiCoins />}
-            title={l.zettleSales.listNotFound}
-            description={l.zettleSales.listNotFoundDesc}
-          />
-        )}
-        <TablePagination table={table} />
-      </Table.Caption>
-    </Table.Root>
+    <CashitTable
+      table={table}
+      cellWidths={{}}
+      locale={locale}
+      emptyStateComponent={
+        <EmptyState
+          icon={<PiCoins />}
+          title={l.zettleSales.listNotFound}
+          description={l.zettleSales.listNotFoundDesc}
+        />
+      }
+    />
   );
 };
 

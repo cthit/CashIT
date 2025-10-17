@@ -1,14 +1,23 @@
 'use client';
 
 import i18nService from '@/services/i18nService';
-import { createListCollection, Input, NativeSelect } from '@chakra-ui/react';
-import { Column } from '@tanstack/react-table';
+import { createListCollection, Input } from '@chakra-ui/react';
+import {
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText
+} from '@/components/ui/select';
+import { Column, ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
 import { useMemo } from 'react';
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData, TValue> {
     filterVariant?: 'range' | 'select' | 'text';
+    defaultExcludeSelect?: string[];
   }
 }
 
@@ -18,6 +27,7 @@ const TableFilter = ({
 }: {
   column: Column<any, unknown>;
   locale: string;
+  excludeDefault?: string[];
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -30,8 +40,9 @@ const TableFilter = ({
         : Array.from(column.getFacetedUniqueValues().keys())
             .sort()
             .slice(0, 5000),
-    [column.getFacetedUniqueValues(), filterVariant]
+    [column, filterVariant]
   );
+
   const selections = useMemo(
     () =>
       createListCollection({
@@ -42,8 +53,6 @@ const TableFilter = ({
       }),
     [sortedUniqueValues]
   );
-
-  console.log('filterValue', columnFilterValue);
 
   return filterVariant === 'range' ? (
     <div>
@@ -69,20 +78,39 @@ const TableFilter = ({
       <div className="h-1" />
     </div>
   ) : filterVariant === 'select' ? (
-    <NativeSelect.Root>
-      <NativeSelect.Field
-        onChange={(e) => column.setFilterValue(e.target.value)}
-        value={columnFilterValue?.toString()}
-        bg="bg"
-      >
-        <option value="">{l.general.all}</option>
+    <SelectRoot
+      collection={selections}
+      multiple
+      value={
+        column.getFilterValue()
+          ? Array.isArray(column.getFilterValue())
+            ? (column.getFilterValue() as unknown[]).map(String)
+            : [String(column.getFilterValue())]
+          : []
+      }
+      onValueChange={({ value }) => {
+        column.setFilterValue(value);
+      }}
+      disabled={selections.items.length === 0}
+      closeOnSelect={false}
+      marginTop="-0.4rem"
+    >
+      <SelectLabel />
+      <SelectTrigger>
+        <SelectValueText
+          textOverflow="ellipsis"
+          textWrap="nowrap"
+          display="block"
+        />
+      </SelectTrigger>
+      <SelectContent position="absolute">
         {selections.items.map((item) => (
-          <option value={item.value} key={item.value}>
+          <SelectItem key={item.value} item={item} textWrap="nowrap">
             {item.label}
-          </option>
+          </SelectItem>
         ))}
-      </NativeSelect.Field>
-    </NativeSelect.Root>
+      </SelectContent>
+    </SelectRoot>
   ) : (
     <Input
       onChange={(value) => column.setFilterValue(value.target.value)}
@@ -93,4 +121,26 @@ const TableFilter = ({
   );
 };
 
+function initializeFilters<T>(
+  columns: ColumnDef<T, any>[],
+  data: any[]
+): ColumnFiltersState {
+  return columns
+    .filter((col) => col.meta?.filterVariant === 'select')
+    .map((col) => {
+      const id = (col as any)?.accessorKey as keyof T;
+      const exclude = col.meta?.defaultExcludeSelect ?? [];
+      const values = [
+        ...new Set(
+          data
+            .map((row) => row[id])
+            .filter((v) => v !== undefined && !exclude.includes(v as string))
+        )
+      ];
+      return values.length ? { id: id as string, value: values } : null;
+    })
+    .filter(Boolean) as ColumnFiltersState;
+}
+
 export default TableFilter;
+export { initializeFilters };

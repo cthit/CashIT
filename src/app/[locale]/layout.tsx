@@ -58,10 +58,11 @@ const LoggedIn = ({
         p="4"
         width="20rem"
         display={{ base: 'none', md: 'block' }}
+        overflowY="auto"
       >
         <Navigation locale={locale} />
       </Box>
-      <Box overflowY="scroll" width="100%">
+      <Box overflowY="auto" width="100%">
         <Container py="6">{children}</Container>
       </Box>
     </Flex>

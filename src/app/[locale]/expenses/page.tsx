@@ -14,13 +14,13 @@ import { HiPlus } from 'react-icons/hi';
 import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
-  //searchParams: Promise<{ gid?: string; sgid?: string; }>;
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const groups = await SessionService.getGroups();
+  const superGroups = await GammaService.getAllSuperGroups();
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const expenses = await GammaService.includeUserInfo(
     await (divisionTreasurer
@@ -50,6 +50,7 @@ export default async function Page(props: {
       <Box p="2" />
       <ExpensesTable
         groups={groups}
+        superGroups={superGroups}
         e={expenses}
         locale={locale}
         treasurerPostId={process.env.TREASURER_POST_ID}

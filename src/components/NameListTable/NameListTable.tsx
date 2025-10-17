@@ -2,11 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { IconButton, Table, LinkBox, LinkOverlay, Box } from '@chakra-ui/react';
+import { IconButton, LinkOverlay } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
-  MenuItemCommand,
   MenuRoot,
   MenuTrigger
 } from '@/components/ui/menu';
@@ -19,11 +18,10 @@ import styles from './NameListTable.module.css';
 import NameListService from '@/services/nameListService';
 import { deleteNameList } from '@/actions/nameLists';
 import { NameListType } from '@prisma/client';
-import { GammaGroup, GammaPost, GammaUser } from '@/types/gamma';
+import { GammaGroupMember, GammaSuperGroup, GammaUser } from '@/types/gamma';
 import {
   ColumnFiltersState,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -32,9 +30,8 @@ import {
   SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import TableFilter from '../TableFilter/TableFilter';
-import TablePagination from '../TablePagination/TablePagination';
 import { HiTrash } from 'react-icons/hi2';
+import CashitTable from '../CashitTable/CashitTable';
 
 type NameList = Awaited<
   ReturnType<typeof NameListService.getForGroup>
@@ -56,30 +53,37 @@ interface NameListRow {
 
 const NameListTable = ({
   e,
-  groups,
+  superGroups,
   locale
 }: {
   e: NameList[];
-  groups: { group: GammaGroup; post: GammaPost }[];
+  superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
 }) => {
   const l = i18nService.getLocale(locale);
 
   const rows = useMemo(() => {
-    const groupsReverse = groups.reduce((acc, group) => {
-      acc[group.group.id] = group;
-      return acc;
-    }, {} as Record<string, { group: GammaGroup; post: GammaPost }>);
+    const superGroupsReverse =
+      superGroups?.reduce((acc, sg) => {
+        acc[sg.superGroup.id] = sg.superGroup;
+        return acc;
+      }, {} as Record<string, GammaSuperGroup>) ?? {};
+
+    const getGroupDisplayName = (superGroupId: string | null): string => {
+      if (!superGroupId) return l.group.noGroup;
+
+      const superGroup = superGroupId ? superGroupsReverse[superGroupId] : null;
+      if (superGroup) return superGroup.prettyName;
+
+      return l.group.unknownGroup;
+    };
 
     return e.map(
       (list) =>
         ({
           id: list.id,
           description: list.name,
-          group: list.gammaGroupId
-            ? groupsReverse[list.gammaGroupId]?.group.prettyName ??
-              l.group.noGroup
-            : l.group.noGroup,
+          group: getGroupDisplayName(list.gammaSuperGroupId),
           groupId: list.gammaGroupId,
           date: list.occurredAt,
           person: `${list.user?.firstName} "${list.user?.nick}" ${list.user?.lastName}`,
@@ -88,7 +92,7 @@ const NameListTable = ({
           type: ListTypeText({ type: list.type, locale })
         } as NameListRow)
     );
-  }, [e, groups, locale]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, locale]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
@@ -176,59 +180,18 @@ const NameListTable = ({
   });
 
   return (
-    <Table.Root>
-      <Table.Header>
-        <Table.Row>
-          {table.getHeaderGroups().map((headerGroup) =>
-            headerGroup.headers.map((header) => {
-              return (
-                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
-                  <Box
-                    onClick={header.column.getToggleSortingHandler()}
-                    cursor={header.column.getCanSort() ? 'pointer' : undefined}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    {header.column.getCanSort() &&
-                      ({
-                        asc: '▴',
-                        desc: '▾'
-                      }[header.column.getIsSorted() as string] ??
-                        '⇅')}
-                  </Box>
-                  {header.column.getCanFilter() ? (
-                    <TableFilter column={header.column} locale={locale} />
-                  ) : null}
-                </Table.ColumnHeader>
-              );
-            })
-          )}
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {table.getRowModel().rows.map((row) => (
-          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <Table.Cell key={cell.id} py="1" textOverflow="ellipsis">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Table.Cell>
-            ))}
-          </LinkBox>
-        ))}
-      </Table.Body>
-      <Table.Caption>
-        {table.getRowModel().rows.length === 0 && (
-          <EmptyState
-            icon={<PiUserList />}
-            title={l.nameLists.listNotFound}
-            description={l.nameLists.listNotFoundDesc}
-          />
-        )}
-        <TablePagination table={table} />
-      </Table.Caption>
-    </Table.Root>
+    <CashitTable
+      table={table}
+      cellWidths={{}}
+      locale={locale}
+      emptyStateComponent={
+        <EmptyState
+          icon={<PiUserList />}
+          title={l.nameLists.listNotFound}
+          description={l.nameLists.listNotFoundDesc}
+        />
+      }
+    />
   );
 };
 
