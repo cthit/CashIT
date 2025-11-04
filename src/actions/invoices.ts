@@ -42,6 +42,7 @@ export async function createInvoiceForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     name,
     customerName,
     description,
@@ -133,6 +134,7 @@ export async function createPersonalInvoice(
 
   return InvoiceService.createPersonal(
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     name,
     customerName,
     description,

@@ -29,6 +29,7 @@ export async function createNameListForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     name,
     type,
     names,
@@ -53,6 +54,7 @@ export async function createPersonalNameList(
 
   await NameListService.createPersonal(
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     name,
     type,
     names,

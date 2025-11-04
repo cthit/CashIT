@@ -22,12 +22,19 @@ import {
 } from 'react-icons/md';
 import BankAccountService from '@/services/bankAccountService';
 import BankAccountsCard from '@/components/BankAccountsCard/BankAccountsCard';
+import { notFound } from 'next/navigation';
+import OrgService from '@/services/orgService';
 
 export default async function Home(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
+
+  const organization = await OrgService.getById(Number(orgId));
+  if (!organization) {
+    notFound();
+  }
 
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const unpaid = await (divisionTreasurer
@@ -87,7 +94,7 @@ export default async function Home(props: {
             overflow="hidden"
             bg="bg.surface"
           >
-            <Link href="/expenses">
+            <Link href={`/org/${orgId}/expenses`}>
               <Box p={4} _hover={{ bg: 'bg.subtle' }} cursor="pointer">
                 <Flex justifyContent="space-between" alignItems="center">
                   <VStack align="start" gap={1} height="3rem">

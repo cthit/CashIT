@@ -63,6 +63,7 @@ export async function createExpenseForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     amount,
     name,
     description,
@@ -183,6 +184,7 @@ export async function createPersonalExpense(
 
   return ExpenseService.createPersonal(
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     amount,
     name,
     description,

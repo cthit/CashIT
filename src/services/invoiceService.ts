@@ -107,6 +107,7 @@ export default class InvoiceService {
     gammaSuperGroupId: string,
     gammaGroupId: string,
     gammaUserId: string,
+    orgId: number,
     name: string,
     customerName: string,
     description: string,
@@ -131,6 +132,7 @@ export default class InvoiceService {
         gammaUserId,
         gammaSuperGroupId,
         gammaGroupId,
+        organizationId: orgId,
         name,
         customerName,
         description,
@@ -203,6 +205,7 @@ export default class InvoiceService {
 
   static async createPersonal(
     gammaUserId: string,
+    orgId: number,
     name: string,
     customerName: string,
     description: string,
@@ -225,6 +228,7 @@ export default class InvoiceService {
     const expense = await prisma.invoice.create({
       data: {
         gammaUserId,
+        organizationId: orgId,
         name,
         customerName,
         description,

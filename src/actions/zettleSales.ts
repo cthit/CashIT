@@ -25,6 +25,7 @@ export async function createZettleSale(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
+    1, // TODO: Use actual organization ID when routing is implemented
     name,
     amount,
     saleDate

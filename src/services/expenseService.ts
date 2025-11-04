@@ -12,28 +12,31 @@ export default class ExpenseService {
     });
   }
 
-  static async getUnpaidCount(gammaGroupId?: string) {
+  static async getUnpaidCount(orgId?: number, gammaGroupId?: string) {
     return await prisma.expense.count({
       where: {
         gammaGroupId,
-        paidAt: null
+        paidAt: null,
+        organizationId: orgId
       }
     });
   }
 
-  static async getUnpaid(gammaGroupId?: string) {
+  static async getUnpaid(orgId?: number, gammaGroupId?: string) {
     return await prisma.expense.findMany({
       where: {
         gammaGroupId,
-        paidAt: null
+        paidAt: null,
+        organizationId: orgId
       }
     });
   }
 
-  static async getForSuperGroup(gammaSuperGroupId: string) {
+  static async getForSuperGroup(gammaSuperGroupId: string, orgId?: number) {
     const expenses = await prisma.expense.findMany({
       where: {
-        gammaSuperGroupId
+        gammaSuperGroupId,
+        organizationId: orgId
       },
       include: {
         receipts: {
@@ -118,6 +121,7 @@ export default class ExpenseService {
     gammaSuperGroupId: string,
     gammaGroupId: string,
     gammaUserId: string,
+    orgId: number,
     amount: number,
     name: string,
     description: string,
@@ -130,6 +134,7 @@ export default class ExpenseService {
         gammaUserId,
         gammaSuperGroupId,
         gammaGroupId,
+        organizationId: orgId,
         name,
         amount,
         description,
@@ -178,6 +183,7 @@ export default class ExpenseService {
 
   static async createPersonal(
     gammaUserId: string,
+    orgId: number,
     amount: number,
     name: string,
     description: string,
@@ -188,6 +194,7 @@ export default class ExpenseService {
     const expense = await prisma.expense.create({
       data: {
         gammaUserId,
+        organizationId: orgId,
         name,
         amount,
         description,
