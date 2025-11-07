@@ -12,14 +12,14 @@ import GoCardlessService from '@/services/goCardlessService';
 import AddRequisitionForm from './AddRequisitionForm';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!divisionTreasurer) {
     notFound();
   }
 
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const localRequisitions = await GoCardlessService.getRegisteredRequisitions();
@@ -35,9 +35,10 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink  as={Link} href="/bank-accounts">
-        {l.bankAccounts.title}
-        </BreadcrumbLink>
+  {/* TODO: Use routing to determine org id dynamically */}
+  <BreadcrumbLink  as={Link} href={`/org/${orgId}/bank-accounts`}>
+  {l.bankAccounts.title}
+  </BreadcrumbLink>
         <BreadcrumbCurrentLink>Add Connection</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />

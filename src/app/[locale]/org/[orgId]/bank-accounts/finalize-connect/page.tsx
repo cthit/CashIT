@@ -13,7 +13,7 @@ import BankAccountManager from '@/components/BankAccountManager/BankAccountManag
 import { getExistingBankAccounts } from '@/actions/bankAccounts';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
   searchParams: Promise<{ ref?: string; error?: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
@@ -21,18 +21,23 @@ export default async function Page(props: {
     notFound();
   }
 
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const { ref, error } = await props.searchParams;
   const l = i18nService.getLocale(locale);
 
   if (error) {
-    redirect('/bank-accounts/connect?error=' + encodeURIComponent(error));
+    redirect(
+      `/org/${orgId}/bank-accounts/connect?error=${encodeURIComponent(
+        error
+      )}`
+    );
   }
 
   if (!ref) {
     redirect(
-      '/bank-accounts/connect?error=' +
-        encodeURIComponent('No reference provided')
+      `/org/${orgId}/bank-accounts/connect?error=${encodeURIComponent(
+        'No reference provided'
+      )}`
     );
   }
 
@@ -42,8 +47,9 @@ export default async function Page(props: {
 
   if (!requisition) {
     redirect(
-      '/bank-accounts/connect?error=' +
-        encodeURIComponent('Requisition not found')
+      `/org/${orgId}/bank-accounts/connect?error=${encodeURIComponent(
+        'Requisition not found'
+      )}`
     );
   }
 
@@ -55,10 +61,11 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href="/bank-accounts">
+        {/* TODO: Use routing to determine org id dynamically */}
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href="/bank-accounts/connect">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts/connect`}>
           Add Connection
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>Finalize Connection</BreadcrumbCurrentLink>

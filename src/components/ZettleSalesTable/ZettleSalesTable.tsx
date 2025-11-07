@@ -51,11 +51,13 @@ interface SaleRow {
 const ZettleSalesTable = ({
   e,
   superGroups,
-  locale
+  locale,
+  orgId = 1
 }: {
   e: ZettleSale[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
+  orgId?: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -93,7 +95,7 @@ const ZettleSalesTable = ({
       cell: (info) => (
         <LinkOverlay
           as={Link}
-          href={'/invoices/view?id=' + info.row.original.id}
+          href={`/org/${orgId}/zettle-sales/view?id=${info.row.original.id}`}
           className={styles.overlay}
         >
           {info.getValue()}
@@ -123,7 +125,7 @@ const ZettleSalesTable = ({
       id: 'actions',
       cell: (info) => {
         const sale = info.row.original;
-        return <SaleActions id={sale.id} locale={locale} />;
+        return <SaleActions id={sale.id} locale={locale} orgId={orgId} />;
       }
     })
   ];
@@ -174,7 +176,7 @@ const ZettleSalesTable = ({
   );
 };
 
-const SaleActions = ({ id, locale }: { id: number; locale: string }) => {
+const SaleActions = ({ id, locale, orgId }: { id: number; locale: string; orgId: number }) => {
   const l = i18nService.getLocale(locale);
   const router = useRouter();
 
@@ -195,7 +197,7 @@ const SaleActions = ({ id, locale }: { id: number; locale: string }) => {
         <MenuItem
           value="edit"
           cursor="pointer"
-          onClick={() => router.push('/zettle-sales/view?id=' + id)}
+          onClick={() => router.push(`/org/${orgId}/zettle-sales/view?id=${id}`)}
         >
           {l.general.edit}
         </MenuItem>

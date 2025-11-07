@@ -11,13 +11,13 @@ import {
 } from 'react-icons/pi';
 import SessionService from '@/services/sessionService';
 
-const Navigation = async ({ locale }: { locale: string }) => {
+const Navigation = async ({ locale, orgId = 1 }: { locale: string; orgId?: number }) => {
   const l = i18nService.getLocale(locale);
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
 
   return (
     <Flex gap="0.25rem" direction="column">
-      <NavigationLink href="/">
+      <NavigationLink href={`/org/${orgId}`}>
         <Icon size="md">
           <PiHouse />
         </Icon>{' '}
@@ -30,25 +30,25 @@ const Navigation = async ({ locale }: { locale: string }) => {
         </Heading>
       </Box>
 
-      <NavigationLink href="/expenses">
+      <NavigationLink href={`/org/${orgId}/expenses`}>
         <Icon size="md">
           <PiCoins />
         </Icon>{' '}
         {l.categories.expenses}
       </NavigationLink>
-      <NavigationLink href="/invoices">
+      <NavigationLink href={`/org/${orgId}/invoices`}>
         <Icon size="md">
           <PiReceipt />
         </Icon>{' '}
         {l.categories.invoices}
       </NavigationLink>
-      <NavigationLink href="/zettle-sales">
+      <NavigationLink href={`/org/${orgId}/zettle-sales`}>
         <Icon size="md">
           <PiCashRegister />
         </Icon>{' '}
         {l.home.zettleSales}
       </NavigationLink>
-      <NavigationLink href="/name-lists">
+      <NavigationLink href={`/org/${orgId}/name-lists`}>
         <Icon size="md">
           <PiUsersThree />
         </Icon>{' '}
@@ -62,14 +62,14 @@ const Navigation = async ({ locale }: { locale: string }) => {
       </Box>
 
       {divisionTreasurer && (
-        <NavigationLink href="/bank-accounts">
+        <NavigationLink href={`/org/${orgId}/bank-accounts`}>
           <Icon size="md">
             <PiBank />
           </Icon>{' '}
           {l.bankAccounts.title}
         </NavigationLink>
       )}
-      <NavigationLink href="/receipt-creator">
+      <NavigationLink href={`/org/${orgId}/receipt-creator`}>
         <Icon size="md">
           <PiReceipt />
         </Icon>{' '}

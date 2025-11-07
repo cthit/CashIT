@@ -12,7 +12,7 @@ export default class ExpenseService {
     });
   }
 
-  static async getUnpaidCount(orgId?: number, gammaGroupId?: string) {
+  static async getUnpaidCount(orgId: number, gammaGroupId?: string) {
     return await prisma.expense.count({
       where: {
         gammaGroupId,
@@ -22,7 +22,7 @@ export default class ExpenseService {
     });
   }
 
-  static async getUnpaid(orgId?: number, gammaGroupId?: string) {
+  static async getUnpaid(orgId: number, gammaGroupId?: string) {
     return await prisma.expense.findMany({
       where: {
         gammaGroupId,
@@ -32,7 +32,7 @@ export default class ExpenseService {
     });
   }
 
-  static async getForSuperGroup(gammaSuperGroupId: string, orgId?: number) {
+  static async getForSuperGroup(gammaSuperGroupId: string, orgId: number) {
     const expenses = await prisma.expense.findMany({
       where: {
         gammaSuperGroupId,

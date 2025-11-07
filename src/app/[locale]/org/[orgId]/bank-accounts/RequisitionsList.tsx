@@ -21,13 +21,13 @@ import DeleteAccountButton from './DeleteAccountButton';
 const RequisitionsList = ({
   requisitions,
   groups: _groups,
-  locale
+  orgId
 }: {
   requisitions: Awaited<
     ReturnType<typeof GoCardlessService.getRegisteredRequisitionsWithStatus>
   >;
   groups: Awaited<ReturnType<typeof GammaService.getAllSuperGroups>>;
-  locale: string;
+  orgId: number;
 }) => {
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -76,7 +76,7 @@ const RequisitionsList = ({
         <Heading as="h1" size="xl">
           Bank Account Connections
         </Heading>
-        <Link href="/bank-accounts/connect">
+        <Link href={`/org/${orgId}/bank-accounts/connect`}>
           <Button colorPalette="cyan">
             <HiPlus />
             Add bank connection
@@ -99,7 +99,7 @@ const RequisitionsList = ({
             Connect your first bank account to get started with managing your
             finances.
           </Text>
-          <Link href="/bank-accounts/connect">
+          <Link href={`/org/${orgId}/bank-accounts/connect`}>
             <Button colorPalette="blue">
               <HiPlus />
               Connect First Bank Account
@@ -143,10 +143,7 @@ const RequisitionsList = ({
                     <HStack>
                       {requisition.status === 'EX' && (
                         <Link
-                          href={
-                            '/bank-accounts/reconnect?requisition=' +
-                            requisition.goCardlessId
-                          }
+                          href={`/org/${orgId}/bank-accounts/reconnect?requisition=${requisition.goCardlessId}`}
                         >
                           <Button size="sm" colorPalette="orange">
                             <HiLink />
@@ -155,10 +152,7 @@ const RequisitionsList = ({
                         </Link>
                       )}
                       <Link
-                        href={
-                          '/bank-accounts/add-account?requisition=' +
-                          requisition.goCardlessId
-                        }
+                        href={`/org/${orgId}/bank-accounts/add-account?requisition=${requisition.goCardlessId}`}
                       >
                         <Button size="sm" variant="outline">
                           <HiPlus />
@@ -204,7 +198,7 @@ const RequisitionsList = ({
                             <VStack align="start" flex="1" gap={0}>
                               <Text fontSize="lg" fontWeight="semibold" mb={1}>
                                 <Link
-                                  href={`/bank-accounts/view?id=${account.goCardlessId}`}
+                                  href={`/org/${orgId}/bank-accounts/view?id=${account.goCardlessId}`}
                                 >
                                   {account.name}
                                 </Link>
@@ -256,7 +250,7 @@ const RequisitionsList = ({
                               <HStack gap={0.5}>
                                 <RefreshAccountButton accountId={account.id} />
                                 <Link
-                                  href={`/bank-accounts/settings?account=${account.goCardlessId}`}
+                                  href={`/org/${orgId}/bank-accounts/settings?account=${account.goCardlessId}`}
                                 >
                                   <IconButton size="sm" variant="ghost">
                                     <HiCog />

@@ -13,7 +13,7 @@ import BankAccountService from '@/services/bankAccountService';
 import AddAccountForm from './AddAccountForm';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
   searchParams: Promise<{ requisition?: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
@@ -25,7 +25,7 @@ export default async function Page(props: {
     notFound();
   }
 
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const accounts = await BankAccountService.getAll();
@@ -42,9 +42,10 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink  as={Link} href="/bank-accounts">
-        {l.bankAccounts.title}
-        </BreadcrumbLink>
+  {/* TODO: Use routing to determine org id dynamically */}
+  <BreadcrumbLink  as={Link} href={`/org/${orgId}/bank-accounts`}>
+  {l.bankAccounts.title}
+  </BreadcrumbLink>
         <BreadcrumbCurrentLink>Add Bank Account</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />

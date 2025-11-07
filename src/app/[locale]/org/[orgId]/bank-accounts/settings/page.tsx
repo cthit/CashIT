@@ -13,7 +13,7 @@ import GammaService from '@/services/gammaService';
 import AddPermissionForm from '../AddPermissionForm';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
   searchParams: Promise<{ account?: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
@@ -21,7 +21,7 @@ export default async function Page(props: {
     notFound();
   }
 
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const accounts = await BankAccountService.getAll();
@@ -35,7 +35,8 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href="/bank-accounts">
+        {/* TODO: Use routing to determine org id dynamically */}
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>Account Settings</BreadcrumbCurrentLink>

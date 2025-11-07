@@ -77,11 +77,13 @@ interface InvoiceRow {
 const InvoicesTable = ({
   e,
   locale,
-  superGroups
+  superGroups,
+  orgId = 1
 }: {
   e: Invoice[];
   locale: string;
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
+  orgId?: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -129,7 +131,7 @@ const InvoicesTable = ({
       cell: (info) => (
         <LinkOverlay
           as={Link}
-          href={'/invoices/view?id=' + info.row.original.id}
+          href={`/org/${orgId}/invoices/view?id=${info.row.original.id}`}
           className={styles.overlay}
         >
           {info.getValue()}

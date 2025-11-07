@@ -15,14 +15,14 @@ import RequisitionsList from './RequisitionsList';
 import UpdateAccountsButton from './UpdateAccountsButton';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!divisionTreasurer) {
     notFound();
   }
 
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const accounts = await BankAccountService.getAll();
@@ -70,10 +70,10 @@ export default async function Page(props: {
             </VStack>
         </Box>
 
-        <RequisitionsList
+                <RequisitionsList
           requisitions={localRequisitions}
           groups={groups}
-          locale={locale}
+          orgId={Number(orgId)}
         />
       </VStack>
     </>

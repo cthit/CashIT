@@ -84,6 +84,7 @@ export default async function Home(props: {
               accounts={bankAccounts}
               locale={locale}
               linkToControls={divisionTreasurer}
+              orgId={Number(orgId)}
             />
           )}
 
@@ -151,7 +152,7 @@ export default async function Home(props: {
             overflow="hidden"
             bg="bg.surface"
           >
-            <Link href="/invoices">
+            <Link href={`/org/${orgId}/invoices`}>
               <Box p={4} _hover={{ bg: 'bg.subtle' }} cursor="pointer">
                 <Flex justifyContent="space-between" alignItems="center">
                   <VStack align="start" gap={1} height="3rem">

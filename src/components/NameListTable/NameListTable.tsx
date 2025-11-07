@@ -54,11 +54,13 @@ interface NameListRow {
 const NameListTable = ({
   e,
   superGroups,
-  locale
+  locale,
+  orgId = 1
 }: {
   e: NameList[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
+  orgId?: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -100,7 +102,7 @@ const NameListTable = ({
       cell: (info) => (
         <LinkOverlay
           as={Link}
-          href={'/name-lists/view?id=' + info.row.original.id}
+          href={`/org/${orgId}/name-lists/view?id=${info.row.original.id}`}
           className={styles.overlay}
         >
           {info.getValue()}

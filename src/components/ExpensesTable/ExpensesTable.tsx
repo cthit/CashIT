@@ -102,7 +102,8 @@ const ExpensesTable = ({
   locale,
   treasurerPostId,
   allEditable = false,
-  superGroups
+  superGroups,
+  orgId = 1
 }: {
   e: Expense[];
   groups: { group: GammaGroup; post: GammaPost }[];
@@ -110,6 +111,7 @@ const ExpensesTable = ({
   treasurerPostId?: string;
   allEditable?: boolean;
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
+  orgId?: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -158,7 +160,7 @@ const ExpensesTable = ({
         cell: (info) => (
           <LinkOverlay
             as={Link}
-            href={'/expenses/view?id=' + info.row.original.id}
+            href={`/org/${orgId}/expenses/view?id=${info.row.original.id}`}
             className={styles.overlay}
           >
             {info.getValue()}
@@ -245,7 +247,8 @@ const ExpensesTable = ({
       locale,
       groups,
       treasurerPostId,
-      allEditable
+      allEditable,
+      orgId
     ]
   );
 

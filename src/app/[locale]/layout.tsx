@@ -32,12 +32,14 @@ export default async function RootLayout({
 }>) {
   const { locale } = await params;
   const user = await SessionService.getUser();
+  // TODO: Get orgId from user preferences or session
+  const orgId = 1;
 
   return (
     <>
-      <Header locale={locale} />
+      <Header locale={locale} orgId={orgId} />
       {user ? (
-        <LoggedIn locale={locale}>{children}</LoggedIn>
+        <LoggedIn locale={locale} orgId={orgId}>{children}</LoggedIn>
       ) : (
         <NotLoggedIn locale={locale} />
       )}
@@ -47,8 +49,9 @@ export default async function RootLayout({
 
 const LoggedIn = ({
   children,
-  locale
-}: Readonly<{ children: React.ReactNode; locale: string }>) => {
+  locale,
+  orgId
+}: Readonly<{ children: React.ReactNode; locale: string; orgId: number }>) => {
   return (
     <Flex direction="row" height="calc(100vh - 4rem)" overflow="hidden">
       <Box
@@ -60,7 +63,7 @@ const LoggedIn = ({
         display={{ base: 'none', md: 'block' }}
         overflowY="auto"
       >
-        <Navigation locale={locale} />
+        <Navigation locale={locale} orgId={orgId} />
       </Box>
       <Box overflowY="auto" width="100%">
         <Container py="6">{children}</Container>

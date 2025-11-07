@@ -15,9 +15,9 @@ import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
   searchParams: Promise<{ gid?: string; show?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const superGroups = await GammaService.getAllSuperGroups();
@@ -32,7 +32,7 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink as={Link} href="/">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
           {l.home.title}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.home.zettleSales}</BreadcrumbCurrentLink>
@@ -42,14 +42,14 @@ export default async function Page(props: {
         <Heading as="h1" size="xl">
           {l.home.zettleSales}
         </Heading>
-        <Link href={'/zettle-sales/create'}>
+        <Link href={`/org/${orgId}/zettle-sales/create`}>
           <Button colorPalette="cyan">
             <HiPlus /> {l.zettleSales.create}
           </Button>
         </Link>
       </Flex>
       <Box p="2" />
-      <ZettleSalesTable e={sales} superGroups={superGroups} locale={locale} />
+      <ZettleSalesTable e={sales} superGroups={superGroups} locale={locale} orgId={Number(orgId)} />
     </>
   );
 }

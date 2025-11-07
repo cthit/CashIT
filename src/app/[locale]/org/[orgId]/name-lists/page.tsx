@@ -15,9 +15,9 @@ import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
   searchParams: Promise<{ gid?: string; sgid?: string; show?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const superGroups = await GammaService.getAllSuperGroups();
@@ -32,7 +32,7 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink as={Link} href="/">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
           {l.home.title}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.nameLists.title}</BreadcrumbCurrentLink>
@@ -42,14 +42,14 @@ export default async function Page(props: {
         <Heading as="h1" size="xl">
           {l.nameLists.title}
         </Heading>
-        <Link href={'/name-lists/create'}>
+        <Link href={`/org/${orgId}/name-lists/create`}>
           <Button colorPalette="cyan">
             <HiPlus /> {l.nameLists.create}
           </Button>
         </Link>
       </Flex>
       <Box p="2" />
-      <NameListTable e={lists} locale={locale} superGroups={superGroups} />
+      <NameListTable e={lists} locale={locale} superGroups={superGroups} orgId={Number(orgId)} />
     </>
   );
 }

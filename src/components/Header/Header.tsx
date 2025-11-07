@@ -14,7 +14,7 @@ import { HiMenu, HiX } from 'react-icons/hi';
 import Navigation from '../Navigation/Navigation';
 import SessionService from '@/services/sessionService';
 
-const Header = async ({ locale }: { locale: string }) => {
+const Header = async ({ locale, orgId = 1 }: { locale: string; orgId?: number }) => {
   const user = await SessionService.getUser();
 
   return (
@@ -39,7 +39,7 @@ const Header = async ({ locale }: { locale: string }) => {
               <Drawer.Positioner>
                 <Drawer.Content pt="4">
                   <Drawer.Body>
-                    <Navigation locale={locale} />
+                    <Navigation locale={locale} orgId={orgId} />
                   </Drawer.Body>
 
                   <Drawer.CloseTrigger asChild>
@@ -54,7 +54,7 @@ const Header = async ({ locale }: { locale: string }) => {
         )}
         <Box>
           <Heading textStyle="2xl" display="inline" mr="0.3rem" ml="2">
-            <Link href="/">CashIT</Link>
+            <Link href={`/org/${orgId}`}>CashIT</Link>
           </Heading>
           <Span color="fg.muted" fontSize="sm">
             beta v0.5.0

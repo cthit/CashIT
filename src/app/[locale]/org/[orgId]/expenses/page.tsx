@@ -14,9 +14,9 @@ import { HiPlus } from 'react-icons/hi';
 import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const groups = await SessionService.getGroups();
@@ -31,7 +31,7 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink as={Link} href="/">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
           {l.home.title}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.categories.expenses}</BreadcrumbCurrentLink>
@@ -41,7 +41,7 @@ export default async function Page(props: {
         <Heading as="h1" size="xl">
           {l.categories.expenses}
         </Heading>
-        <Link href={'/expenses/create'}>
+        <Link href={`/org/${orgId}/expenses/create`}>
           <Button colorPalette="cyan">
             <HiPlus /> {l.expense.newTitle}
           </Button>
@@ -55,6 +55,7 @@ export default async function Page(props: {
         locale={locale}
         treasurerPostId={process.env.TREASURER_POST_ID}
         allEditable={divisionTreasurer}
+        orgId={Number(orgId)}
       />
       <Box p="4" />
     </>
