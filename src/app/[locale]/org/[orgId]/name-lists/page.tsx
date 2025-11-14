@@ -49,7 +49,12 @@ export default async function Page(props: {
         </Link>
       </Flex>
       <Box p="2" />
-      <NameListTable e={lists} locale={locale} superGroups={superGroups} orgId={Number(orgId)} />
+      <NameListTable
+        e={lists}
+        locale={locale}
+        superGroups={superGroups}
+        orgId={Number(orgId)}
+      />
     </>
   );
 }

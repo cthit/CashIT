@@ -49,7 +49,12 @@ export default async function Page(props: {
         </Link>
       </Flex>
       <Box p="2" />
-      <ZettleSalesTable e={sales} superGroups={superGroups} locale={locale} orgId={Number(orgId)} />
+      <ZettleSalesTable
+        e={sales}
+        superGroups={superGroups}
+        locale={locale}
+        orgId={Number(orgId)}
+      />
     </>
   );
 }

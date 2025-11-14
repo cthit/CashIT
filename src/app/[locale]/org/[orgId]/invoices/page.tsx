@@ -49,7 +49,12 @@ export default async function Page(props: {
         </Link>
       </Flex>
       <Box p="2" />
-      <InvoicesTable e={invoices} locale={locale} superGroups={superGroups} orgId={Number(orgId)} />
+      <InvoicesTable
+        e={invoices}
+        locale={locale}
+        superGroups={superGroups}
+        orgId={Number(orgId)}
+      />
     </>
   );
 }

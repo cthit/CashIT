@@ -1,7 +1,9 @@
-import { Box, LinkBox, Table } from '@chakra-ui/react';
+import { Box, Table } from '@chakra-ui/react';
 import { flexRender, Table as TTable } from '@tanstack/react-table';
 import TableFilter from '../TableFilter/TableFilter';
 import TablePagination from '../TablePagination/TablePagination';
+import { useRouter } from 'next/navigation';
+import styles from './CashitTable.module.css';
 
 const CashitTable = ({
   table,
@@ -14,8 +16,28 @@ const CashitTable = ({
   locale: string;
   emptyStateComponent: React.ReactNode;
 }) => {
+  const router = useRouter();
+  const handleRowClick = (url: string | undefined, e: React.MouseEvent) => {
+    // Don't navigate if clicking on the actions menu
+    const target = e.target as HTMLElement;
+    if (
+      !url ||
+      target.closest('button') ||
+      target.closest('[role="menuitem"]')
+    ) {
+      return;
+    }
+    router.push(url);
+  };
   return (
-    <Table.Root w="100%" tableLayout="fixed">
+    <Table.Root
+      w="100%"
+      tableLayout="fixed"
+      variant="outline"
+      rounded="md"
+      interactive
+      className={styles.table}
+    >
       <Table.ColumnGroup>
         {table
           .getHeaderGroups()
@@ -26,11 +48,15 @@ const CashitTable = ({
           )}
       </Table.ColumnGroup>
       <Table.Header>
-        <Table.Row>
+        <Table.Row className={styles.headerRow}>
           {table.getHeaderGroups().map((headerGroup) =>
             headerGroup.headers.map((header) => {
               return (
-                <Table.ColumnHeader key={header.id} colSpan={header.colSpan}>
+                <Table.ColumnHeader
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  className={styles.headerCell}
+                >
                   <Box
                     onClick={header.column.getToggleSortingHandler()}
                     cursor={header.column.getCanSort() ? 'pointer' : undefined}
@@ -57,19 +83,23 @@ const CashitTable = ({
       </Table.Header>
       <Table.Body>
         {table.getRowModel().rows.map((row) => (
-          <LinkBox as={Table.Row} _hover={{ bg: 'bg.subtle' }} key={row.id}>
+          <Table.Row
+            key={row.id}
+            onClick={(e) => handleRowClick(row.original.url, e)}
+            cursor={row.original.url ? 'pointer' : 'default'}
+          >
             {row.getVisibleCells().map((cell) => (
               <Table.Cell
                 key={cell.id}
-                py="1"
                 textOverflow="ellipsis"
                 textWrap="nowrap"
                 overflow="hidden"
+                py="1"
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </Table.Cell>
             ))}
-          </LinkBox>
+          </Table.Row>
         ))}
       </Table.Body>
       <Table.Caption>

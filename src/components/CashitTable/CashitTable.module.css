@@ -1,0 +1,4 @@
+.table:has(tbody:empty) .headerCell {
+    border-bottom-width: 0 !important;
+    border-bottom: none !important;
+}

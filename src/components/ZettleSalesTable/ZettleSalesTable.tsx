@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { IconButton, LinkOverlay } from '@chakra-ui/react';
+import { IconButton } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -12,10 +12,8 @@ import {
 } from '@/components/ui/menu';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { PiCoins } from 'react-icons/pi';
-import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { EmptyState } from '../ui/empty-state';
-import styles from './ZettleSalesTable.module.css';
 import ZettleSaleService from '@/services/zettleSaleService';
 import { deleteZettleSale } from '@/actions/zettleSales';
 import { GammaGroupMember, GammaSuperGroup, GammaUser } from '@/types/gamma';
@@ -46,18 +44,19 @@ interface SaleRow {
   date: Date;
   person: string;
   total: number;
+  url: string;
 }
 
 const ZettleSalesTable = ({
   e,
   superGroups,
   locale,
-  orgId = 1
+  orgId
 }: {
   e: ZettleSale[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
-  orgId?: number;
+  orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -92,14 +91,7 @@ const ZettleSalesTable = ({
   const defaultColumns = [
     columnHelper.accessor('description', {
       header: l.general.description,
-      cell: (info) => (
-        <LinkOverlay
-          as={Link}
-          href={`/org/${orgId}/zettle-sales/view?id=${info.row.original.id}`}
-          className={styles.overlay}
-        >
-          {info.getValue()}
-        </LinkOverlay>
+      cell: (info) => (info.getValue()
       )
     }),
     columnHelper.accessor('group', {

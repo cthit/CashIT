@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { IconButton, LinkOverlay } from '@chakra-ui/react';
+import { IconButton } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -11,10 +11,8 @@ import {
 } from '@/components/ui/menu';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { PiUserList } from 'react-icons/pi';
-import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { EmptyState } from '../ui/empty-state';
-import styles from './NameListTable.module.css';
 import NameListService from '@/services/nameListService';
 import { deleteNameList } from '@/actions/nameLists';
 import { NameListType } from '@prisma/client';
@@ -49,18 +47,19 @@ interface NameListRow {
   tracked: string;
   peopleCount: number;
   type: NameListType;
+  url: string;
 }
 
 const NameListTable = ({
   e,
   superGroups,
   locale,
-  orgId = 1
+  orgId
 }: {
   e: NameList[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
-  orgId?: number;
+  orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -91,23 +90,16 @@ const NameListTable = ({
           person: `${list.user?.firstName} "${list.user?.nick}" ${list.user?.lastName}`,
           tracked: list.tracked ? 'Yes' : 'No',
           peopleCount: list.names.length + list.gammaNames.length,
-          type: ListTypeText({ type: list.type, locale })
+          type: ListTypeText({ type: list.type, locale }),
+          url: `/org/${orgId}/name-lists/view?id=${list.id}`
         } as NameListRow)
     );
-  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, locale]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, locale, orgId]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
       header: l.general.description,
-      cell: (info) => (
-        <LinkOverlay
-          as={Link}
-          href={`/org/${orgId}/name-lists/view?id=${info.row.original.id}`}
-          className={styles.overlay}
-        >
-          {info.getValue()}
-        </LinkOverlay>
-      )
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor('group', {
       header: l.expense.group,

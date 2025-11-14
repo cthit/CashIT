@@ -16,7 +16,6 @@ import {
   IconButton,
   Separator,
   Text,
-  LinkOverlay,
   Box
 } from '@chakra-ui/react';
 import {
@@ -39,7 +38,6 @@ import { PiChatFill, PiCoins, PiPaperclip } from 'react-icons/pi';
 import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { EmptyState } from '../ui/empty-state';
-import styles from './ExpensesTable.module.css';
 import {
   GammaGroup,
   GammaPost,
@@ -86,6 +84,7 @@ interface ExpenseRow {
   status: ExpenseStatus;
   statusText: string;
   receipts: Expense['receipts'];
+  url: string;
 }
 
 const cellWidths: Record<string, string> = {
@@ -103,7 +102,7 @@ const ExpensesTable = ({
   treasurerPostId,
   allEditable = false,
   superGroups,
-  orgId = 1
+  orgId
 }: {
   e: Expense[];
   groups: { group: GammaGroup; post: GammaPost }[];
@@ -111,7 +110,7 @@ const ExpensesTable = ({
   treasurerPostId?: string;
   allEditable?: boolean;
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
-  orgId?: number;
+  orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -148,24 +147,23 @@ const ExpensesTable = ({
         status: status,
         statusText: RequestStatusText({ b: status, locale: locale }),
         receipts: expense.receipts,
-        groupId: expense.gammaGroupId
+        groupId: expense.gammaGroupId,
+        url: `/org/${orgId}/expenses/view?id=${expense.id}`
       } as ExpenseRow;
     });
-  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, locale]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, locale, orgId]);
 
   const defaultColumns = useMemo(
     () => [
       columnHelper.accessor('description', {
         header: l.general.description,
-        cell: (info) => (
-          <LinkOverlay
+        cell: (info) =>
+          /*<LinkOverlay
             as={Link}
             href={`/org/${orgId}/expenses/view?id=${info.row.original.id}`}
-            className={styles.overlay}
-          >
-            {info.getValue()}
-          </LinkOverlay>
-        )
+          >*/
+          info.getValue()
+          /*</LinkOverlay>*/
       }),
       columnHelper.accessor('group', {
         header: l.expense.group,
@@ -247,8 +245,7 @@ const ExpensesTable = ({
       locale,
       groups,
       treasurerPostId,
-      allEditable,
-      orgId
+      allEditable
     ]
   );
 
