@@ -7,7 +7,8 @@ import {
   PiCoins,
   PiHouse,
   PiReceipt,
-  PiUsersThree
+  PiUsersThree,
+  PiGear
 } from 'react-icons/pi';
 import SessionService from '@/services/sessionService';
 
@@ -75,6 +76,22 @@ const Navigation = async ({ locale, orgId = 1 }: { locale: string; orgId?: numbe
         </Icon>{' '}
         {l.categories.receiptCreator}
       </NavigationLink>
+
+      {divisionTreasurer && (
+        <>
+          <Box>
+            <Heading as="h1" size="xl" mt="4" mb="0">
+              Admin
+            </Heading>
+          </Box>
+          <NavigationLink href={`/admin/organizations`}>
+            <Icon size="md">
+              <PiGear />
+            </Icon>{' '}
+            Organizations
+          </NavigationLink>
+        </>
+      )}
     </Flex>
   );
 };
