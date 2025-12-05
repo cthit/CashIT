@@ -2,8 +2,11 @@ import prisma from '@/prisma';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 
 export default class ExpenseService {
-  static async getAll() {
+  static async getAll(orgId: number) {
     return await prisma.expense.findMany({
+      where: {
+        organizationId: orgId
+      },
       include: {
         receipts: {
           include: { media: true }

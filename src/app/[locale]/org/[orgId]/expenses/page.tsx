@@ -24,7 +24,7 @@ export default async function Page(props: {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const expenses = await GammaService.includeUserInfo(
     await (divisionTreasurer
-      ? ExpenseService.getAll()
+      ? ExpenseService.getAll(Number(orgId))
       : SessionService.getExpenses())
   );
 

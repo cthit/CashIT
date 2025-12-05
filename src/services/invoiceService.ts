@@ -19,11 +19,12 @@ export default class InvoiceService {
     });
   }
 
-  static async getUnsent(gammaGroupId?: string) {
+  static async getUnsent(orgId: number, gammaGroupId?: string) {
     return await prisma.invoice.findMany({
       where: {
         gammaGroupId,
-        sentAt: null
+        sentAt: null,
+        organizationId: orgId
       },
       include: { items: true }
     });

@@ -38,10 +38,10 @@ export default async function Home(props: {
 
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const unpaid = await (divisionTreasurer
-    ? ExpenseService.getAll()
+    ? ExpenseService.getUnpaid(organization.id)
     : SessionService.getExpenses());
   const unsent = await (divisionTreasurer
-    ? InvoiceService.getAll()
+    ? InvoiceService.getUnsent(organization.id)
     : SessionService.getInvoices());
 
   const bankAccounts = divisionTreasurer
