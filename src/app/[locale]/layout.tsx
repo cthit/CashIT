@@ -39,7 +39,9 @@ export default async function RootLayout({
     <>
       <Header locale={locale} orgId={orgId} />
       {user ? (
-        <LoggedIn locale={locale} orgId={orgId}>{children}</LoggedIn>
+        <LoggedIn locale={locale} orgId={orgId}>
+          {children}
+        </LoggedIn>
       ) : (
         <NotLoggedIn locale={locale} />
       )}
@@ -58,7 +60,6 @@ const LoggedIn = ({
         bg="bg.panel"
         borderRightWidth="1px"
         borderColor="border.emphasized"
-        p="4"
         width="20rem"
         display={{ base: 'none', md: 'block' }}
         overflowY="auto"

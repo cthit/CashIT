@@ -1,20 +1,26 @@
 import Navbar from './Navbar/Navbar';
 import styles from './Header.module.css';
 import Link from 'next/link';
-import {
-  Box,
-  Heading,
-  IconButton,
-  Span,
-  Drawer,
-  Portal,
-  Flex
-} from '@chakra-ui/react';
+import { Box, Heading, IconButton, Span, Flex } from '@chakra-ui/react';
 import { HiMenu, HiX } from 'react-icons/hi';
 import Navigation from '../Navigation/Navigation';
 import SessionService from '@/services/sessionService';
+import {
+  DrawerBackdrop,
+  DrawerBody,
+  DrawerCloseTrigger,
+  DrawerContent,
+  DrawerRoot,
+  DrawerTrigger
+} from '../ui/drawer';
 
-const Header = async ({ locale, orgId = 1 }: { locale: string; orgId?: number }) => {
+const Header = async ({
+  locale,
+  orgId
+}: {
+  locale: string;
+  orgId?: number;
+}) => {
   const user = await SessionService.getUser();
 
   return (
@@ -28,36 +34,32 @@ const Header = async ({ locale, orgId = 1 }: { locale: string; orgId?: number })
     >
       <Flex alignItems="center">
         {user && (
-          <Drawer.Root placement="start">
-            <Drawer.Trigger asChild>
+          <DrawerRoot placement="start">
+            <DrawerTrigger asChild>
               <IconButton variant="ghost" size="md" display={{ md: 'none' }}>
                 <HiMenu />
               </IconButton>
-            </Drawer.Trigger>
-            <Portal>
-              <Drawer.Backdrop />
-              <Drawer.Positioner>
-                <Drawer.Content pt="4">
-                  <Drawer.Body>
-                    <Navigation locale={locale} orgId={orgId} />
-                  </Drawer.Body>
+            </DrawerTrigger>
+            <DrawerBackdrop />
+            <DrawerContent pt="4">
+              <DrawerBody>
+                <Navigation locale={locale} orgId={orgId} inDrawer={true} />
+              </DrawerBody>
 
-                  <Drawer.CloseTrigger asChild>
-                    <IconButton variant="ghost" size="sm">
-                      <HiX />
-                    </IconButton>
-                  </Drawer.CloseTrigger>
-                </Drawer.Content>
-              </Drawer.Positioner>
-            </Portal>
-          </Drawer.Root>
+              <DrawerCloseTrigger asChild>
+                <IconButton variant="ghost" size="sm">
+                  <HiX />
+                </IconButton>
+              </DrawerCloseTrigger>
+            </DrawerContent>
+          </DrawerRoot>
         )}
         <Box>
           <Heading textStyle="2xl" display="inline" mr="0.3rem" ml="2">
             <Link href={`/org/${orgId}`}>CashIT</Link>
           </Heading>
           <Span color="fg.muted" fontSize="sm">
-            beta v0.5.0
+            beta v0.6.0
           </Span>
         </Box>
       </Flex>
