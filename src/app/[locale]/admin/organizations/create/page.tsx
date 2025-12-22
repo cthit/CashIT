@@ -38,7 +38,7 @@ export default async function Page(props: {
         Create Organization
       </Heading>
 
-      <OrganizationForm mode="create" locale={locale} />
+      <OrganizationForm mode="create" />
     </>
   );
 }
