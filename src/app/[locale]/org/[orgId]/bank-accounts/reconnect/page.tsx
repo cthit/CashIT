@@ -39,10 +39,9 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-  {/* TODO: Use routing to determine org id dynamically */}
-  <BreadcrumbLink  as={Link} href={`/org/${orgId}/bank-accounts`}>
-  {l.bankAccounts.title}
-  </BreadcrumbLink>
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
+          {l.bankAccounts.title}
+        </BreadcrumbLink>
         <BreadcrumbCurrentLink>Reconnect Accounts</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />

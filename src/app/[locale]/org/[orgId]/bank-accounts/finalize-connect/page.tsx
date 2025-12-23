@@ -27,9 +27,7 @@ export default async function Page(props: {
 
   if (error) {
     redirect(
-      `/org/${orgId}/bank-accounts/connect?error=${encodeURIComponent(
-        error
-      )}`
+      `/org/${orgId}/bank-accounts/connect?error=${encodeURIComponent(error)}`
     );
   }
 
@@ -61,7 +59,6 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {/* TODO: Use routing to determine org id dynamically */}
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>

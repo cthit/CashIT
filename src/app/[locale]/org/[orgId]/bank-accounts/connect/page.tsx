@@ -26,7 +26,9 @@ export default async function Page(props: {
   const requisitions = (await GoCardlessService.getRequisitions()).results;
   const institutions = await GoCardlessService.getInstitutions();
   const unusedRequisitions = requisitions.filter(
-    (r) => !localRequisitions.find((lr) => lr.goCardlessId === r.id) && r.status !== 'EX'
+    (r) =>
+      !localRequisitions.find((lr) => lr.goCardlessId === r.id) &&
+      r.status !== 'EX'
   );
 
   return (
@@ -35,10 +37,9 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-  {/* TODO: Use routing to determine org id dynamically */}
-  <BreadcrumbLink  as={Link} href={`/org/${orgId}/bank-accounts`}>
-  {l.bankAccounts.title}
-  </BreadcrumbLink>
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
+          {l.bankAccounts.title}
+        </BreadcrumbLink>
         <BreadcrumbCurrentLink>Add Connection</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
@@ -46,7 +47,10 @@ export default async function Page(props: {
       <Heading as="h1" size="xl" display="inline" mr="auto">
         Add Connection
       </Heading>
-      <AddRequisitionForm requisitions={unusedRequisitions} institutions={institutions} />
+      <AddRequisitionForm
+        requisitions={unusedRequisitions}
+        institutions={institutions}
+      />
     </>
   );
 }

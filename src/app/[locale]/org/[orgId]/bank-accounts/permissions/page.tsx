@@ -35,7 +35,6 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href="/">
           {l.home.title}
         </BreadcrumbLink>
-        {/* TODO: Use routing to determine org id dynamically */}
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>
@@ -47,8 +46,8 @@ export default async function Page(props: {
         Manage Bank Account Permissions
       </Heading>
 
-      <AddPermissionForm 
-        accounts={accounts} 
+      <AddPermissionForm
+        accounts={accounts}
         groups={groups}
         selectedAccountId={selectedAccountId}
       />
