@@ -5,6 +5,7 @@ import ZettleSaleService from '@/services/zettleSaleService';
 
 export async function createZettleSale(
   gammaGroupId: string,
+  orgId: number,
   name: string,
   amount: number,
   saleDate: Date
@@ -25,7 +26,7 @@ export async function createZettleSale(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     name,
     amount,
     saleDate

@@ -46,6 +46,7 @@ export default function CreateExpenseForm({
   readOnly,
   groups,
   locale,
+  orgId,
   gid,
   e
 }: {
@@ -53,6 +54,7 @@ export default function CreateExpenseForm({
   groups: GammaGroup[];
   locale: string;
   gid?: string;
+  orgId: number;
   e?: Prisma.ExpenseGetPayload<{ include: { receipts: true } }>;
 }) {
   const l = i18nService.getLocale(locale);
@@ -114,6 +116,7 @@ export default function CreateExpenseForm({
               )
             : createExpenseForGroup(
                 groupId,
+                orgId,
                 +amount,
                 name,
                 description,
@@ -121,7 +124,7 @@ export default function CreateExpenseForm({
                 formData,
                 type
               )
-          ).then(() => router.push(`/expenses`))
+          ).then(() => router.push(`/org/${orgId}/expenses`))
         : (editing
             ? editPersonalExpense(
                 e.id,
@@ -135,6 +138,7 @@ export default function CreateExpenseForm({
                 type
               )
             : createPersonalExpense(
+                orgId,
                 +amount,
                 name,
                 description,
@@ -142,7 +146,7 @@ export default function CreateExpenseForm({
                 formData,
                 type
               )
-          ).then(() => router.push('/expenses'));
+          ).then(() => router.push(`/org/${orgId}/expenses`));
     },
     [
       files,

@@ -10,12 +10,13 @@ import { Box } from '@chakra-ui/react';
 import InvoiceService from '@/services/invoiceService';
 import SendInvoiceForm from '../create/SendInvoiceForm';
 import i18nService from '@/services/i18nService';
+import OrgService from '@/services/orgService';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const { id } = await props.searchParams;
@@ -46,6 +47,11 @@ export default async function Page(props: {
 
   const groups = (await SessionService.getGroups()).map((g) => g.group);
 
+  const org = await OrgService.getById(+orgId);
+  if (!org) {
+    notFound();
+  }
+
   return (
     <>
       <BreadcrumbRoot>
@@ -63,6 +69,7 @@ export default async function Page(props: {
         groups={groups}
         i={invoice}
         locale={locale}
+        orgId={org.id}
         user={user}
       />
     </>

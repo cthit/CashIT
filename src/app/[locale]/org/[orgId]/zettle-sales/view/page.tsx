@@ -10,12 +10,13 @@ import i18nService from '@/services/i18nService';
 import CreateZettleSaleForm from '../create/CreateZettleSaleForm';
 import ZettleSaleService from '@/services/zettleSaleService';
 import SessionService from '@/services/sessionService';
+import OrgService from '@/services/orgService';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const { id } = await props.searchParams;
@@ -30,6 +31,11 @@ export default async function Page(props: {
 
   const groups = (await SessionService.getGroups()).map((g) => g.group);
 
+  const org = await OrgService.getById(+orgId);
+  if (!org) {
+    notFound();
+  }
+
   return (
     <>
       <BreadcrumbRoot>
@@ -42,7 +48,7 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <CreateZettleSaleForm groups={groups} locale={locale} s={sale} />
+      <CreateZettleSaleForm groups={groups} locale={locale} s={sale} orgId={org.id} />
     </>
   );
 }

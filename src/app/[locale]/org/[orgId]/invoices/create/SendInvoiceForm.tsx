@@ -74,12 +74,14 @@ export default function SendInvoiceForm({
   readOnly,
   groups,
   locale,
+  orgId,
   user,
   i
 }: {
   readOnly?: boolean;
   groups: GammaGroup[];
   locale: string;
+  orgId: number;
   user?: GammaUser;
   i?: Prisma.InvoiceGetPayload<{ include: { items: true } }>;
 }) {
@@ -148,6 +150,7 @@ export default function SendInvoiceForm({
               )
             : createInvoiceForGroup(
                 groupId,
+                orgId,
                 name,
                 customerName,
                 comments,
@@ -159,7 +162,7 @@ export default function SendInvoiceForm({
                 customerOrderReference,
                 contractNumber
               )
-          ).then(() => router.push('/invoices'))
+          ).then(() => router.push(`/org/${orgId}/invoices`))
         : (editing
             ? editPersonalInvoice(
                 i.id,
@@ -175,6 +178,7 @@ export default function SendInvoiceForm({
                 contractNumber
               )
             : createPersonalInvoice(
+                orgId,
                 name,
                 customerName,
                 comments,
@@ -186,7 +190,7 @@ export default function SendInvoiceForm({
                 customerOrderReference,
                 contractNumber
               )
-          ).then(() => router.push('/invoices'));
+          ).then(() => router.push(`/org/${orgId}/invoices`));
     },
     [
       comments,

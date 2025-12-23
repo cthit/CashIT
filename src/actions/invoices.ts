@@ -15,6 +15,7 @@ export async function getInvoicesForGroup(gammaSuperGroupId: string) {
 
 export async function createInvoiceForGroup(
   gammaGroupId: string,
+  orgId: number,
   name: string,
   customerName: string,
   description: string,
@@ -42,7 +43,7 @@ export async function createInvoiceForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     name,
     customerName,
     description,
@@ -116,6 +117,7 @@ export async function editInvoiceForGroup(
 }
 
 export async function createPersonalInvoice(
+  orgId: number,
   name: string,
   customerName: string,
   description: string,
@@ -134,7 +136,7 @@ export async function createPersonalInvoice(
 
   return InvoiceService.createPersonal(
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     name,
     customerName,
     description,

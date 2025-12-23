@@ -6,6 +6,7 @@ import { NameListType, Prisma } from '@prisma/client';
 
 export async function createNameListForGroup(
   gammaGroupId: string,
+  orgId: number,
   name: string,
   type: NameListType,
   names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -29,7 +30,7 @@ export async function createNameListForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     name,
     type,
     names,
@@ -40,6 +41,7 @@ export async function createNameListForGroup(
 }
 
 export async function createPersonalNameList(
+  orgId: number,
   name: string,
   type: NameListType,
   names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -54,7 +56,7 @@ export async function createPersonalNameList(
 
   await NameListService.createPersonal(
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     name,
     type,
     names,

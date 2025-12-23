@@ -68,11 +68,13 @@ export default function CreateNameListForm({
   superGroups,
   nl,
   groups,
+  orgId,
   locale
 }: {
   superGroups: { members: GammaGroupMember[]; superGroup: GammaSuperGroup }[];
   nl?: Awaited<ReturnType<typeof NameListService.getById>>;
   groups: GammaGroup[];
+  orgId: number;
   locale: string;
 }) {
   const l = i18nService.getLocale(locale);
@@ -164,21 +166,23 @@ export default function CreateNameListForm({
         : groupId !== '' && groupId !== undefined
         ? createNameListForGroup(
             groupId,
+            orgId,
             name,
             type,
             customNames,
             gammaNames,
             trackIndividual,
             new Date(date)
-          ).then(() => router.push('/name-lists'))
+          ).then(() => router.push(`/org/${orgId}/name-lists`))
         : createPersonalNameList(
+            orgId,
             name,
             type,
             customNames,
             gammaNames,
             trackIndividual,
             new Date(date)
-          ).then(() => router.push('/name-lists'));
+          ).then(() => router.push(`/org/${orgId}/name-lists`));
     },
     [
       edited,

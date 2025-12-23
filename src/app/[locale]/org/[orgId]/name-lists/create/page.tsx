@@ -9,17 +9,24 @@ import CreateNameListForm from './CreateNameListForm';
 import Link from 'next/link';
 import GammaService from '@/services/gammaService';
 import i18nService from '@/services/i18nService';
+import OrgService from '@/services/orgService';
+import { notFound } from 'next/navigation';
 
 export default async function Page(props: {
   searchParams: Promise<{ gid?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
 
   const l = i18nService.getLocale(locale);
 
   const superGroups = await GammaService.getAllSuperGroups();
   const groups = (await SessionService.getGroups()).map((g) => g.group);
+
+  const org = await OrgService.getById(+orgId);
+  if (!org) {
+    notFound();
+  }
 
   return (
     <>
@@ -37,6 +44,7 @@ export default async function Page(props: {
         groups={groups}
         superGroups={superGroups}
         locale={locale}
+        orgId={org.id}
       />
     </>
   );

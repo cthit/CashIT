@@ -20,6 +20,7 @@ export async function getExpensesForGroup(gammaSuperGroupId: string) {
 
 export async function createExpenseForGroup(
   gammaGroupId: string,
+  orgId: number,
   amount: number,
   name: string,
   description: string,
@@ -63,7 +64,7 @@ export async function createExpenseForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     amount,
     name,
     description,
@@ -150,6 +151,7 @@ export async function editExpenseForGroup(
 }
 
 export async function createPersonalExpense(
+  orgId: number,
   amount: number,
   name: string,
   description: string,
@@ -184,7 +186,7 @@ export async function createPersonalExpense(
 
   return ExpenseService.createPersonal(
     gammaUserId,
-    1, // TODO: Use actual organization ID when routing is implemented
+    orgId,
     amount,
     name,
     description,

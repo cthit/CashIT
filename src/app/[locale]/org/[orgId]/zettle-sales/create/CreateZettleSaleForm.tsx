@@ -27,10 +27,12 @@ import {
 export default function CreateZettleSaleForm({
   groups,
   locale,
+  orgId,
   s
 }: {
   groups: GammaGroup[];
   locale: string;
+  orgId: number;
   s?: Awaited<ReturnType<typeof ZettleSaleService.getById>>;
 }) {
   const l = i18nService.getLocale(locale);
@@ -57,13 +59,13 @@ export default function CreateZettleSaleForm({
 
       if (s) {
         await editZettleSale(s.id, name, +amount, new Date(date));
-        router.push('/zettle-sales');
+        router.push(`/org/${orgId}/zettle-sales`);
       } else if (groupId !== undefined) {
-        await createZettleSale(groupId, name, +amount, new Date(date));
-        router.push('/zettle-sales');
+        await createZettleSale(groupId, orgId, name, +amount, new Date(date));
+        router.push(`/org/${orgId}/zettle-sales`);
       }
     },
-    [amount, date, groupId, name, router, s]
+    [amount, date, groupId, name, orgId, router, s]
   );
 
   return (
