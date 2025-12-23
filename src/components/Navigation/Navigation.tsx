@@ -16,7 +16,7 @@ import OrgService from '@/services/orgService';
 
 const Navigation = async ({
   locale,
-  orgId = 1,
+  orgId,
   inDrawer = false
 }: {
   locale: string;
@@ -27,6 +27,8 @@ const Navigation = async ({
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const organizations = await OrgService.getAll();
 
+  const orgPrefix = orgId !== undefined ? `/org/${orgId}` : '/';
+
   return (
     <Flex justifyContent="space-between" height="100%" direction="column">
       <Flex
@@ -35,43 +37,47 @@ const Navigation = async ({
         overflowY="auto"
         p={inDrawer ? 0 : 4}
       >
-        <NavigationLink href={`/org/${orgId}`}>
+        <NavigationLink href={orgPrefix}>
           <Icon size="md">
             <PiHouse />
           </Icon>{' '}
           {l.home.title}
         </NavigationLink>
 
-        <Box>
-          <Heading as="h1" size="xl" mt="4" mb="0">
-            {l.categories.accounting}
-          </Heading>
-        </Box>
+        {orgId !== undefined && (
+          <>
+            <Box>
+              <Heading as="h1" size="xl" mt="4" mb="0">
+                {l.categories.accounting}
+              </Heading>
+            </Box>
 
-        <NavigationLink href={`/org/${orgId}/expenses`}>
-          <Icon size="md">
-            <PiCoins />
-          </Icon>{' '}
-          {l.categories.expenses}
-        </NavigationLink>
-        <NavigationLink href={`/org/${orgId}/invoices`}>
-          <Icon size="md">
-            <PiReceipt />
-          </Icon>{' '}
-          {l.categories.invoices}
-        </NavigationLink>
-        <NavigationLink href={`/org/${orgId}/zettle-sales`}>
-          <Icon size="md">
-            <PiCashRegister />
-          </Icon>{' '}
-          {l.home.zettleSales}
-        </NavigationLink>
-        <NavigationLink href={`/org/${orgId}/name-lists`}>
-          <Icon size="md">
-            <PiUsersThree />
-          </Icon>{' '}
-          {l.categories.nameLists}
-        </NavigationLink>
+            <NavigationLink href={`${orgPrefix}/expenses`}>
+              <Icon size="md">
+                <PiCoins />
+              </Icon>{' '}
+              {l.categories.expenses}
+            </NavigationLink>
+            <NavigationLink href={`${orgPrefix}/invoices`}>
+              <Icon size="md">
+                <PiReceipt />
+              </Icon>{' '}
+              {l.categories.invoices}
+            </NavigationLink>
+            <NavigationLink href={`${orgPrefix}/zettle-sales`}>
+              <Icon size="md">
+                <PiCashRegister />
+              </Icon>{' '}
+              {l.home.zettleSales}
+            </NavigationLink>
+            <NavigationLink href={`${orgPrefix}/name-lists`}>
+              <Icon size="md">
+                <PiUsersThree />
+              </Icon>{' '}
+              {l.categories.nameLists}
+            </NavigationLink>
+          </>
+        )}
 
         <Box>
           <Heading as="h1" size="xl" mt="4" mb="0">
@@ -79,8 +85,8 @@ const Navigation = async ({
           </Heading>
         </Box>
 
-        {divisionTreasurer && (
-          <NavigationLink href={`/org/${orgId}/bank-accounts`}>
+        {divisionTreasurer && orgId !== undefined && (
+          <NavigationLink href={`${orgPrefix}/bank-accounts`}>
             <Icon size="md">
               <PiBank />
             </Icon>{' '}

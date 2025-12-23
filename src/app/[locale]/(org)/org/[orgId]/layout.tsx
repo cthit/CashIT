@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation';
+
 //import localFont from 'next/font/local';
 //import './globals.css';
 import Header from '@/components/Header/Header';
@@ -28,18 +30,23 @@ export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId?: string }>;
 }>) {
-  const { locale } = await params;
+  const { locale, orgId } = await params;
+  
+  // Check if orgId is a positive integer
+  if (orgId === ""  || isNaN(Number(orgId)) || Number(orgId) < 0) {
+    notFound();
+  }
+
   const user = await SessionService.getUser();
-  // TODO: Get orgId from user preferences or session
-  const orgId = 1;
+  const orgIdNumber = orgId !== undefined ? parseInt(orgId, 10) : undefined;
 
   return (
     <>
-      <Header locale={locale} orgId={orgId} />
+      <Header locale={locale} orgId={orgIdNumber} />
       {user ? (
-        <LoggedIn locale={locale} orgId={orgId}>
+        <LoggedIn locale={locale} orgId={orgIdNumber}>
           {children}
         </LoggedIn>
       ) : (
@@ -53,7 +60,7 @@ const LoggedIn = ({
   children,
   locale,
   orgId
-}: Readonly<{ children: React.ReactNode; locale: string; orgId: number }>) => {
+}: Readonly<{ children: React.ReactNode; locale: string; orgId?: number }>) => {
   return (
     <Flex direction="row" height="calc(100vh - 4rem)" overflow="hidden">
       <Box

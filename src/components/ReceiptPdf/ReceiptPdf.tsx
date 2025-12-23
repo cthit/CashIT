@@ -1,7 +1,7 @@
 import {
   FormInvoiceItem,
   formToInvoiceItem
-} from '@/app/[locale]/receipt-creator/ReceiptCreateForm';
+} from '@/app/[locale]/(orgless)/receipt-creator/ReceiptCreateForm';
 import i18nService from '@/services/i18nService';
 import InvoiceService from '@/services/invoiceService';
 import { InvoiceItemVat } from '@prisma/client';

@@ -51,14 +51,18 @@ export default async function Home(props: {
   return (
     <VStack gap={8} align="stretch" maxW="6xl" mx="auto">
       <Box textAlign="center" py={8}>
-        <Heading as="h1" size="2xl" mb={4}>
+        <Heading as="h1" size="2xl">
           Welcome to CashIT!
         </Heading>
+        <Heading as="h2" size="lg" fontWeight="normal" color="fg.muted">
+          {organization.name}
+        </Heading>
         <Text fontSize="sm" color="fg.muted" mt={4}>
-          This service is in beta and is subject to change. Please report any
-          bugs or issues to Goose or on{' '}
+          This service is in beta and is subject to change. Please report any bugs or
+          issues to Goose or on{' '}
           <Link
             href="https://github.com/cthit/CashIT/issues"
+            target="_blank"
             style={{
               color: 'var(--chakra-colors-blue-500)',
               textDecoration: 'underline'

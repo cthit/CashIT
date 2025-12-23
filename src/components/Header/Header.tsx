@@ -22,6 +22,7 @@ const Header = async ({
   orgId?: number;
 }) => {
   const user = await SessionService.getUser();
+  const orgPrefix = orgId !== undefined ? `/org/${orgId}` : '/';
 
   return (
     <Box
@@ -56,7 +57,7 @@ const Header = async ({
         )}
         <Box>
           <Heading textStyle="2xl" display="inline" mr="0.3rem" ml="2">
-            <Link href={`/org/${orgId}`}>CashIT</Link>
+            <Link href={orgPrefix}>CashIT</Link>
           </Heading>
           <Span color="fg.muted" fontSize="sm">
             beta v0.6.0

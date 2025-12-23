@@ -25,14 +25,14 @@ const OrganizationSelector = ({
   const router = useRouter();
 
   const l = i18nService.getLocale(locale);
-
-  const frameworks = createListCollection({
+    
+  const orgsCollection = createListCollection({
     items: orgs.map((org) => ({ label: org.name, value: org.id.toString() }))
   });
 
   return (
     <SelectRoot
-      collection={frameworks}
+      collection={orgsCollection}
       positioning={
         inDrawer
           ? {
@@ -43,7 +43,7 @@ const OrganizationSelector = ({
             }
           : undefined
       }
-      defaultValue={orgId ? [orgId.toString()] : undefined}
+      value={orgId !== undefined ? [orgId.toString()] : undefined}
       onValueChange={({ value }) => {
         if (value?.[0] !== undefined) router.push(`/org/${value[0]}`);
       }}
@@ -69,8 +69,8 @@ const OrganizationSelector = ({
     </Select.Trigger>
 
       <SelectContent portalled={!inDrawer}>
-        {frameworks.items.map((item) => (
-          <SelectItem key={item.value} item={item} border="none">
+        {orgsCollection.items.map((item) => (
+          <SelectItem key={item.value} item={item}>
             {item.label}
           </SelectItem>
         ))}
