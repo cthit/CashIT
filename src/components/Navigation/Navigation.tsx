@@ -8,7 +8,8 @@ import {
   PiHouse,
   PiReceipt,
   PiUsersThree,
-  PiGear
+  PiGear,
+  PiEnvelope
 } from 'react-icons/pi';
 import SessionService from '@/services/sessionService';
 import OrganizationSelector from './OrganizationSelector';
@@ -112,6 +113,12 @@ const Navigation = async ({
                 <PiGear />
               </Icon>{' '}
               Organizations
+            </NavigationLink>
+            <NavigationLink href={`/admin/email-notifications`}>
+              <Icon size="md">
+                <PiEnvelope />
+              </Icon>{' '}
+              Notifications
             </NavigationLink>
           </>
         )}
