@@ -137,7 +137,7 @@ const ExpensesTable = ({
         id: expense.id,
         description: expense.name,
         group: getGroupDisplayName(expense.gammaSuperGroupId),
-        date: expense.createdAt,
+        date: expense.occurredAt,
         type: ExpenseTypeText({
           type: expense.type,
           locale
