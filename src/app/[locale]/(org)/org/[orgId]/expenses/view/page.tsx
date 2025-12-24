@@ -11,13 +11,14 @@ import CreateExpenseForm from '../create/CreateExpenseForm';
 import ExpenseService from '@/services/expenseService';
 import i18nService from '@/services/i18nService';
 import ForwardExpenseForm from './ForwardExpenseForm';
+import OrgService from '@/services/orgService';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const { id } = searchParams;
@@ -48,6 +49,11 @@ export default async function Page(props: {
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit =
     divisionTreasurer || group || user?.id === expense.gammaUserId;
+  
+  const org = await OrgService.getById(Number(orgId));
+  if (!org) {
+    notFound();
+  }
 
   return (
     <>
@@ -68,6 +74,7 @@ export default async function Page(props: {
         e={expense}
         locale={locale}
         readOnly={!canEdit}
+        orgId={org.id}
         groups={groups}
       />
     </>
