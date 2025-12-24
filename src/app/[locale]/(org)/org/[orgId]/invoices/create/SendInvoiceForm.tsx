@@ -91,7 +91,7 @@ export default function SendInvoiceForm({
   const router = useRouter();
 
   const groupOptions = createListCollection({
-    items: [{ label: l.group.noGroup, value: '' }].concat(
+    items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
       groups.map((group) => ({
         label: group.prettyName,
         value: group.id
@@ -99,7 +99,9 @@ export default function SendInvoiceForm({
     )
   });
 
-  const [groupId, setGroupId] = useState<string | undefined>(undefined);
+  const [groupId, setGroupId] = useState<string | undefined>(    i !== undefined && i !== null
+      ? i.gammaGroupId ?? 'cashit-nogroup'
+      : undefined);
   const [name, setName] = useState<string>(i?.name ?? '');
   const [comments, setComments] = useState<string>(i?.description ?? '');
 
@@ -132,7 +134,7 @@ export default function SendInvoiceForm({
   const createExpense = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      groupId
+      groupId !== undefined && groupId !== 'cashit-nogroup'
         ? (editing
             ? editInvoiceForGroup(
                 i.id,

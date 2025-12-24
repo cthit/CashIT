@@ -47,13 +47,11 @@ export default function CreateExpenseForm({
   groups,
   locale,
   orgId,
-  gid,
   e
 }: {
   readOnly?: boolean;
   groups: GammaGroup[];
   locale: string;
-  gid?: string;
   orgId: number;
   e?: Prisma.ExpenseGetPayload<{ include: { receipts: true } }>;
 }) {
@@ -69,7 +67,7 @@ export default function CreateExpenseForm({
   });
 
   const groupOptions = createListCollection({
-    items: [{ label: l.group.noGroup, value: '' }].concat(
+    items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
       groups.map((group) => ({
         label: group.prettyName,
         value: group.id
@@ -80,7 +78,11 @@ export default function CreateExpenseForm({
   const [removeFiles, setRemoveFiles] = useState<number[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [amount, setAmount] = useState<string>((e?.amount ?? '') + '');
-  const [groupId, setGroupId] = useState<string | undefined>(gid);
+  const [groupId, setGroupId] = useState<string | undefined>(
+    e !== undefined && e !== null
+      ? e.gammaGroupId ?? 'cashit-nogroup'
+      : undefined
+  );
   const [name, setName] = useState<string>(e?.name ?? '');
   const [date, setDate] = useState<string>(
     e?.occurredAt ? i18nService.formatDate(e.occurredAt, false) : ''
@@ -99,7 +101,7 @@ export default function CreateExpenseForm({
       files.forEach((file) => {
         formData.append('file', file);
       });
-      groupId
+      groupId !== undefined && groupId !== 'cashit-nogroup'
         ? (editing
             ? editExpenseForGroup(
                 e.id,

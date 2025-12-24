@@ -80,7 +80,7 @@ export default function CreateNameListForm({
   const l = i18nService.getLocale(locale);
 
   const groupOptions = createListCollection({
-    items: [{ label: l.group.noGroup, value: '' }].concat(
+    items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
       groups.map((group) => ({
         label: group.prettyName,
         value: group.id
@@ -163,7 +163,7 @@ export default function CreateNameListForm({
             trackIndividual,
             new Date(date)
           ).then(() => router.push('/name-lists'))
-        : groupId !== '' && groupId !== undefined
+        : groupId !== undefined && groupId !== 'cashit-nogroup'
         ? createNameListForGroup(
             groupId,
             orgId,

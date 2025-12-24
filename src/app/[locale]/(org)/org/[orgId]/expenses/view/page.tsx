@@ -49,7 +49,7 @@ export default async function Page(props: {
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit =
     divisionTreasurer || group || user?.id === expense.gammaUserId;
-  
+
   const org = await OrgService.getById(Number(orgId));
   if (!org) {
     notFound();
@@ -70,7 +70,6 @@ export default async function Page(props: {
       <ForwardExpenseForm e={expense} locale={locale} />
       <Box p="4" />
       <CreateExpenseForm
-        gid={expense.gammaGroupId ?? undefined}
         e={expense}
         locale={locale}
         readOnly={!canEdit}
