@@ -14,10 +14,10 @@ import { PiCoins } from 'react-icons/pi';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const { locale } = await props.params;
+  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const { id } = searchParams;
@@ -47,7 +47,7 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink as={Link} href="/">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
           {l.home.title}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.bankAccounts.details}</BreadcrumbCurrentLink>

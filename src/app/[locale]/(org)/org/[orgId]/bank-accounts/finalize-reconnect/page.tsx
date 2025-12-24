@@ -57,7 +57,7 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink as={Link} href="/">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
           {l.home.title}
         </BreadcrumbLink>
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>

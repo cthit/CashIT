@@ -6,18 +6,14 @@ import {
   BreadcrumbLink,
   BreadcrumbRoot
 } from '@/components/ui/breadcrumb';
-import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import SessionService from '@/services/sessionService';
 import { notFound } from 'next/navigation';
 import OrgService from '@/services/orgService';
-import { Button } from '@/components/ui/button';
-import { HiPlus } from 'react-icons/hi';
 import OrganizationSettingsForm from './OrganizationSettingsForm';
 
 export default async function Page(props: {
-  params: Promise<{ locale: string, orgId: string }>;
-
+  params: Promise<{ locale: string; orgId: string }>;
 }) {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!divisionTreasurer) {
@@ -35,9 +31,7 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink href="/">
-          {l.home.title}
-        </BreadcrumbLink>
+        <BreadcrumbLink href={`/org/${orgId}`}>{l.home.title}</BreadcrumbLink>
         <BreadcrumbCurrentLink>{organization.name}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />

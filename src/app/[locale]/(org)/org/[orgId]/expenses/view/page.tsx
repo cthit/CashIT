@@ -58,10 +58,10 @@ export default async function Page(props: {
   return (
     <>
       <BreadcrumbRoot>
-        <BreadcrumbLink as={Link} href="/">
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
           {l.home.title}
         </BreadcrumbLink>
-        <BreadcrumbLink as={Link} href={'/expenses'}>
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/expenses`}>
           {l.categories.expenses}
         </BreadcrumbLink>
         <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
