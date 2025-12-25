@@ -80,26 +80,30 @@ const Navigation = async ({
           </>
         )}
 
-        <Box>
-          <Heading as="h1" size="xl" mt="4" mb="0">
-            {l.categories.tools}
-          </Heading>
-        </Box>
+        {orgId !== undefined && (
+          <>
+            <Box>
+              <Heading as="h1" size="xl" mt="4" mb="0">
+                {l.categories.tools}
+              </Heading>
+            </Box>
 
-        {divisionTreasurer && orgId !== undefined && (
-          <NavigationLink href={`${orgPrefix}/bank-accounts`}>
-            <Icon size="md">
-              <PiBank />
-            </Icon>{' '}
-            {l.bankAccounts.title}
-          </NavigationLink>
+            {divisionTreasurer && (
+              <NavigationLink href={`${orgPrefix}/bank-accounts`}>
+                <Icon size="md">
+                  <PiBank />
+                </Icon>{' '}
+                {l.bankAccounts.title}
+              </NavigationLink>
+            )}
+            <NavigationLink href={`${orgPrefix}/receipt-creator`}>
+              <Icon size="md">
+                <PiReceipt />
+              </Icon>{' '}
+              {l.categories.receiptCreator}
+            </NavigationLink>
+          </>
         )}
-        <NavigationLink href={`/receipt-creator`}>
-          <Icon size="md">
-            <PiReceipt />
-          </Icon>{' '}
-          {l.categories.receiptCreator}
-        </NavigationLink>
 
         {divisionTreasurer && (
           <>

@@ -157,7 +157,13 @@ const ReceiptItemRow = memo(
 
 ReceiptItemRow.displayName = 'ReceiptItemRow';
 
-export default function ReceiptCreateForm({ locale }: { locale: string }) {
+export default function ReceiptCreateForm({
+  locale,
+  orgName
+}: {
+  locale: string;
+  orgName: string;
+}) {
   const l = i18nService.getLocale(locale);
 
   const [items, setItems] = useState<FormInvoiceItem[]>([]);
@@ -178,11 +184,12 @@ export default function ReceiptCreateForm({ locale }: { locale: string }) {
           treasurer={treasurer}
           locale={locale}
           date={new Date(date)}
+          orgName={orgName}
         />
       ).toBlob();
       FileService.saveToFile(`receipt-${new Date().getTime()}.pdf`, blob);
     },
-    [date, items, locale, name, purchaser, treasurer]
+    [date, items, locale, name, purchaser, treasurer, orgName]
   );
 
   const handleUpdateItem = useCallback(

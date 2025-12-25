@@ -1,7 +1,7 @@
 import {
   FormInvoiceItem,
   formToInvoiceItem
-} from '@/app/[locale]/(orgless)/receipt-creator/ReceiptCreateForm';
+} from '@/app/[locale]/(org)/org/[orgId]/receipt-creator/ReceiptCreateForm';
 import i18nService from '@/services/i18nService';
 import InvoiceService from '@/services/invoiceService';
 import { InvoiceItemVat } from '@prisma/client';
@@ -78,7 +78,8 @@ const ReceiptPdf = ({
   purchaser,
   treasurer,
   date,
-  locale
+  locale,
+  orgName
 }: {
   items: FormInvoiceItem[];
   name: string;
@@ -86,6 +87,7 @@ const ReceiptPdf = ({
   treasurer: string;
   date: Date;
   locale: string;
+  orgName: string;
 }) => {
   const invoiceItems = items.map((i) => formToInvoiceItem(i));
 
@@ -101,7 +103,7 @@ const ReceiptPdf = ({
         <View style={[styles.section, styles.head]}>
           <View>
             <Text style={styles.title}>
-              Teknologsektionen Informationsteknik
+              {orgName}
             </Text>
             <Text>Kvitto</Text>
             <Text style={[styles.dataTitle, { marginTop: 15 }]}>Datum</Text>
