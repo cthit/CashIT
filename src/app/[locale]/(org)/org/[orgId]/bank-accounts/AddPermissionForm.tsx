@@ -20,11 +20,18 @@ import { setBankAccountAccess } from '@/actions/bankAccounts';
 export default function AddPermissionForm({
   accounts,
   groups,
-  selectedAccountId
+  selectedAccountId,
+  orgId
 }: {
   accounts: Prisma.BankAccountGetPayload<{}>[];
-  groups: { superGroup: GammaSuperGroup; members: any[]; hasBanner: boolean; hasAvatar: boolean; }[];
+  groups: {
+    superGroup: GammaSuperGroup;
+    members: any[];
+    hasBanner: boolean;
+    hasAvatar: boolean;
+  }[];
   selectedAccountId?: string;
+  orgId: string;
 }) {
   const router = useRouter();
 
@@ -34,7 +41,7 @@ export default function AddPermissionForm({
   // Load current permissions when account is selected
   useEffect(() => {
     if (accId) {
-      const account = accounts.find(a => a.goCardlessId === accId);
+      const account = accounts.find((a) => a.goCardlessId === accId);
       if (account) {
         setSelectedGroups(account.gammaSuperGroupAccesses);
       }
@@ -49,10 +56,10 @@ export default function AddPermissionForm({
 
       if (accId) {
         await setBankAccountAccess(accId, selectedGroups);
-        router.push('/bank-accounts');
+        router.push(`/org/${orgId}/bank-accounts`);
       }
     },
-    [accId, router, selectedGroups]
+    [accId, router, selectedGroups, orgId]
   );
 
   const groupList = useMemo(

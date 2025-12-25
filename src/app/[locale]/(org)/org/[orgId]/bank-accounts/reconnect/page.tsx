@@ -50,7 +50,7 @@ export default async function Page(props: {
         Reconnect Accounts
       </Heading>
       <p>Create a new requisition and transfer accounts?</p>
-      <RecreateRequisitionButton id={requisition.id} />
+      <RecreateRequisitionButton id={requisition.id} orgId={orgId} />
     </>
   );
 }

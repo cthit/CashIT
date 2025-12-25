@@ -77,6 +77,7 @@ export default async function Page(props: {
         mode="connect"
         requisition={requisition}
         existingAccounts={existingAccounts}
+        orgId={orgId}
       />
     </>
   );

@@ -50,6 +50,7 @@ export default async function Page(props: {
         accounts={accounts}
         groups={groups}
         selectedAccountId={selectedAccountId}
+        orgId={orgId}
       />
     </>
   );

@@ -80,10 +80,12 @@ interface ReconnectModeProps {
   requisition?: never;
 }
 
-type BankAccountManagerProps = ConnectModeProps | ReconnectModeProps;
+type BankAccountManagerProps = (ConnectModeProps | ReconnectModeProps) & {
+  orgId: string;
+};
 
 export default function BankAccountManager(props: BankAccountManagerProps) {
-  const { mode, existingAccounts } = props;
+  const { mode, existingAccounts, orgId } = props;
   const router = useRouter();
 
   // Extract accounts and requisitionId based on mode
@@ -116,7 +118,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
   useEffect(() => {
     if (accounts.length === 0) {
       setTimeout(() => {
-        router.push('/bank-accounts');
+        router.push(`/org/${orgId}/bank-accounts`);
       }, 2000);
       return;
     }
@@ -151,7 +153,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
           }));
         });
     });
-  }, [accounts, requisitionId, mode, router, existingAccounts]);
+  }, [accounts, requisitionId, mode, router, existingAccounts, orgId]);
 
   const updateAccountState = (
     accountId: string,
@@ -214,7 +216,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
       // Auto-redirect - immediate if no actions, delayed if actions were processed
       setTimeout(
         () => {
-          router.push('/bank-accounts');
+          router.push(`/org/${orgId}/bank-accounts`);
         },
         hadActionsToProcess ? 1500 : 0
       );
@@ -458,7 +460,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
         <HStack justify="space-between" pt={4}>
           <Button
             variant="outline"
-            onClick={() => router.push('/bank-accounts')}
+            onClick={() => router.push(`/org/${orgId}/bank-accounts`)}
           >
             Cancel
           </Button>

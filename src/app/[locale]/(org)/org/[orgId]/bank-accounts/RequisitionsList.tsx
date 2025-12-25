@@ -96,15 +96,8 @@ const RequisitionsList = ({
             No bank connections found
           </Text>
           <Text color="fg.muted" mb={4}>
-            Connect your first bank account to get started with managing your
-            finances.
+            Connect your first bank account to get started.
           </Text>
-          <Link href={`/org/${orgId}/bank-accounts/connect`}>
-            <Button colorPalette="blue">
-              <HiPlus />
-              Connect First Bank Account
-            </Button>
-          </Link>
         </Box>
       ) : (
         <VStack gap={4} align="stretch">

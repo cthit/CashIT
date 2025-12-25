@@ -52,7 +52,11 @@ export default async function Page(props: {
       <Heading as="h1" size="xl" display="inline" mr="auto">
         Add Bank Account
       </Heading>
-      <AddAccountForm requisition={requisition} accounts={accounts} />
+      <AddAccountForm
+        requisition={requisition}
+        accounts={accounts}
+        orgId={orgId}
+      />
     </>
   );
 }

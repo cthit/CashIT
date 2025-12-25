@@ -37,10 +37,12 @@ interface Institution {
 
 export default function AddRequisitionForm({
   requisitions,
-  institutions
+  institutions,
+  orgId
 }: {
   requisitions: Requisition[];
   institutions: Institution[];
+  orgId: string;
 }) {
   const router = useRouter();
   const [existingRequisitionId, setExistingRequisitionId] = useState<
@@ -58,14 +60,14 @@ export default function AddRequisitionForm({
         setIsSubmitting(true);
         try {
           await registerRequisition(existingRequisitionId);
-          router.push('/bank-accounts');
+          router.push(`/org/${orgId}/bank-accounts`);
         } catch (error) {
           console.error('Error registering requisition:', error);
           setIsSubmitting(false);
         }
       }
     },
-    [existingRequisitionId, router, isSubmitting]
+    [existingRequisitionId, router, isSubmitting, orgId]
   );
 
   const submitNew = useCallback(
@@ -74,7 +76,10 @@ export default function AddRequisitionForm({
       if (newInstitutionId && !isSubmitting) {
         setIsSubmitting(true);
         try {
-          const newRequisition = await createNewRequisition(newInstitutionId);
+          const newRequisition = await createNewRequisition(
+            newInstitutionId,
+            orgId
+          );
           // Redirect to the GoCardless link
           window.location.href = newRequisition.link;
         } catch (error) {
@@ -83,7 +88,7 @@ export default function AddRequisitionForm({
         }
       }
     },
-    [newInstitutionId, isSubmitting]
+    [newInstitutionId, isSubmitting, orgId]
   );
 
   const existingReqs = createListCollection({
@@ -95,7 +100,7 @@ export default function AddRequisitionForm({
 
   const institutionList = createListCollection({
     items: (process.env.NODE_ENV === 'development'
-      ? [{ label: 'Sandbox finance', value: 'SANDBOXFINANCE_SFIN0000' }]
+      ? [{ label: 'Sandbox Finance', value: 'SANDBOXFINANCE_SFIN0000' }]
       : []
     ).concat(
       institutions.map((i) => ({

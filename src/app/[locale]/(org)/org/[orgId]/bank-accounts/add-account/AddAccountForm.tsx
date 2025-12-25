@@ -41,10 +41,12 @@ interface AccountOption {
 
 export default function AddAccountForm({
   requisition,
-  accounts
+  accounts,
+  orgId
 }: {
   requisition: Requisition;
   accounts: Prisma.BankAccountGetPayload<{}>[];
+  orgId: string;
 }) {
   const router = useRouter();
   const [accId, setAccId] = useState<string | undefined>();
@@ -113,10 +115,10 @@ export default function AddAccountForm({
 
       if (accId && requisition.id) {
         await registerBankAccount(accId, requisition.id);
-        router.push('/bank-accounts');
+        router.push(`/org/${orgId}/bank-accounts`);
       }
     },
-    [accId, requisition, router]
+    [accId, requisition, router, orgId]
   );
 
   const requisitionAccounts = createListCollection({
