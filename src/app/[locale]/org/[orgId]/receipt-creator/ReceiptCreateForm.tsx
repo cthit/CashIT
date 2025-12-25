@@ -271,7 +271,7 @@ export default function ReceiptCreateForm({
               <Table.Row>
                 <Table.ColumnHeader>{l.economy.product}</Table.ColumnHeader>
                 <Table.ColumnHeader>{l.economy.count}</Table.ColumnHeader>
-                <Table.ColumnHeader>{l.economy.priceEach}</Table.ColumnHeader>
+                <Table.ColumnHeader>{l.economy.unitPrice}</Table.ColumnHeader>
                 <Table.ColumnHeader>{l.economy.vat}</Table.ColumnHeader>
                 <Table.ColumnHeader />
               </Table.Row>

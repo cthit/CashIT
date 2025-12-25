@@ -27,7 +27,8 @@
     "group": "Group",
     "noGroup": "No group",
     "selectGroup": "Select a group",
-    "unknownGroup": "Unknown group"
+    "unknownGroup": "Unknown group",
+    "personal": "Personal"
   },
   "categories": {
     "nameLists": "Name Lists",
@@ -41,6 +42,7 @@
   },
   "general": {
     "edit": "Edit",
+    "view": "View",
     "delete": "Delete",
     "description": "Description",
     "comment": "Comment",
@@ -50,7 +52,11 @@
     "save": "Save",
     "create": "Create",
     "export": "Export",
-    "import": "Import"
+    "import": "Import",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No",
+    "unknown": "Unknown"
   },
   "economy": {
     "name": "Name",
@@ -71,7 +77,7 @@
     "requestRevision": "Request Revision",
     "products": "Products",
     "product": "Product",
-    "priceEach": "Price Each",
+    "unitPrice": "Unit Price (ex. VAT)",
     "vat": "VAT",
     "count": "Count",
     "addProduct": "Add product"
@@ -95,6 +101,10 @@
     "customerOrderReference": "Customer Order Reference",
     "contractNumber": "Contract Number",
     "determinedWhenSent": "Determined when it is sent",
+    "notSent": "Not sent",
+    "item": "Item",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
     "status": {
       "pending": "Awaiting Approval",
       "approved": "Awating Sending",
@@ -116,6 +126,8 @@
     "type": "Type",
     "invoiceType": "Invoice",
     "expenseType": "Reimbursement",
+    "expense": "Expense",
+    "invoice": "Invoice",
     "receipts": "Receipts",
     "receiptsUpload": "Upload Receipts",
     "name": "Name",
@@ -134,7 +146,8 @@
   "zettleSales": {
     "listNotFound": "No sales found",
     "listNotFoundDesc": "Adjust your filters or register a new sale",
-    "create": "Register sale"
+    "create": "Register sale",
+    "zettleSale": "Sale"
   },
   "nameLists": {
     "title": "Name lists",
@@ -142,6 +155,7 @@
     "edit": "Edit name list",
     "listNotFound": "No name lists found",
     "listNotFoundDesc": "Adjust your filters or create a new name list",
+    "nameList": "Name List",
     "tracked": "Tracked",
     "people": "People",
     "format": "Name list format",
@@ -153,9 +167,10 @@
     "list": "Name lists",
     "listPersonal": "My name lists",
     "noNicks": "Remember to not use nicks in the name lists. Use the full name of the person instead.",
+    "type": "Type",
     "types": {
       "event": "Event",
-      "workFood": "Work Food",
+      "workFood": "Meeting Costs",
       "teambuilding": "Teambuilding",
       "profileClothing": "Profile Clothing"
     }

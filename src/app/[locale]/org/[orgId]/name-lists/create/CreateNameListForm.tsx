@@ -1,6 +1,5 @@
 'use client';
 
-import { pdf } from '@react-pdf/renderer';
 import { useCallback, useMemo, useState } from 'react';
 import {
   Box,
@@ -36,8 +35,6 @@ import {
 } from '@/actions/nameLists';
 import { useRouter } from 'next/navigation';
 import NameListService from '@/services/nameListService';
-import FileService from '@/services/fileService';
-import NameListPdf from '@/components/NameListPdf/NameListPdf';
 
 export interface GroupNameItem {
   name: string;
@@ -154,8 +151,6 @@ export default function CreateNameListForm({
             .filter((n) => n.cost > 0)
         : [];
 
-      console.log('Group ID:', groupId);
-
       edited
         ? editNameList(
             nl.id,
@@ -204,26 +199,6 @@ export default function CreateNameListForm({
     ]
   );
 
-  const exportPdf = useCallback(async () => {
-    if (!nl) return;
-
-    const gammaNames = groupNames
-      .map((n) => ({
-        nameNick: n.nameNick,
-        fullName: n.fullName,
-        amount: +n.amount
-      }))
-      .filter((n) => n.amount > 0);
-
-    const blob = await pdf(
-      <NameListPdf gammaNames={gammaNames} nl={nl} locale={locale} />
-    ).toBlob();
-    FileService.saveToFile(
-      `name-list-${nl.id}-${new Date().getTime()}.pdf`,
-      blob
-    );
-  }, [groupNames, locale, nl]);
-
   const listTypes = createListCollection({
     items: [
       { label: l.nameLists.types.event, value: NameListType.EVENT },
@@ -242,12 +217,6 @@ export default function CreateNameListForm({
   return (
     <form onSubmit={createList}>
       <Heading>{nl ? l.nameLists.edit : l.nameLists.create}</Heading>
-      <Box p="1.5" />
-      {nl && (
-        <Button variant="surface" type="button" onClick={exportPdf}>
-          {l.general.download}
-        </Button>
-      )}
       <Box p="2.5" />
       <Fieldset.Root width={400}>
         <Fieldset.Content>
@@ -392,11 +361,6 @@ export default function CreateNameListForm({
             <Button variant="surface" type="submit">
               {l.economy.submit}
             </Button>
-            {nl && (
-              <Button variant="surface" type="button" onClick={exportPdf}>
-                Download
-              </Button>
-            )}
           </Field>
         </Fieldset.Content>
       </Fieldset.Root>

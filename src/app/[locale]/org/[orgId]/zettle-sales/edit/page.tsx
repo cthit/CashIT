@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { Box, Fieldset, Heading, Text } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -7,11 +7,10 @@ import {
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
 import i18nService from '@/services/i18nService';
+import CreateZettleSaleForm from '../create/CreateZettleSaleForm';
 import ZettleSaleService from '@/services/zettleSaleService';
 import SessionService from '@/services/sessionService';
 import OrgService from '@/services/orgService';
-import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
@@ -35,12 +34,14 @@ export default async function Page(props: {
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit = user?.id === sale.gammaUserId;
 
+  if (!canEdit) {
+    notFound();
+  }
+
   const org = await OrgService.getById(+orgId);
   if (!org) {
     notFound();
   }
-
-  const selectedGroup = groups.find((g) => g.id === sale.gammaGroupId);
 
   return (
     <>
@@ -51,44 +52,15 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href={`/org/${orgId}/zettle-sales`}>
           {l.home.zettleSales}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>{l.general.view}</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      {canEdit && (
-        <Box mb="4">
-          <Button asChild colorPalette="cyan">
-            <Link href={`/org/${orgId}/zettle-sales/edit?id=${id}`}>
-              {l.general.edit}
-            </Link>
-          </Button>
-        </Box>
-      )}
-      <Fieldset.Root>
-        <Fieldset.Legend>
-          <Heading size="lg">{l.zettleSales.zettleSale}</Heading>
-        </Fieldset.Legend>
-        <Fieldset.Content mt="0.25rem">
-          <Field label={l.group.group}>
-            <Text>{selectedGroup?.prettyName || l.general.unknown}</Text>
-          </Field>
-
-          <Field label={l.general.description}>
-            <Text>{sale.name}</Text>
-          </Field>
-
-          <Field label={l.economy.date}>
-            <Text>{sale.saleDate.toLocaleDateString(locale)}</Text>
-          </Field>
-
-          <Field label={l.economy.amountTotal}>
-            <Text>{sale.amount} kr</Text>
-          </Field>
-
-          <Field label={l.general.comment}>
-            <Text>{sale.description || l.general.none}</Text>
-          </Field>
-        </Fieldset.Content>
-      </Fieldset.Root>
+      <CreateZettleSaleForm
+        groups={groups}
+        locale={locale}
+        s={sale}
+        orgId={org.id}
+      />
     </>
   );
 }

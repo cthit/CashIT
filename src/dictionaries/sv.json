@@ -27,7 +27,8 @@
     "group": "Grupp",
     "noGroup": "Ingen grupp",
     "selectGroup": "Välj en grupp",
-    "unknownGroup": "Okänd grupp"
+    "unknownGroup": "Okänd grupp",
+    "personal": "Personlig"
   },
   "categories": {
     "nameLists": "Namnlistor",
@@ -41,6 +42,7 @@
   },
   "general": {
     "edit": "Redigera",
+    "view": "Visa",
     "delete": "Radera",
     "description": "Beskrivning",
     "comment": "Kommentar",
@@ -50,7 +52,11 @@
     "save": "Spara",
     "create": "Skapa",
     "export": "Exportera",
-    "import": "Importera"
+    "import": "Importera",
+    "none": "Ingen",
+    "yes": "Ja",
+    "no": "Nej",
+    "unknown": "Okänd"
   },
   "economy": {
     "name": "Namn",
@@ -71,7 +77,7 @@
     "requestRevision": "Begär ändring",
     "products": "Artiklar",
     "product": "Artikel",
-    "priceEach": "Á pris",
+    "unitPrice": "Á pris (ex. moms)",
     "vat": "Moms",
     "count": "Antal",
     "addProduct": "Lägg till artikel"
@@ -81,6 +87,7 @@
     "listNotFoundDesc": "Justera dina filter eller skapa en ny kundfaktura",
     "new": "Skicka faktura",
     "nameHint": "Kort beskrivning av fakturan",
+    "comments": "Kommentarer",
     "commentsHint": "Information för dig eller sektionskassören",
     "details": "Fakturadetaljer",
     "customerName": "Kundens namn",
@@ -94,6 +101,10 @@
     "customerOrderReference": "Er orderreferens",
     "contractNumber": "Kontraktsnummer",
     "determinedWhenSent": "Bestäms vid utskick",
+    "notSent": "Ej skickad",
+    "item": "Artikel",
+    "quantity": "Antal",
+    "subtotal": "Subtotal",
     "status": {
       "pending": "Inväntar godkännande",
       "approved": "Inväntar skickande",
@@ -115,6 +126,8 @@
     "type": "Typ",
     "invoiceType": "Faktura",
     "expenseType": "Utlägg",
+    "expense": "Kostnad",
+    "invoice": "Faktura",
     "description": "Kommentar",
     "receipts": "Bildunderlag",
     "receiptsUpload": "Ladda upp",
@@ -134,7 +147,8 @@
   "zettleSales": {
     "listNotFound": "Inga försäljningar hittades",
     "listNotFoundDesc": "Justera dina filter eller registrera en ny försäljning",
-    "create": "Registrera försäljning"
+    "create": "Registrera försäljning",
+    "zettleSale": "Försäljning"
   },
   "nameLists": {
     "title": "Namnlistor",
@@ -142,6 +156,7 @@
     "edit": "Redigera namnlista",
     "listNotFound": "Inga namnlistor hittades",
     "listNotFoundDesc": "Justera dina filter eller skapa en ny namnlista",
+    "nameList": "Namnlista",
     "tracked": "Spårad",
     "people": "Personer",
     "format": "Listformat",
@@ -153,9 +168,10 @@
     "list": "Namnlistor",
     "listPersonal": "Mina namnlistor",
     "noNicks": "Kom ihåg att inte använda nicks i namnlistor. Använd istället personens fullständiga namn.",
+    "type": "Typ",
     "types": {
       "event": "Arrangemang",
-      "workFood": "Arbetsmat",
+      "workFood": "Möteskostnader",
       "teambuilding": "Teambuilding",
       "profileClothing": "Profilering"
     }

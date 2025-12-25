@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { Box } from '@chakra-ui/react';
+import { Box, Fieldset, Heading, Icon, Text } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -7,11 +7,14 @@ import {
 } from '@/components/ui/breadcrumb';
 import SessionService from '@/services/sessionService';
 import Link from 'next/link';
-import CreateExpenseForm from '../create/CreateExpenseForm';
 import ExpenseService from '@/services/expenseService';
 import i18nService from '@/services/i18nService';
 import ForwardExpenseForm from './ForwardExpenseForm';
 import OrgService from '@/services/orgService';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { ExpenseType } from '@prisma/client';
+import { LuCloud } from 'react-icons/lu';
 
 export default async function Page(props: {
   searchParams: Promise<{ id?: string }>;
@@ -55,6 +58,10 @@ export default async function Page(props: {
     notFound();
   }
 
+  const selectedGroup = expense.gammaGroupId
+    ? groups.find((g) => g.id === expense.gammaGroupId)
+    : null;
+
   return (
     <>
       <BreadcrumbRoot>
@@ -64,18 +71,94 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href={`/org/${orgId}/expenses`}>
           {l.categories.expenses}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>{l.general.edit}</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>{l.general.view}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
+      {canEdit && (
+        <Box mb="4">
+          <Button asChild colorPalette="cyan">
+            <Link href={`/org/${orgId}/expenses/edit?id=${id}`}>
+              {l.general.edit}
+            </Link>
+          </Button>
+        </Box>
+      )}
       <ForwardExpenseForm e={expense} locale={locale} />
       <Box p="4" />
-      <CreateExpenseForm
-        e={expense}
-        locale={locale}
-        readOnly={!canEdit}
-        orgId={org.id}
-        groups={groups}
-      />
+      <Fieldset.Root>
+        <Fieldset.Legend>
+          <Heading size="lg">{l.expense.expense}</Heading>
+        </Fieldset.Legend>
+        <Fieldset.Content>
+          <Field label={l.group.group}>
+            <Text>
+              {selectedGroup ? selectedGroup.prettyName : l.group.personal}
+            </Text>
+          </Field>
+
+          <Field label={l.general.description}>
+            <Text>{expense.name}</Text>
+          </Field>
+
+          <Field label={l.economy.date}>
+            <Text>{expense.occurredAt.toLocaleDateString(locale)}</Text>
+          </Field>
+
+          <Field label={l.economy.amountTotal}>
+            <Text>{expense.amount} kr</Text>
+          </Field>
+
+          <Field label={l.expense.type}>
+            <Text>
+              {expense.type === ExpenseType.EXPENSE
+                ? l.expense.expense
+                : l.expense.invoice}
+            </Text>
+          </Field>
+
+          <Field label={l.general.comment}>
+            <Text>{expense.description || l.general.none}</Text>
+          </Field>
+
+          <Field label={l.expense.receipts}>
+            {expense.receipts.length > 0 ? (
+              expense.receipts.map((file) => (
+                <UploadedFile
+                  key={file.id}
+                  name={file.name}
+                  sha256={file.sha256}
+                />
+              ))
+            ) : (
+              <Text>{l.general.none}</Text>
+            )}
+          </Field>
+        </Fieldset.Content>
+      </Fieldset.Root>
     </>
   );
 }
+
+const UploadedFile = ({ name, sha256 }: { name: string; sha256: string }) => {
+  return (
+    <Box
+      display="flex"
+      borderWidth="1px"
+      rounded="md"
+      p="4"
+      w="100%"
+      alignItems="center"
+      gap="3"
+    >
+      <Icon fontSize="lg" color="fg.muted">
+        <LuCloud />
+      </Icon>
+
+      <Text textStyle="sm" flex="1">
+        <Link href={'/api/media/' + sha256} target="_blank">
+          {name}
+        </Link>
+      </Text>
+    </Box>
+  );
+};
