@@ -1,6 +1,9 @@
 'use client';
 
-import { registerRequisition, createNewRequisition } from '@/actions/goCardless';
+import {
+  registerRequisition,
+  createNewRequisition
+} from '@/actions/goCardless';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import {
@@ -12,7 +15,13 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { Requisition } from '@/services/goCardlessService';
-import { Box, createListCollection, VStack, Heading, Text } from '@chakra-ui/react';
+import {
+  Box,
+  createListCollection,
+  VStack,
+  Heading,
+  Text
+} from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
@@ -34,8 +43,12 @@ export default function AddRequisitionForm({
   institutions: Institution[];
 }) {
   const router = useRouter();
-  const [existingRequisitionId, setExistingRequisitionId] = useState<string | undefined>();
-  const [newInstitutionId, setNewInstitutionId] = useState<string | undefined>();
+  const [existingRequisitionId, setExistingRequisitionId] = useState<
+    string | undefined
+  >();
+  const [newInstitutionId, setNewInstitutionId] = useState<
+    string | undefined
+  >();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submitExisting = useCallback(
@@ -81,10 +94,15 @@ export default function AddRequisitionForm({
   });
 
   const institutionList = createListCollection({
-    items: institutions.map((i) => ({
-      label: i.name,
-      value: i.id
-    }))
+    items: (process.env.NODE_ENV === 'development'
+      ? [{ label: 'Sandbox finance', value: 'SANDBOXFINANCE_SFIN0000' }]
+      : []
+    ).concat(
+      institutions.map((i) => ({
+        label: i.name,
+        value: i.id
+      }))
+    )
   });
 
   return (
@@ -92,9 +110,12 @@ export default function AddRequisitionForm({
       {/* Existing Unused Requisitions */}
       {requisitions.length > 0 && (
         <Box>
-          <Heading size="lg" mb={4}>Use Existing Connection</Heading>
+          <Heading size="lg" mb={4}>
+            Use Existing Connection
+          </Heading>
           <Text color="fg.muted" mb={4}>
-            These are connections you&apos;ve created before but haven&apos;t registered locally yet.
+            These are connections you&apos;ve created before but haven&apos;t
+            registered locally yet.
           </Text>
           <form onSubmit={submitExisting}>
             <VStack gap={4} align="stretch">
@@ -102,7 +123,9 @@ export default function AddRequisitionForm({
                 <SelectRoot
                   collection={existingReqs}
                   value={existingRequisitionId ? [existingRequisitionId] : []}
-                  onValueChange={({ value }) => setExistingRequisitionId(value?.[0])}
+                  onValueChange={({ value }) =>
+                    setExistingRequisitionId(value?.[0])
+                  }
                 >
                   <SelectLabel />
                   <SelectTrigger>
@@ -117,9 +140,9 @@ export default function AddRequisitionForm({
                   </SelectContent>
                 </SelectRoot>
               </Field>
-              <Button 
-                variant="surface" 
-                type="submit" 
+              <Button
+                variant="surface"
+                type="submit"
                 disabled={!existingRequisitionId || isSubmitting}
                 loading={isSubmitting}
               >
@@ -132,7 +155,9 @@ export default function AddRequisitionForm({
 
       {/* Create New Connection */}
       <Box>
-        <Heading size="lg" mb={4}>Create New Connection</Heading>
+        <Heading size="lg" mb={4}>
+          Create New Connection
+        </Heading>
         <Text color="fg.muted" mb={4}>
           Connect to a new bank by selecting your financial institution.
         </Text>
@@ -157,9 +182,9 @@ export default function AddRequisitionForm({
                 </SelectContent>
               </SelectRoot>
             </Field>
-            <Button 
-              variant="solid" 
-              type="submit" 
+            <Button
+              variant="solid"
+              type="submit"
               disabled={!newInstitutionId || isSubmitting}
               loading={isSubmitting}
             >
