@@ -1,6 +1,6 @@
 {
   "name": "cashit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -32,6 +32,7 @@
     "@types/react-dom": "19.2.3",
     "eslint": "^8",
     "eslint-config-next": "15.5.9",
+    "@typescript-eslint/parser": "8.50.1",
     "prisma": "6.6.0",
     "typescript": "^5"
   },
