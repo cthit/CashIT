@@ -1,7 +1,7 @@
 'use client';
 
 import { pdf } from '@react-pdf/renderer';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, memo } from 'react';
 import {
   Box,
   Fieldset,
@@ -54,6 +54,109 @@ export const formToInvoiceItem = (item: FormInvoiceItem) =>
     vat: item.vat
   } satisfies Prisma.InvoiceItemCreateInput);
 
+const ReceiptItemRow = memo(
+  ({
+    item,
+    index,
+    onUpdate,
+    onDelete
+  }: {
+    item: FormInvoiceItem;
+    index: number;
+    onUpdate: (
+      index: number,
+      field: keyof FormInvoiceItem,
+      value: string
+    ) => void;
+    onDelete: (index: number) => void;
+  }) => {
+    const handleNameChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        onUpdate(index, 'name', e.target.value);
+      },
+      [index, onUpdate]
+    );
+
+    const handleCountChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        onUpdate(index, 'count', e.target.value);
+      },
+      [index, onUpdate]
+    );
+
+    const handleAmountChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        onUpdate(index, 'amount', e.target.value);
+      },
+      [index, onUpdate]
+    );
+
+    const handleVatChange = useCallback(
+      ({ value }: { value: string[] }) => {
+        onUpdate(index, 'vat', value?.[0] || InvoiceItemVat.VAT_25);
+      },
+      [index, onUpdate]
+    );
+
+    const handleDelete = useCallback(() => {
+      onDelete(index);
+    }, [index, onDelete]);
+
+    return (
+      <Table.Row>
+        <Table.Cell py="1">
+          <Field required>
+            <Input value={item.name} onChange={handleNameChange} />
+          </Field>
+        </Table.Cell>
+
+        <Table.Cell py="1">
+          <Field invalid={isNaN(+item.count)} required>
+            <Input value={item.count} onChange={handleCountChange} />
+          </Field>
+        </Table.Cell>
+
+        <Table.Cell py="1">
+          <Field invalid={isNaN(+item.amount)} required>
+            <InputGroup endElement="kr" width="100%">
+              <Input value={item.amount} onChange={handleAmountChange} />
+            </InputGroup>
+          </Field>
+        </Table.Cell>
+
+        <Table.Cell py="1">
+          <Field required>
+            <SelectRoot
+              collection={vatTypes}
+              value={[item.vat]}
+              onValueChange={handleVatChange}
+            >
+              <SelectTrigger>
+                <SelectValueText placeholder="Select a type" />
+              </SelectTrigger>
+              <SelectContent>
+                {vatTypes.items.map((item) => (
+                  <SelectItem key={item.value} item={item}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          </Field>
+        </Table.Cell>
+
+        <Table.Cell py="1">
+          <IconButton variant="subtle" size="sm" onClick={handleDelete}>
+            <HiTrash />
+          </IconButton>
+        </Table.Cell>
+      </Table.Row>
+    );
+  }
+);
+
+ReceiptItemRow.displayName = 'ReceiptItemRow';
+
 export default function ReceiptCreateForm({ locale }: { locale: string }) {
   const l = i18nService.getLocale(locale);
 
@@ -81,6 +184,33 @@ export default function ReceiptCreateForm({ locale }: { locale: string }) {
     },
     [date, items, locale, name, purchaser, treasurer]
   );
+
+  const handleUpdateItem = useCallback(
+    (index: number, field: keyof FormInvoiceItem, value: string) => {
+      setItems((prevItems) => {
+        const newItems = [...prevItems];
+        newItems[index] = { ...newItems[index], [field]: value };
+        return newItems;
+      });
+    },
+    []
+  );
+
+  const handleDeleteItem = useCallback((index: number) => {
+    setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+  }, []);
+
+  const handleAddItem = useCallback(() => {
+    setItems((prevItems) => [
+      ...prevItems,
+      {
+        name: '',
+        amount: '',
+        count: '',
+        vat: InvoiceItemVat.VAT_25
+      }
+    ]);
+  }, []);
 
   return (
     <form onSubmit={exportPdf}>
@@ -141,87 +271,13 @@ export default function ReceiptCreateForm({ locale }: { locale: string }) {
             </Table.Header>
             <Table.Body>
               {items.map((item, index) => (
-                <Table.Row key={index}>
-                  <Table.Cell py="1">
-                    <Field required>
-                      <Input
-                        value={item.name}
-                        onChange={(e) => {
-                          const newItems = [...items];
-                          newItems[index].name = e.target.value;
-                          setItems(newItems);
-                        }}
-                      />
-                    </Field>
-                  </Table.Cell>
-
-                  <Table.Cell py="1">
-                    <Field invalid={isNaN(+item.count)} required>
-                      <Input
-                        value={item.count}
-                        onChange={(e) => {
-                          const newItems = [...items];
-                          newItems[index].count = e.target.value;
-                          setItems(newItems);
-                        }}
-                      />
-                    </Field>
-                  </Table.Cell>
-
-                  <Table.Cell py="1">
-                    <Field invalid={isNaN(+item.amount)} required>
-                      <InputGroup endElement="kr" width="100%">
-                        <Input
-                          value={item.amount}
-                          onChange={(e) => {
-                            const newItems = [...items];
-                            newItems[index].amount = e.target.value;
-                            setItems(newItems);
-                          }}
-                        />
-                      </InputGroup>
-                    </Field>
-                  </Table.Cell>
-
-                  <Table.Cell py="1">
-                    <Field required>
-                      <SelectRoot
-                        collection={vatTypes}
-                        value={[item.vat]}
-                        onValueChange={({ value }) => {
-                          const newItems = [...items];
-                          newItems[index].vat = value?.[0] as InvoiceItemVat;
-                          setItems(newItems);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValueText placeholder="Select a type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {vatTypes.items.map((item) => (
-                            <SelectItem key={item.value} item={item}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </SelectRoot>
-                    </Field>
-                  </Table.Cell>
-
-                  <Table.Cell py="1">
-                    <IconButton
-                      variant="subtle"
-                      size="sm"
-                      onClick={() => {
-                        const newItems = [...items];
-                        newItems.splice(index, 1);
-                        setItems(newItems);
-                      }}
-                    >
-                      <HiTrash />
-                    </IconButton>
-                  </Table.Cell>
-                </Table.Row>
+                <ReceiptItemRow
+                  key={index}
+                  item={item}
+                  index={index}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                />
               ))}
             </Table.Body>
             <Table.Caption>
@@ -229,17 +285,7 @@ export default function ReceiptCreateForm({ locale }: { locale: string }) {
                 variant="subtle"
                 float="right"
                 mt="1"
-                onClick={() =>
-                  setItems([
-                    ...items,
-                    {
-                      name: '',
-                      amount: '',
-                      count: '',
-                      vat: InvoiceItemVat.VAT_25
-                    }
-                  ])
-                }
+                onClick={handleAddItem}
               >
                 <HiPlus /> {l.economy.addProduct}
               </Button>
