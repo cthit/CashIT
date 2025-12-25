@@ -60,8 +60,12 @@ const ViewOrganizationPage = async ({ params }: PageProps) => {
             <Text>{organization.name}</Text>
           </Box>
           <Box>
-            <Text fontWeight="bold">Created At</Text>
-            <Text>{organization.createdAt.toLocaleDateString()}</Text>
+            <Text fontWeight="bold">Primary Email</Text>
+            <Text>{organization.primaryEmail}</Text>
+          </Box>
+          <Box>
+            <Text fontWeight="bold">Owner Gamma Super Group ID</Text>
+            <Text>{organization.ownerGammaSuperGroupId}</Text>
           </Box>
           <Box>
             <Text fontWeight="bold">Updated At</Text>

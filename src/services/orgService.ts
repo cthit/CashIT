@@ -18,21 +18,34 @@ export default class OrgService {
     return organization;
   }
 
-  static async create(name: string) {
+  static async create(
+    name: string,
+    primaryEmail: string,
+    ownerGammaSuperGroupId: string
+  ) {
     return await prisma.organization.create({
       data: {
-        name
+        name,
+        primaryEmail,
+        ownerGammaSuperGroupId
       }
     });
   }
 
-  static async update(id: number, name: string) {
+  static async update(
+    id: number,
+    name: string,
+    primaryEmail: string,
+    ownerGammaSuperGroupId: string
+  ) {
     return await prisma.organization.update({
       where: {
         id
       },
       data: {
-        name
+        name,
+        primaryEmail,
+        ownerGammaSuperGroupId
       }
     });
   }

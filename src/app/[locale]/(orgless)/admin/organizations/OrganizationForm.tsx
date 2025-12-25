@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Box, Input, VStack } from '@chakra-ui/react';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
-import { createOrganization, updateOrganization } from '@/actions/organizations';
+import {
+  createOrganization,
+  updateOrganization
+} from '@/actions/organizations';
 import { Organization } from '@prisma/client';
 
 interface OrganizationFormProps {
@@ -15,7 +18,13 @@ interface OrganizationFormProps {
 
 const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
   const router = useRouter();
-  const [name, setName] = useState(organization?.name || '');
+  const [name, setName] = useState(organization?.name ?? '');
+  const [primaryEmail, setPrimaryEmail] = useState(
+    organization?.primaryEmail ?? ''
+  );
+  const [ownerGammaSuperGroupId, setOwnerGammaSuperGroupId] = useState(
+    organization?.ownerGammaSuperGroupId ?? ''
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,10 +36,15 @@ const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
 
       try {
         if (mode === 'create') {
-          await createOrganization(name);
+          await createOrganization(name, primaryEmail, ownerGammaSuperGroupId);
           router.push('/admin/organizations');
         } else if (organization) {
-          await updateOrganization(organization.id, name);
+          await updateOrganization(
+            organization.id,
+            name,
+            primaryEmail,
+            ownerGammaSuperGroupId
+          );
           router.push(`/admin/organizations/${organization.id}`);
         }
         router.refresh();
@@ -39,7 +53,7 @@ const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
         setLoading(false);
       }
     },
-    [mode, name, organization, router]
+    [mode, name, organization, router, primaryEmail, ownerGammaSuperGroupId]
   );
 
   return (
@@ -51,6 +65,27 @@ const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter organization name"
+              required
+              disabled={loading}
+            />
+          </Field>
+
+          <Field label="Primary Email" required>
+            <Input
+              type="email"
+              value={primaryEmail}
+              onChange={(e) => setPrimaryEmail(e.target.value)}
+              placeholder="Enter primary email"
+              required
+              disabled={loading}
+            />
+          </Field>
+
+          <Field label="Owner Gamma Super Group ID" required>
+            <Input
+              value={ownerGammaSuperGroupId}
+              onChange={(e) => setOwnerGammaSuperGroupId(e.target.value)}
+              placeholder="Enter owner gamma super group ID"
               required
               disabled={loading}
             />
@@ -69,7 +104,9 @@ const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
               loading={loading}
               disabled={loading || !name.trim()}
             >
-              {mode === 'create' ? 'Create Organization' : 'Update Organization'}
+              {mode === 'create'
+                ? 'Create Organization'
+                : 'Update Organization'}
             </Button>
             <Button
               type="button"

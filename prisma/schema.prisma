@@ -15,10 +15,12 @@ enum RequestStatus {
 }
 
 model Organization {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  primaryEmail           String
+  ownerGammaSuperGroupId String
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   expenses    Expense[]
   invoices    Invoice[]

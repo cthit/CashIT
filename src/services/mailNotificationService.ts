@@ -2,6 +2,7 @@ import prisma from '@/prisma';
 import { RequestStatus } from '@prisma/client';
 import GotifyService from './gotifyService';
 import GammaService from './gammaService';
+import OrgService from './orgService';
 
 export default class MailNotificationService {
   static async notifyNewDocuments() {
@@ -16,7 +17,13 @@ export default class MailNotificationService {
       );
     }
 
-    console.log('Group email map:', groupEmailMap);
+    const orgs = await OrgService.getAll();
+    const orgEmailMap = new Map<number, string>();
+    for (const org of orgs) {
+      if (org.primaryEmail) {
+        orgEmailMap.set(org.id, org.primaryEmail);
+      }
+    }
 
     const expenses = await prisma.expense.findMany({
       where: {
@@ -41,23 +48,22 @@ export default class MailNotificationService {
       { expenses: typeof expenses; invoices: typeof invoices }
     >();
 
-    const getEmail = (groupId: string | null) =>
+    const getEmail = (groupId: string | null, orgId: number | null) =>
       groupId && groupEmailMap.has(groupId)
         ? groupEmailMap.get(groupId)!
-        : 'kassor.styrit@chalmers.it';
+        : orgId && orgEmailMap.has(orgId)
+        ? orgEmailMap.get(orgId)!
+        : process.env.DIVISION_TREASURER_EMAIL ?? 'kassor.styrit@chalmers.it';
 
     for (const expense of expenses) {
-      const email = getEmail(expense.gammaSuperGroupId);
-      console.log(
-        `Expense with group ${expense.gammaSuperGroupId} assigned to email ${email}`
-      );
+      const email = getEmail(expense.gammaSuperGroupId, expense.organizationId);
       if (!documentsByEmail.has(email))
         documentsByEmail.set(email, { expenses: [], invoices: [] });
       documentsByEmail.get(email)!.expenses.push(expense);
     }
 
     for (const invoice of invoices) {
-      const email = getEmail(invoice.gammaSuperGroupId);
+      const email = getEmail(invoice.gammaSuperGroupId, invoice.organizationId);
       if (!documentsByEmail.has(email))
         documentsByEmail.set(email, { expenses: [], invoices: [] });
       documentsByEmail.get(email)!.invoices.push(invoice);

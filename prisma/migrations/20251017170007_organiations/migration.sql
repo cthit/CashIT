@@ -21,6 +21,8 @@ COMMIT;
 CREATE TABLE "Organization" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
+    "ownerGammaSuperGroupId" TEXT NOT NULL,
+    "primaryEmail" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -34,8 +36,20 @@ BEGIN
        EXISTS (SELECT 1 FROM "Invoice") OR 
        EXISTS (SELECT 1 FROM "NameList") OR 
        EXISTS (SELECT 1 FROM "ZettleSale") THEN
-        INSERT INTO "Organization" ("name", "createdAt", "updatedAt") 
-        VALUES ('Default Organization', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        INSERT INTO "Organization" (
+            "name",
+            "ownerGammaSuperGroupId",
+            "primaryEmail",
+            "createdAt",
+            "updatedAt"
+            )
+        VALUES (
+            'Default Organization',
+            '45432d44-0de4-4ed0-88ce-8cdf31b72f73',
+            'default@example.com',
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+            );
     END IF;
 END $$;
 
