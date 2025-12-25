@@ -83,16 +83,16 @@ const ZettleSalesTable = ({
         group: getGroupDisplayName(sale.gammaSuperGroupId),
         date: sale.saleDate,
         person: `${sale.user?.firstName} "${sale.user?.nick}" ${sale.user?.lastName}`,
-        total: sale.amount
+        total: sale.amount,
+        url: `/org/${orgId}/zettle-sales/view?id=${sale.id}`
       } as SaleRow;
     });
-  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, orgId]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
       header: l.general.description,
-      cell: (info) => (info.getValue()
-      )
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor('group', {
       header: l.expense.group,
@@ -168,7 +168,15 @@ const ZettleSalesTable = ({
   );
 };
 
-const SaleActions = ({ id, locale, orgId }: { id: number; locale: string; orgId: number }) => {
+const SaleActions = ({
+  id,
+  locale,
+  orgId
+}: {
+  id: number;
+  locale: string;
+  orgId: number;
+}) => {
   const l = i18nService.getLocale(locale);
   const router = useRouter();
 
@@ -189,7 +197,9 @@ const SaleActions = ({ id, locale, orgId }: { id: number; locale: string; orgId:
         <MenuItem
           value="edit"
           cursor="pointer"
-          onClick={() => router.push(`/org/${orgId}/zettle-sales/view?id=${id}`)}
+          onClick={() =>
+            router.push(`/org/${orgId}/zettle-sales/view?id=${id}`)
+          }
         >
           {l.general.edit}
         </MenuItem>

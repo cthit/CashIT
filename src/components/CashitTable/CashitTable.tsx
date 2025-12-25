@@ -23,7 +23,8 @@ const CashitTable = ({
     if (
       !url ||
       target.closest('button') ||
-      target.closest('[role="menuitem"]')
+      target.closest('[role="menu"]') ||
+      target.closest('[role="dialog"]')
     ) {
       return;
     }
