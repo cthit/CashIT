@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Input, VStack } from '@chakra-ui/react';
+import { Box, createListCollection, Input, VStack } from '@chakra-ui/react';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import {
@@ -10,13 +10,27 @@ import {
   updateOrganization
 } from '@/actions/organizations';
 import { Organization } from '@prisma/client';
+import { GammaSuperGroup } from '@/types/gamma';
+import {
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText
+} from '@/components/ui/select';
 
 interface OrganizationFormProps {
   mode: 'create' | 'edit';
   organization?: Organization;
+  superGroups: GammaSuperGroup[];
 }
 
-const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
+const OrganizationForm = ({
+  mode,
+  organization,
+  superGroups
+}: OrganizationFormProps) => {
   const router = useRouter();
   const [name, setName] = useState(organization?.name ?? '');
   const [primaryEmail, setPrimaryEmail] = useState(
@@ -56,6 +70,13 @@ const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
     [mode, name, organization, router, primaryEmail, ownerGammaSuperGroupId]
   );
 
+  const superGroupCollection = createListCollection({
+    items: superGroups.map((sg) => ({
+      value: sg.id,
+      label: sg.prettyName
+    }))
+  });
+
   return (
     <Box maxW="2xl">
       <form onSubmit={handleSubmit}>
@@ -81,14 +102,27 @@ const OrganizationForm = ({ mode, organization }: OrganizationFormProps) => {
             />
           </Field>
 
-          <Field label="Owner Gamma Super Group ID" required>
-            <Input
-              value={ownerGammaSuperGroupId}
-              onChange={(e) => setOwnerGammaSuperGroupId(e.target.value)}
-              placeholder="Enter owner gamma super group ID"
-              required
-              disabled={loading}
-            />
+          <Field label="Owner Group" required>
+            <SelectRoot
+              collection={superGroupCollection}
+              value={ownerGammaSuperGroupId ? [ownerGammaSuperGroupId] : []}
+              onValueChange={({ value }) =>
+                setOwnerGammaSuperGroupId(value?.[0])
+              }
+              disabled={loading || superGroupCollection.items.length === 0}
+            >
+              <SelectLabel />
+              <SelectTrigger>
+                <SelectValueText placeholder="Select a group" />
+              </SelectTrigger>
+              <SelectContent>
+                {superGroupCollection.items.map((item) => (
+                  <SelectItem key={item.value} item={item}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
           </Field>
 
           {error && (

@@ -9,6 +9,7 @@ import i18nService from '@/services/i18nService';
 import SessionService from '@/services/sessionService';
 import { notFound } from 'next/navigation';
 import OrganizationForm from '../OrganizationForm';
+import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
   params: Promise<{ locale: string }>;
@@ -20,6 +21,9 @@ export default async function Page(props: {
 
   const { locale } = await props.params;
   const l = i18nService.getLocale(locale);
+  const superGroups = (await GammaService.getAllSuperGroups()).map(
+    (sg) => sg.superGroup
+  );
 
   return (
     <>
@@ -38,7 +42,7 @@ export default async function Page(props: {
         Create Organization
       </Heading>
 
-      <OrganizationForm mode="create" />
+      <OrganizationForm mode="create" superGroups={superGroups} />
     </>
   );
 }
