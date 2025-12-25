@@ -154,17 +154,19 @@ export default function CreateNameListForm({
             .filter((n) => n.cost > 0)
         : [];
 
+      console.log('Group ID:', groupId);
+
       edited
         ? editNameList(
             nl.id,
-            (groupId === '' ? null : groupId) ?? nl.gammaGroupId,
+            groupId === 'cashit-nogroup' ? null : groupId ?? nl.gammaGroupId,
             name,
             type,
             customNames,
             gammaNames,
             trackIndividual,
             new Date(date)
-          ).then(() => router.push('/name-lists'))
+          ).then(() => router.push(`/org/${orgId}/name-lists`))
         : groupId !== undefined && groupId !== 'cashit-nogroup'
         ? createNameListForGroup(
             groupId,

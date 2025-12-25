@@ -19,8 +19,7 @@ import { GammaGroup, GammaUser } from '@/types/gamma';
 import {
   createInvoiceForGroup,
   createPersonalInvoice,
-  editInvoiceForGroup,
-  editPersonalInvoice
+  editInvoice
 } from '@/actions/invoices';
 import { useRouter } from 'next/navigation';
 import { InvoiceItemVat, Prisma } from '@prisma/client';
@@ -99,9 +98,11 @@ export default function SendInvoiceForm({
     )
   });
 
-  const [groupId, setGroupId] = useState<string | undefined>(    i !== undefined && i !== null
+  const [groupId, setGroupId] = useState<string | undefined>(
+    i !== undefined && i !== null
       ? i.gammaGroupId ?? 'cashit-nogroup'
-      : undefined);
+      : undefined
+  );
   const [name, setName] = useState<string>(i?.name ?? '');
   const [comments, setComments] = useState<string>(i?.description ?? '');
 
@@ -136,7 +137,7 @@ export default function SendInvoiceForm({
       event.preventDefault();
       groupId !== undefined && groupId !== 'cashit-nogroup'
         ? (editing
-            ? editInvoiceForGroup(
+            ? editInvoice(
                 i.id,
                 groupId,
                 name,
@@ -166,8 +167,9 @@ export default function SendInvoiceForm({
               )
           ).then(() => router.push(`/org/${orgId}/invoices`))
         : (editing
-            ? editPersonalInvoice(
+            ? editInvoice(
                 i.id,
+                null,
                 name,
                 customerName,
                 comments,
@@ -207,7 +209,8 @@ export default function SendInvoiceForm({
       name,
       referenceCode,
       router,
-      subscriptionNumber
+      subscriptionNumber,
+      orgId
     ]
   );
 

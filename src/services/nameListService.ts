@@ -172,6 +172,7 @@ export default class NameListService {
   static async edit(
     id: number,
     gammaGroupId: string | null,
+    gammaSuperGroupId: string | null,
     name: string,
     type: NameListType,
     names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -194,6 +195,7 @@ export default class NameListService {
       data: {
         name,
         gammaGroupId,
+        gammaSuperGroupId,
         type,
         names: {
           // IMPORTANT: Do not change the order of these operations

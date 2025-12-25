@@ -58,7 +58,13 @@ export default function CreateZettleSaleForm({
       event.preventDefault();
 
       if (s) {
-        await editZettleSale(s.id, name, +amount, new Date(date));
+        await editZettleSale(
+          s.id,
+          groupId ?? s.gammaGroupId,
+          name,
+          +amount,
+          new Date(date)
+        );
         router.push(`/org/${orgId}/zettle-sales`);
       } else if (groupId !== undefined) {
         await createZettleSale(groupId, orgId, name, +amount, new Date(date));

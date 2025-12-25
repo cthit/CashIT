@@ -3,8 +3,7 @@
 import {
   createExpenseForGroup,
   createPersonalExpense,
-  editExpenseForGroup,
-  editPersonalExpense
+  editExpense
 } from '@/actions/expenses';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
@@ -31,10 +30,7 @@ import {
 } from '@/components/ui/select';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
-import {
-  FileUploadList,
-  FileUploadRoot
-} from '@/components/ui/file-upload';
+import { FileUploadList, FileUploadRoot } from '@/components/ui/file-upload';
 import { HiUpload } from 'react-icons/hi';
 import { ExpenseType, Prisma } from '@prisma/client';
 import { LuCloud, LuUndo, LuX } from 'react-icons/lu';
@@ -104,7 +100,7 @@ export default function CreateExpenseForm({
       });
       groupId !== undefined && groupId !== 'cashit-nogroup'
         ? (editing
-            ? editExpenseForGroup(
+            ? editExpense(
                 e.id,
                 groupId,
                 +amount,
@@ -129,11 +125,13 @@ export default function CreateExpenseForm({
               )
           ).then(() => router.push(`/org/${orgId}/expenses`))
         : (editing
-            ? editPersonalExpense(
+            ? editExpense(
                 e.id,
+                null,
                 +amount,
                 name,
                 description,
+                new Date(date),
                 formData,
                 e.receipts
                   .filter((r) => !removeFiles.some((f) => f === r.id))
