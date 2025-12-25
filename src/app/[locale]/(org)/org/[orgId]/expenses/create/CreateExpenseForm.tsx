@@ -17,7 +17,9 @@ import {
   Box,
   createListCollection,
   IconButton,
-  Icon
+  Icon,
+  FileUploadDropzone,
+  FileUploadDropzoneContent
 } from '@chakra-ui/react';
 import {
   SelectContent,
@@ -31,8 +33,7 @@ import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
 import {
   FileUploadList,
-  FileUploadRoot,
-  FileUploadTrigger
+  FileUploadRoot
 } from '@/components/ui/file-upload';
 import { HiUpload } from 'react-icons/hi';
 import { ExpenseType, Prisma } from '@prisma/client';
@@ -162,7 +163,8 @@ export default function CreateExpenseForm({
       description,
       removeFiles,
       router,
-      groupId
+      groupId,
+      orgId
     ]
   );
 
@@ -258,11 +260,14 @@ export default function CreateExpenseForm({
               }
               required={remainingCloudFiles.length === 0}
             >
-              <FileUploadTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <HiUpload /> {l.expense.receiptsUpload}
-                </Button>
-              </FileUploadTrigger>
+              <FileUploadDropzone w="100%" minH="8rem">
+                <Icon size="md" color="fg.muted">
+                  <HiUpload />
+                </Icon>
+                <FileUploadDropzoneContent>
+                  <Box>{l.expense.receiptsUpload}</Box>
+                </FileUploadDropzoneContent>
+              </FileUploadDropzone>
               <FileUploadList files={files} clearable />
               {e?.receipts?.map((file) => {
                 const fileDeleted = removeFiles.some((f) => f === file.id);
