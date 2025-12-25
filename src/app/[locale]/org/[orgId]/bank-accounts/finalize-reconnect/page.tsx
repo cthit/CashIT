@@ -77,6 +77,7 @@ export default async function Page(props: {
         requisitionId={requisition.id}
         existingAccounts={existingAccounts}
         orgId={orgId}
+        locale={locale}
       />
     </>
   );

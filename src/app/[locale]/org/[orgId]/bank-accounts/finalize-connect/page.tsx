@@ -63,14 +63,16 @@ export default async function Page(props: {
           {l.bankAccounts.title}
         </BreadcrumbLink>
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts/connect`}>
-          Add Connection
+          {l.bankConnections.addConnection}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Finalize Connection</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>
+          {l.bankConnections.addConnection}
+        </BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
       <Heading as="h1" size="xl" mb={6}>
-        Finalize Bank Connection
+        {l.bankConnections.addConnection}
       </Heading>
 
       <BankAccountManager
@@ -78,6 +80,7 @@ export default async function Page(props: {
         requisition={requisition}
         existingAccounts={existingAccounts}
         orgId={orgId}
+        locale={locale}
       />
     </>
   );

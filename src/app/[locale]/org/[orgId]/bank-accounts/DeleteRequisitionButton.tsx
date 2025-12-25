@@ -16,14 +16,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import i18nService from '@/services/i18nService';
 
 export default function DeleteRequisitionButton({ 
   requisitionId,
-  accountCount
+  accountCount,
+  locale
 }: { 
   requisitionId: string;
   accountCount: number;
+  locale: string;
 }) {
+  const l = i18nService.getLocale(locale);
+  const d = l.dialogs;
+
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -46,38 +52,36 @@ export default function DeleteRequisitionButton({
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
           <HiTrash />
-          Delete
+          {l.general.delete}
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Bank Connection</DialogTitle>
+          <DialogTitle>{d.deleteConnectionTitle}</DialogTitle>
         </DialogHeader>
         <DialogBody>
-          <p>
-            Are you sure you want to delete this bank connection? This will permanently remove:
-          </p>
+          <p>{d.deleteConnectionConfirm}</p>
           <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-            <li>The connection itself</li>
-            <li>{accountCount} bank account{accountCount !== 1 ? 's' : ''}</li>
-            <li>All transaction history</li>
-            <li>All permission settings</li>
+            <li>{d.deleteConnectionConnection}</li>
+            <li>{accountCount} {d.deleteConnectionBankAccounts.replace('{count}', accountCount !== 1 ? 's' : '')}</li>
+            <li>{d.deleteConnectionTransactions}</li>
+            <li>{d.deleteConnectionPermissions}</li>
           </ul>
           <p style={{ marginTop: '10px', fontWeight: 'bold', color: 'red' }}>
-            This action cannot be undone.
+            {d.deleteConnectionWarning}
           </p>
         </DialogBody>
         <DialogFooter>
           <DialogActionTrigger asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{d.cancel}</Button>
           </DialogActionTrigger>
           <Button 
             colorPalette="red" 
             onClick={handleDelete}
             disabled={deleting}
           >
-            {deleting ? 'Deleting...' : 'Delete Connection'}
+            {deleting ? d.deleting : d.deleteConnectionTitle}
           </Button>
         </DialogFooter>
         <DialogCloseTrigger />

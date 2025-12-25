@@ -26,7 +26,7 @@ export default function UpdateAccountsButton({ locale }: { locale: string }) {
       onClick={updateBankAccounts}
       disabled={refreshing}
     >
-      <HiRefresh /> {refreshing ? 'Refreshing' : l.bankAccounts.refresh}
+      <HiRefresh /> {refreshing ? l.dialogs.deleting : l.bankAccounts.refresh}
     </Button>
   );
 }

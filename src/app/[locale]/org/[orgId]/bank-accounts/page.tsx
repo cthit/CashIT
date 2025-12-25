@@ -50,9 +50,7 @@ export default async function Page(props: {
       </BreadcrumbRoot>
       <Box p="4" />
 
-      <Text>
-        Note! Bank accounts are currently shared between every organization.
-      </Text>
+      <Text>{l.bankAccounts.sharedNote}</Text>
       <VStack gap={6} align="stretch">
         <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
           <Heading as="h1" size="xl">
@@ -62,13 +60,14 @@ export default async function Page(props: {
         </Flex>
 
         <Box p={4} bg="bg.subtle" rounded="md" borderWidth="1px">
-          <Heading size="md">Total Available Balance</Heading>
+          <Heading size="md">{l.bankAccounts.totalAvailableBalance}</Heading>
           <VStack align="start" gap={0}>
             <Text fontSize="2xl" fontWeight="bold" color="green.600">
               {new Intl.NumberFormat('sv-SE').format(totalAvailable)}
             </Text>
             <Text fontSize="sm" color="fg.muted">
-              Booked: {new Intl.NumberFormat('sv-SE').format(totalBooked)}
+              {l.bankAccounts.bookedBalance}:{' '}
+              {new Intl.NumberFormat('sv-SE').format(totalBooked)}
             </Text>
           </VStack>
         </Box>
@@ -77,6 +76,7 @@ export default async function Page(props: {
           requisitions={localRequisitions}
           groups={groups}
           orgId={Number(orgId)}
+          locale={locale}
         />
       </VStack>
     </>

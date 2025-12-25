@@ -40,17 +40,20 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Add Connection</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>
+          {l.bankConnections.addConnection}
+        </BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
       <Heading as="h1" size="xl" display="inline" mr="auto">
-        Add Connection
+        {l.bankConnections.addConnection}
       </Heading>
       <AddRequisitionForm
         requisitions={unusedRequisitions}
         institutions={institutions}
         orgId={orgId}
+        locale={locale}
       />
     </>
   );

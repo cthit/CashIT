@@ -21,35 +21,23 @@ import DeleteAccountButton from './DeleteAccountButton';
 const RequisitionsList = ({
   requisitions,
   groups: _groups,
-  orgId
+  orgId,
+  locale
 }: {
   requisitions: Awaited<
     ReturnType<typeof GoCardlessService.getRegisteredRequisitionsWithStatus>
   >;
   groups: Awaited<ReturnType<typeof GammaService.getAllSuperGroups>>;
   orgId: number;
+  locale: string;
 }) => {
+  const l = i18nService.getLocale(locale);
   const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'CR':
-        return 'Created';
-      case 'GC':
-        return 'Giving Consent';
-      case 'UA':
-        return 'Undergoing Authentication';
-      case 'RJ':
-        return 'Rejected';
-      case 'SA':
-        return 'Selecting Accounts';
-      case 'GA':
-        return 'Granting Access';
-      case 'LN':
-        return 'Linked';
-      case 'EX':
-        return 'Expired';
-      default:
-        return 'Unknown';
-    }
+    return (
+      l.bankConnections.status[
+        status as keyof typeof l.bankConnections.status
+      ] || l.bankConnections.status.unknown
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -74,12 +62,12 @@ const RequisitionsList = ({
     <VStack gap={4} align="stretch">
       <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
         <Heading as="h1" size="xl">
-          Bank Account Connections
+          {l.bankConnections.title}
         </Heading>
         <Link href={`/org/${orgId}/bank-accounts/connect`}>
           <Button colorPalette="cyan">
             <HiPlus />
-            Add bank connection
+            {l.bankConnections.addConnection}
           </Button>
         </Link>
       </Flex>
@@ -93,10 +81,10 @@ const RequisitionsList = ({
           textAlign="center"
         >
           <Text fontSize="lg" mb={2}>
-            No bank connections found
+            {l.bankConnections.noConnectionsFound}
           </Text>
           <Text color="fg.muted" mb={4}>
-            Connect your first bank account to get started.
+            {l.bankConnections.connectFirstAccount}
           </Text>
         </Box>
       ) : (
@@ -123,7 +111,9 @@ const RequisitionsList = ({
                   {/* Requisition header */}
                   <HStack justify="space-between" align="start">
                     <VStack align="start" gap={1}>
-                      <Heading size="md">Connection #{requisition.id}</Heading>
+                      <Heading size="md">
+                        {l.bankConnections.connectionNo} #{requisition.id}
+                      </Heading>
                       <Text fontSize="sm" color="fg.muted">
                         <Badge
                           colorPalette={getStatusColor(requisition.status)}
@@ -140,7 +130,7 @@ const RequisitionsList = ({
                         >
                           <Button size="sm" colorPalette="orange">
                             <HiLink />
-                            Reconnect
+                            {l.bankConnections.reconnect}
                           </Button>
                         </Link>
                       )}
@@ -149,12 +139,13 @@ const RequisitionsList = ({
                       >
                         <Button size="sm" variant="outline">
                           <HiPlus />
-                          Add Account
+                          {l.bankConnections.addAccount}
                         </Button>
                       </Link>
                       <DeleteRequisitionButton
                         requisitionId={requisition.goCardlessId}
                         accountCount={requisition.bankAccounts.length}
+                        locale={locale}
                       />
                     </HStack>
                   </HStack>
@@ -164,13 +155,14 @@ const RequisitionsList = ({
                     <HStack gap={6}>
                       <VStack align="start" gap={0}>
                         <Text fontSize="sm" color="fg.muted">
-                          Available in connection
+                          {l.bankConnections.availableInConnection}
                         </Text>
                         <Text fontWeight="semibold" color="green.600">
                           {i18nService.formatNumber(totalAvailable)}
                         </Text>
                         <Text fontSize="xs" color="fg.muted">
-                          Booked: {i18nService.formatNumber(totalBooked)}
+                          {l.bankConnections.booked}:{' '}
+                          {i18nService.formatNumber(totalBooked)}
                         </Text>
                       </VStack>
                     </HStack>
@@ -197,7 +189,7 @@ const RequisitionsList = ({
                                 </Link>
                               </Text>
                               <Text fontSize="sm" color="fg.muted">
-                                Refreshed{' '}
+                                {l.bankConnections.refreshed}{' '}
                                 {i18nService.formatRelative(
                                   account.updatedAt,
                                   'en'
@@ -207,14 +199,13 @@ const RequisitionsList = ({
                                 {account.gammaSuperGroupAccesses.length > 0 ? (
                                   <>
                                     {account.gammaSuperGroupAccesses.length}{' '}
-                                    group
-                                    {account.gammaSuperGroupAccesses.length !==
+                                    {account.gammaSuperGroupAccesses.length ===
                                     1
-                                      ? 's'
-                                      : ''}
+                                      ? l.bankConnections.groupSingular
+                                      : l.bankConnections.groupPlural}
                                   </>
                                 ) : (
-                                  'No permissions'
+                                  l.bankAccounts.noPermissions
                                 )}
                               </Text>
                             </VStack>
@@ -234,7 +225,7 @@ const RequisitionsList = ({
                               </Text>
                               <Text fontSize="sm">
                                 <Text as="span" color="fg.muted">
-                                  Booked:{' '}
+                                  {l.bankConnections.booked}:{' '}
                                   {new Intl.NumberFormat('sv-SE').format(
                                     account.balanceBooked
                                   )}
@@ -251,6 +242,7 @@ const RequisitionsList = ({
                                 </Link>
                                 <DeleteAccountButton
                                   goCardlessId={account.goCardlessId}
+                                  locale={locale}
                                 />
                               </HStack>
                             </VStack>
@@ -261,7 +253,7 @@ const RequisitionsList = ({
                   ) : (
                     <Box p={4} bg="bg.muted" rounded="md" textAlign="center">
                       <Text color="fg.muted">
-                        No bank accounts found in this connection
+                        {l.bankConnections.noBankAccountsFound}
                       </Text>
                     </Box>
                   )}

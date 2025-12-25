@@ -13,6 +13,7 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { Requisition } from '@/services/goCardlessService';
+import i18nService from '@/services/i18nService';
 import { Box, createListCollection, Text } from '@chakra-ui/react';
 import { Prisma } from '@prisma/client';
 import { useRouter } from 'next/navigation';
@@ -42,13 +43,16 @@ interface AccountOption {
 export default function AddAccountForm({
   requisition,
   accounts,
-  orgId
+  orgId,
+  locale
 }: {
   requisition: Requisition;
   accounts: Prisma.BankAccountGetPayload<{}>[];
   orgId: string;
+  locale: string;
 }) {
   const router = useRouter();
+  const l = i18nService.getLocale(locale);
   const [accId, setAccId] = useState<string | undefined>();
   const [accountOptions, setAccountOptions] = useState<AccountOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,11 +142,9 @@ export default function AddAccountForm({
         textAlign="center"
       >
         <Text fontSize="lg" mb={2}>
-          Loading Available Accounts...
+          {l.addAccount.loading}
         </Text>
-        <Text color="fg.muted">
-          Fetching account details from your bank connection.
-        </Text>
+        <Text color="fg.muted">{l.addAccount.loadingDescription}</Text>
       </Box>
     );
   }
@@ -157,14 +159,13 @@ export default function AddAccountForm({
         textAlign="center"
       >
         <Text fontSize="lg" mb={2}>
-          No New Accounts Available
+          {l.addAccount.noAccountsAvailable}
         </Text>
         <Text color="fg.muted" mb={4}>
-          All accounts from this bank connection have already been registered in
-          the system.
+          {l.addAccount.noAccountsMessage}
         </Text>
         <Text color="fg.muted" fontSize="sm">
-          You can view your existing accounts on the main bank accounts page.
+          {l.addAccount.viewExistingAccounts}
         </Text>
       </Box>
     );
@@ -173,13 +174,11 @@ export default function AddAccountForm({
   return (
     <Box>
       <Text color="fg.muted" mb={4}>
-        Select an account from your bank connection to add to the system. You
-        can then set permissions and start managing transactions for this
-        account.
+        {l.addAccount.selectDescription}
       </Text>
 
       <form onSubmit={submit}>
-        <Field label="Select Account" required>
+        <Field label={l.addAccount.selectLabel} required>
           <SelectRoot
             collection={requisitionAccounts}
             value={accId ? [accId] : []}
@@ -188,7 +187,7 @@ export default function AddAccountForm({
           >
             <SelectLabel />
             <SelectTrigger>
-              <SelectValueText placeholder="Choose an account to add" />
+              <SelectValueText placeholder={l.addAccount.selectPlaceholder} />
             </SelectTrigger>
             <SelectContent>
               {requisitionAccounts.items.map((item) => (
@@ -203,7 +202,7 @@ export default function AddAccountForm({
         <Box p="2" />
 
         <Button variant="surface" type="submit" disabled={!accId}>
-          Add Account
+          {l.addAccount.addButton}
         </Button>
       </form>
     </Box>

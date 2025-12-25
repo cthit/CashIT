@@ -1,4 +1,4 @@
-import { Box, Heading } from '@chakra-ui/react';
+import { Box, Heading, Text } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -42,15 +42,30 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Reconnect Accounts</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>
+          {l.accountManagement.reconnectBankAccounts}
+        </BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
       <Heading as="h1" size="xl" display="inline" mr="auto">
-        Reconnect Accounts
+        {l.accountManagement.reconnectBankAccounts}
       </Heading>
-      <p>Create a new requisition and transfer accounts?</p>
-      <RecreateRequisitionButton id={requisition.id} orgId={orgId} />
+      <Text>
+        {l.accountManagement.connectDescription
+          .replace('{count}', requisition.accounts.length.toString())
+          .replace(
+            '{plural}',
+            requisition.accounts.length !== 1
+              ? l.accountManagement.accounts
+              : l.accountManagement.account
+          )}
+      </Text>
+      <RecreateRequisitionButton
+        id={requisition.id}
+        orgId={orgId}
+        locale={locale}
+      />
     </>
   );
 }

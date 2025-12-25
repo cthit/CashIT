@@ -38,12 +38,12 @@ export default async function Page(props: {
         <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
           {l.bankAccounts.title}
         </BreadcrumbLink>
-        <BreadcrumbCurrentLink>Manage Permissions</BreadcrumbCurrentLink>
+        <BreadcrumbCurrentLink>{l.bankAccounts.managePermissions}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
 
       <Heading as="h1" size="xl" mb="6">
-        Manage Bank Account Permissions
+        {l.bankAccounts.managePermissions}
       </Heading>
 
       <AddPermissionForm
@@ -51,6 +51,7 @@ export default async function Page(props: {
         groups={groups}
         selectedAccountId={selectedAccountId}
         orgId={orgId}
+        locale={locale}
       />
     </>
   );

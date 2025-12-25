@@ -15,6 +15,7 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { Requisition } from '@/services/goCardlessService';
+import i18nService from '@/services/i18nService';
 import {
   Box,
   createListCollection,
@@ -38,13 +39,16 @@ interface Institution {
 export default function AddRequisitionForm({
   requisitions,
   institutions,
-  orgId
+  orgId,
+  locale
 }: {
   requisitions: Requisition[];
   institutions: Institution[];
   orgId: string;
+  locale: string;
 }) {
   const router = useRouter();
+  const l = i18nService.getLocale(locale);
   const [existingRequisitionId, setExistingRequisitionId] = useState<
     string | undefined
   >();
@@ -116,15 +120,14 @@ export default function AddRequisitionForm({
       {requisitions.length > 0 && (
         <Box>
           <Heading size="lg" mb={4}>
-            Use Existing Connection
+            {l.bankConnections.useExisting}
           </Heading>
           <Text color="fg.muted" mb={4}>
-            These are connections you&apos;ve created before but haven&apos;t
-            registered locally yet.
+            {l.bankConnections.existingDescription}
           </Text>
           <form onSubmit={submitExisting}>
             <VStack gap={4} align="stretch">
-              <Field label="Select Connection" required>
+              <Field label={l.bankConnections.selectConnection} required>
                 <SelectRoot
                   collection={existingReqs}
                   value={existingRequisitionId ? [existingRequisitionId] : []}
@@ -134,7 +137,9 @@ export default function AddRequisitionForm({
                 >
                   <SelectLabel />
                   <SelectTrigger>
-                    <SelectValueText placeholder="Select a connection" />
+                    <SelectValueText
+                      placeholder={l.bankConnections.selectPlaceholder}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {existingReqs.items.map((item) => (
@@ -151,7 +156,7 @@ export default function AddRequisitionForm({
                 disabled={!existingRequisitionId || isSubmitting}
                 loading={isSubmitting}
               >
-                Register Connection
+                {l.general.create}
               </Button>
             </VStack>
           </form>
@@ -161,14 +166,14 @@ export default function AddRequisitionForm({
       {/* Create New Connection */}
       <Box>
         <Heading size="lg" mb={4}>
-          Create New Connection
+          {l.bankConnections.newConnection}
         </Heading>
         <Text color="fg.muted" mb={4}>
-          Connect to a new bank by selecting your financial institution.
+          {l.bankConnections.newConnection}
         </Text>
         <form onSubmit={submitNew}>
           <VStack gap={4} align="stretch">
-            <Field label="Select Bank" required>
+            <Field label={l.bankAccounts.title} required>
               <SelectRoot
                 collection={institutionList}
                 value={newInstitutionId ? [newInstitutionId] : []}
@@ -176,7 +181,7 @@ export default function AddRequisitionForm({
               >
                 <SelectLabel />
                 <SelectTrigger>
-                  <SelectValueText placeholder="Select your bank" />
+                  <SelectValueText placeholder={l.general.search} />
                 </SelectTrigger>
                 <SelectContent>
                   {institutionList.items.map((item) => (
@@ -193,7 +198,7 @@ export default function AddRequisitionForm({
               disabled={!newInstitutionId || isSubmitting}
               loading={isSubmitting}
             >
-              Connect to Bank
+              {l.bankConnections.addConnection}
             </Button>
           </VStack>
         </form>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import i18nService from '@/services/i18nService';
 import { deleteBankAccount } from '@/actions/bankAccounts';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -19,10 +20,14 @@ import {
 import { IconButton } from '@chakra-ui/react';
 
 export default function DeleteAccountButton({
-  goCardlessId
+  goCardlessId,
+  locale
 }: {
   goCardlessId: string;
+  locale: string;
 }) {
+  const l = i18nService.getLocale(locale);
+  const d = l.dialogs;
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -50,28 +55,24 @@ export default function DeleteAccountButton({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Account</DialogTitle>
+          <DialogTitle>{d.deleteAccountTitle}</DialogTitle>
         </DialogHeader>
         <DialogBody>
-          <p>
-            Are you sure you want to delete this account? This will permanently
-            remove:
-          </p>
+          <p>{d.deleteAccountConfirm}</p>
           <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-            <li>Account transaction history</li>
-            <li>Account permissions</li>
+            <li>{d.deleteAccountTransactions}</li>
+            <li>{d.deleteAccountPermissions}</li>
           </ul>
           <p style={{ marginTop: '10px' }}>
-            Note that you will be able to add this account again in the future,
-            at the loss of the above.
+            {d.deleteAccountNote}
           </p>
         </DialogBody>
         <DialogFooter>
           <DialogActionTrigger asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{d.cancel}</Button>
           </DialogActionTrigger>
           <Button colorPalette="red" onClick={handleDelete} disabled={deleting}>
-            {deleting ? 'Deleting...' : 'Delete Account'}
+            {deleting ? d.deleting : d.deleteAccountTitle}
           </Button>
         </DialogFooter>
         <DialogCloseTrigger />

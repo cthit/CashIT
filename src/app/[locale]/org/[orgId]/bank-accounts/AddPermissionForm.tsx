@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import i18nService from '@/services/i18nService';
 import { Field } from '@/components/ui/field';
 import { GammaSuperGroup } from '@/types/gamma';
 import {
@@ -21,7 +22,8 @@ export default function AddPermissionForm({
   accounts,
   groups,
   selectedAccountId,
-  orgId
+  orgId,
+  locale
 }: {
   accounts: Prisma.BankAccountGetPayload<{}>[];
   groups: {
@@ -32,7 +34,10 @@ export default function AddPermissionForm({
   }[];
   selectedAccountId?: string;
   orgId: string;
+  locale: string;
 }) {
+  const l = i18nService.getLocale(locale);
+  const d = l.dialogs;
   const router = useRouter();
 
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -90,9 +95,9 @@ export default function AddPermissionForm({
 
   return (
     <form onSubmit={submit}>
-      <Heading size="md">Set Account Access</Heading>
+      <Heading size="md">{d.setAccountAccess}</Heading>
 
-      <Field label="Account" required>
+      <Field label={d.selectAccount} required>
         <SelectRoot
           collection={accs}
           value={accId ? [accId] : []}
@@ -101,7 +106,7 @@ export default function AddPermissionForm({
         >
           <SelectLabel />
           <SelectTrigger>
-            <SelectValueText placeholder="Select an account" />
+            <SelectValueText placeholder={d.selectAccount} />
           </SelectTrigger>
           <SelectContent>
             {accs.items.map((item) => (
@@ -113,7 +118,7 @@ export default function AddPermissionForm({
         </SelectRoot>
       </Field>
 
-      <Field label="Super Group(s)">
+      <Field label={d.superGroups}>
         <SelectRoot
           multiple
           collection={groupList}
@@ -122,7 +127,7 @@ export default function AddPermissionForm({
         >
           <SelectLabel />
           <SelectTrigger>
-            <SelectValueText placeholder="Select group(s)" />
+            <SelectValueText placeholder={d.selectGroups} />
           </SelectTrigger>
           <SelectContent>
             {groupList.items.map((acc) => (
@@ -137,7 +142,7 @@ export default function AddPermissionForm({
       <Box p="2" />
 
       <Button variant="surface" type="submit">
-        Submit
+        {d.submit}
       </Button>
     </form>
   );

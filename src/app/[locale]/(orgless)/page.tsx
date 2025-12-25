@@ -14,7 +14,7 @@ export default async function Page(props: {
   return (
     <>
       <Heading as="h1" size="xl" display="inline" mr="auto">
-        Choose an organization
+        {l.navigation.chooseOrganization}
       </Heading>
       <Box p="2" />
       <Box p="2" />
