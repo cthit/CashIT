@@ -51,7 +51,8 @@ const sgToMembers = (
   return nl && sg
     ? sg.members.map((m) => ({
         id: m.user.id,
-        nick: m.user.firstName + ' ' + m.user.lastName,
+        nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
+        fullName: `${m.user.firstName} ${m.user.lastName}`,
         amount:
           nl.gammaNames
             .find((n) => n.gammaUserId === m.user.id)
@@ -59,7 +60,8 @@ const sgToMembers = (
       }))
     : sg?.members.map((m) => ({
         id: m.user.id,
-        nick: m.user.firstName + ' ' + m.user.lastName,
+        nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
+        fullName: `${m.user.firstName} ${m.user.lastName}`,
         amount: ''
       })) ?? [];
 };
@@ -195,7 +197,8 @@ export default function CreateNameListForm({
       names,
       router,
       trackIndividual,
-      type
+      type,
+      orgId
     ]
   );
 
@@ -203,7 +206,11 @@ export default function CreateNameListForm({
     if (!nl) return;
 
     const gammaNames = groupNames
-      .map((n) => ({ nick: n.nick, amount: +n.amount }))
+      .map((n) => ({
+        nameNick: n.nameNick,
+        fullName: n.fullName,
+        amount: +n.amount
+      }))
       .filter((n) => n.amount > 0);
 
     const blob = await pdf(
@@ -350,7 +357,7 @@ export default function CreateNameListForm({
           <Separator />
 
           {groupNames.map((member, index) => (
-            <Field label={member.nick} key={member.id}>
+            <Field label={member.nameNick} key={member.id}>
               {trackIndividual ? (
                 <Input
                   type="number"
