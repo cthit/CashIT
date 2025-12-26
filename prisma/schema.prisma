@@ -14,8 +14,24 @@ enum RequestStatus {
   REJECTED
 }
 
+model Organization {
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  primaryEmail           String
+  ownerGammaSuperGroupId String
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  expenses    Expense[]
+  invoices    Invoice[]
+  nameLists   NameList[]
+  zettleSales ZettleSale[]
+}
+
 model Expense {
-  id                Int     @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  organizationId    Int
   gammaSuperGroupId String?
   gammaGroupId      String?
   gammaUserId       String
@@ -36,11 +52,12 @@ model Expense {
 enum ExpenseType {
   EXPENSE
   INVOICE
-  CARD
 }
 
 model Invoice {
-  id                Int     @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  organizationId    Int
   gammaSuperGroupId String?
   gammaGroupId      String?
   gammaUserId       String
@@ -83,6 +100,8 @@ enum InvoiceItemVat {
 
 model NameList {
   id                Int                  @id @default(autoincrement())
+  organization      Organization         @relation(fields: [organizationId], references: [id])
+  organizationId    Int
   gammaSuperGroupId String?
   gammaGroupId      String?
   gammaUserId       String
@@ -142,16 +161,18 @@ model NamedMedia {
 }
 
 model ZettleSale {
-  id                Int      @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  organizationId    Int
   gammaSuperGroupId String
   gammaGroupId      String
   gammaUserId       String
-  amount            Float    @db.DoublePrecision
+  amount            Float        @db.DoublePrecision
   description       String
   name              String
-  saleDate          DateTime @db.Date
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  saleDate          DateTime     @db.Date
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@unique([gammaGroupId, saleDate])
 }

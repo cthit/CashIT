@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { IconButton, LinkOverlay } from '@chakra-ui/react';
+import { IconButton } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -12,10 +12,8 @@ import {
 } from '@/components/ui/menu';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { PiCoins } from 'react-icons/pi';
-import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { EmptyState } from '../ui/empty-state';
-import styles from './ZettleSalesTable.module.css';
 import ZettleSaleService from '@/services/zettleSaleService';
 import { deleteZettleSale } from '@/actions/zettleSales';
 import { GammaGroupMember, GammaSuperGroup, GammaUser } from '@/types/gamma';
@@ -46,16 +44,19 @@ interface SaleRow {
   date: Date;
   person: string;
   total: number;
+  url: string;
 }
 
 const ZettleSalesTable = ({
   e,
   superGroups,
-  locale
+  locale,
+  orgId
 }: {
   e: ZettleSale[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
+  orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -82,23 +83,16 @@ const ZettleSalesTable = ({
         group: getGroupDisplayName(sale.gammaSuperGroupId),
         date: sale.saleDate,
         person: `${sale.user?.firstName} "${sale.user?.nick}" ${sale.user?.lastName}`,
-        total: sale.amount
+        total: sale.amount,
+        url: `/org/${orgId}/zettle-sales/view?id=${sale.id}`
       } as SaleRow;
     });
-  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup]);
+  }, [superGroups, e, l.group.noGroup, l.group.unknownGroup, orgId]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
       header: l.general.description,
-      cell: (info) => (
-        <LinkOverlay
-          as={Link}
-          href={'/invoices/view?id=' + info.row.original.id}
-          className={styles.overlay}
-        >
-          {info.getValue()}
-        </LinkOverlay>
-      )
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor('group', {
       header: l.expense.group,
@@ -123,7 +117,7 @@ const ZettleSalesTable = ({
       id: 'actions',
       cell: (info) => {
         const sale = info.row.original;
-        return <SaleActions id={sale.id} locale={locale} />;
+        return <SaleActions id={sale.id} locale={locale} orgId={orgId} />;
       }
     })
   ];
@@ -174,7 +168,15 @@ const ZettleSalesTable = ({
   );
 };
 
-const SaleActions = ({ id, locale }: { id: number; locale: string }) => {
+const SaleActions = ({
+  id,
+  locale,
+  orgId
+}: {
+  id: number;
+  locale: string;
+  orgId: number;
+}) => {
   const l = i18nService.getLocale(locale);
   const router = useRouter();
 
@@ -195,7 +197,9 @@ const SaleActions = ({ id, locale }: { id: number; locale: string }) => {
         <MenuItem
           value="edit"
           cursor="pointer"
-          onClick={() => router.push('/zettle-sales/view?id=' + id)}
+          onClick={() =>
+            router.push(`/org/${orgId}/zettle-sales/view?id=${id}`)
+          }
         >
           {l.general.edit}
         </MenuItem>

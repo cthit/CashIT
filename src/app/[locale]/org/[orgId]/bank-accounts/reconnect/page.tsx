@@ -1,0 +1,71 @@
+import { Box, Heading, Text } from '@chakra-ui/react';
+import {
+  BreadcrumbCurrentLink,
+  BreadcrumbLink,
+  BreadcrumbRoot
+} from '@/components/ui/breadcrumb';
+import Link from 'next/link';
+import i18nService from '@/services/i18nService';
+import SessionService from '@/services/sessionService';
+import { notFound } from 'next/navigation';
+import GoCardlessService from '@/services/goCardlessService';
+import RecreateRequisitionButton from './RecreateRequisitionButton';
+
+export default async function Page(props: {
+  params: Promise<{ locale: string; orgId: string }>;
+  searchParams: Promise<{ requisition?: string }>;
+}) {
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  if (!divisionTreasurer) {
+    notFound();
+  }
+  const requisitionId = (await props.searchParams).requisition;
+  if (!requisitionId) {
+    notFound();
+  }
+
+  const { locale, orgId } = await props.params;
+  const l = i18nService.getLocale(locale);
+
+  const requisitions = (await GoCardlessService.getRequisitions()).results;
+  const requisition = requisitions.find((r) => r.id === requisitionId);
+  if (!requisition) {
+    notFound();
+  }
+
+  return (
+    <>
+      <BreadcrumbRoot>
+        <BreadcrumbLink as={Link} href={`/org/${orgId}`}>
+          {l.home.title}
+        </BreadcrumbLink>
+        <BreadcrumbLink as={Link} href={`/org/${orgId}/bank-accounts`}>
+          {l.bankAccounts.title}
+        </BreadcrumbLink>
+        <BreadcrumbCurrentLink>
+          {l.accountManagement.reconnectBankAccounts}
+        </BreadcrumbCurrentLink>
+      </BreadcrumbRoot>
+      <Box p="4" />
+
+      <Heading as="h1" size="xl" display="inline" mr="auto">
+        {l.accountManagement.reconnectBankAccounts}
+      </Heading>
+      <Text>
+        {l.accountManagement.connectDescription
+          .replace('{count}', requisition.accounts.length.toString())
+          .replace(
+            '{plural}',
+            requisition.accounts.length !== 1
+              ? l.accountManagement.accounts
+              : l.accountManagement.account
+          )}
+      </Text>
+      <RecreateRequisitionButton
+        id={requisition.id}
+        orgId={orgId}
+        locale={locale}
+      />
+    </>
+  );
+}

@@ -1,0 +1,216 @@
+import i18nService from '@/services/i18nService';
+import SessionService from '@/services/sessionService';
+import {
+  Badge,
+  Box,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
+  Separator,
+  Text,
+  VStack
+} from '@chakra-ui/react';
+import Link from 'next/link';
+import './page.css';
+import ExpenseService from '@/services/expenseService';
+import InvoiceService from '@/services/invoiceService';
+import {
+  MdOutlineArrowForwardIos,
+  MdReceiptLong,
+  MdAttachMoney
+} from 'react-icons/md';
+import BankAccountService from '@/services/bankAccountService';
+import BankAccountsCard from '@/components/BankAccountsCard/BankAccountsCard';
+import { notFound } from 'next/navigation';
+import OrgService from '@/services/orgService';
+
+export default async function Home(props: {
+  params: Promise<{ locale: string; orgId: string }>;
+}) {
+  const { locale, orgId } = await props.params;
+  const l = i18nService.getLocale(locale);
+
+  const organization = await OrgService.getById(Number(orgId));
+  if (!organization) {
+    notFound();
+  }
+
+  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const unpaid = await (divisionTreasurer
+    ? ExpenseService.getUnpaid(organization.id)
+    : SessionService.getExpenses());
+  const unsent = await (divisionTreasurer
+    ? InvoiceService.getUnsent(organization.id)
+    : SessionService.getInvoices());
+
+  const bankAccounts = divisionTreasurer
+    ? await BankAccountService.getAll()
+    : await SessionService.getBankAccounts();
+
+  return (
+    <VStack gap={8} align="stretch" maxW="6xl" mx="auto">
+      <Box textAlign="center" py={8}>
+        <Heading as="h1" size="2xl">
+          Welcome to CashIT!
+        </Heading>
+        <Heading as="h2" size="lg" fontWeight="normal" color="fg.muted">
+          {organization.name}
+        </Heading>
+        <Text fontSize="sm" color="fg.muted" mt={4}>
+          This service is in beta and is subject to change. Please report any bugs or
+          issues to Goose or on{' '}
+          <Link
+            href="https://github.com/cthit/CashIT/issues"
+            target="_blank"
+            style={{
+              color: 'var(--chakra-colors-blue-500)',
+              textDecoration: 'underline'
+            }}
+          >
+            GitHub
+          </Link>
+          .
+        </Text>
+      </Box>
+
+      <VStack gap={6} align="stretch">
+        <Grid
+          className="stats-grid"
+          templateColumns={{
+            base: '1fr',
+            md: 'repeat(auto-fit, minmax(300px, 1fr))'
+          }}
+          gap={6}
+        >
+          {bankAccounts.length > 0 && (
+            <BankAccountsCard
+              accounts={bankAccounts}
+              locale={locale}
+              linkToControls={divisionTreasurer}
+              orgId={Number(orgId)}
+            />
+          )}
+
+          <Box
+            className="stats-card"
+            borderWidth="1px"
+            borderRadius="lg"
+            overflow="hidden"
+            bg="bg.surface"
+          >
+            <Link href={`/org/${orgId}/expenses`}>
+              <Box p={4} _hover={{ bg: 'bg.subtle' }} cursor="pointer">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <VStack align="start" gap={1} height="3rem">
+                    <HStack gap={2}>
+                      <MdReceiptLong
+                        size={20}
+                        color="var(--chakra-colors-orange-500)"
+                      />
+                      <Heading as="h3" size="lg">
+                        {l.categories.expenses}
+                      </Heading>
+                    </HStack>
+                    <Badge
+                      size="sm"
+                      colorPalette={unpaid.length > 0 ? 'orange' : 'gray'}
+                      variant={unpaid.length > 0 ? 'solid' : 'subtle'}
+                    >
+                      {unpaid.length}{' '}
+                      {unpaid.length === 1
+                        ? l.economy.unpaid
+                        : l.economy.unpaidPlural}
+                    </Badge>
+                  </VStack>
+                  <MdOutlineArrowForwardIos
+                    size={16}
+                    color="var(--chakra-colors-fg-muted)"
+                  />
+                </Flex>
+              </Box>
+            </Link>
+            <Separator />
+            <Box p={4}>
+              <Flex justifyContent="space-between" alignItems="center">
+                <Text color="fg.muted" fontWeight="medium">
+                  {l.economy.total}
+                </Text>
+                <Text
+                  fontSize="lg"
+                  fontWeight="bold"
+                  color={unpaid.length > 0 ? 'orange.500' : 'fg.default'}
+                >
+                  {i18nService.formatNumber(
+                    unpaid.reduce((a, b) => a + b.amount, 0)
+                  )}
+                </Text>
+              </Flex>
+            </Box>
+          </Box>
+
+          <Box
+            className="stats-card"
+            borderWidth="1px"
+            borderRadius="lg"
+            overflow="hidden"
+            bg="bg.surface"
+          >
+            <Link href={`/org/${orgId}/invoices`}>
+              <Box p={4} _hover={{ bg: 'bg.subtle' }} cursor="pointer">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <VStack align="start" gap={1} height="3rem">
+                    <HStack gap={2}>
+                      <MdAttachMoney
+                        size={20}
+                        color="var(--chakra-colors-green-500)"
+                      />
+                      <Heading as="h3" size="lg">
+                        {l.categories.invoices}
+                      </Heading>
+                    </HStack>
+                    <Badge
+                      size="sm"
+                      colorPalette={unsent.length > 0 ? 'green' : 'gray'}
+                      variant={unsent.length > 0 ? 'solid' : 'subtle'}
+                    >
+                      {unsent.length}{' '}
+                      {unsent.length === 1
+                        ? l.economy.unpaid
+                        : l.economy.unpaidPlural}
+                    </Badge>
+                  </VStack>
+                  <MdOutlineArrowForwardIos
+                    size={16}
+                    color="var(--chakra-colors-fg-muted)"
+                  />
+                </Flex>
+              </Box>
+            </Link>
+            <Separator />
+            <Box p={4}>
+              <Flex justifyContent="space-between" alignItems="center">
+                <Text color="fg.muted" fontWeight="medium">
+                  {l.economy.total}
+                </Text>
+                <Text
+                  fontSize="lg"
+                  fontWeight="bold"
+                  color={unsent.length > 0 ? 'green.500' : 'fg.default'}
+                >
+                  {i18nService.formatNumber(
+                    unsent.reduce(
+                      (a, b) =>
+                        a + InvoiceService.calculateSumForItems(b.items),
+                      0
+                    )
+                  )}
+                </Text>
+              </Flex>
+            </Box>
+          </Box>
+        </Grid>
+      </VStack>
+    </VStack>
+  );
+}

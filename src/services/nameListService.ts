@@ -95,6 +95,7 @@ export default class NameListService {
     gammaSuperGroupId: string,
     gammaGroupId: string,
     gammaUserId: string,
+    orgId: number,
     name: string,
     type: NameListType,
     names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -115,6 +116,7 @@ export default class NameListService {
         gammaSuperGroupId,
         gammaGroupId,
         gammaUserId,
+        organizationId: orgId,
         name,
         type,
         names: {
@@ -132,6 +134,7 @@ export default class NameListService {
 
   static async createPersonal(
     gammaUserId: string,
+    orgId: number,
     name: string,
     type: NameListType,
     names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -150,6 +153,7 @@ export default class NameListService {
     const expense = await prisma.nameList.create({
       data: {
         gammaUserId,
+        organizationId: orgId,
         name,
         type,
         names: {
@@ -168,6 +172,7 @@ export default class NameListService {
   static async edit(
     id: number,
     gammaGroupId: string | null,
+    gammaSuperGroupId: string | null,
     name: string,
     type: NameListType,
     names: Prisma.NameListEntryCreateNestedManyWithoutNameListInput['create'],
@@ -190,6 +195,7 @@ export default class NameListService {
       data: {
         name,
         gammaGroupId,
+        gammaSuperGroupId,
         type,
         names: {
           // IMPORTANT: Do not change the order of these operations

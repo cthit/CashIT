@@ -1,3 +1,0 @@
-.overlay::before {
-  border-bottom: 1px var(--global-color-border, currentColor) solid;
-}

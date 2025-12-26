@@ -20,6 +20,7 @@ export async function getExpensesForGroup(gammaSuperGroupId: string) {
 
 export async function createExpenseForGroup(
   gammaGroupId: string,
+  orgId: number,
   amount: number,
   name: string,
   description: string,
@@ -63,6 +64,7 @@ export async function createExpenseForGroup(
     group.superGroup.id,
     gammaGroupId,
     gammaUserId,
+    orgId,
     amount,
     name,
     description,
@@ -72,9 +74,9 @@ export async function createExpenseForGroup(
   );
 }
 
-export async function editExpenseForGroup(
+export async function editExpense(
   id: number,
-  gammaGroupId: string,
+  gammaGroupId: string | null,
   amount: number,
   name: string,
   description: string,
@@ -85,33 +87,42 @@ export async function editExpenseForGroup(
 ) {
   const gammaUserId = (await SessionService.getUser())?.id;
   if (!gammaUserId) {
-    throw new Error('User is not logged in and cannot create an expense');
-  }
-
-  const group = (await SessionService.getGroups()).find(
-    (g) => g.group.id === gammaGroupId
-  )?.group;
-  if (group === undefined) {
-    throw new Error('Group does not exist');
+    throw new Error('User is not logged in and cannot edit an expense');
   }
 
   const existing = await ExpenseService.getById(id);
 
   if (existing === null) {
     throw new Error('Expense does not exist');
-  } else if (
-    existing.gammaSuperGroupId === null ||
-    existing.gammaGroupId === null
-  ) {
-    throw new Error('Expense is not a group expense');
-  } else if (existing.gammaGroupId !== group.id) {
-    throw new Error('Group does not own this expense');
+  }
+
+  // Check if user has permission to edit this expense
+  // User can edit if:
+  // 1. They created the expense (for personal expenses)
+  // 2. They belong to the group that owns the expense (for group expenses)
+  const userGroups = await SessionService.getGroups();
+  const canEdit =
+    existing.gammaUserId === gammaUserId || // User created it
+    (existing.gammaGroupId !== null &&
+      userGroups.some((g) => g.group.id === existing.gammaGroupId)); // User belongs to the group
+
+  if (!canEdit) {
+    throw new Error('User does not have permission to edit this expense');
   }
 
   if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
     throw new Error(
       'Expense cannot be edited after it has been paid or approved'
     );
+  }
+
+  // Validate the new group if specified
+  let group = null;
+  if (gammaGroupId !== null) {
+    group = userGroups.find((g) => g.group.id === gammaGroupId)?.group;
+    if (group === undefined) {
+      throw new Error('Group does not exist or user does not have access to it');
+    }
   }
 
   const receipts = (
@@ -134,21 +145,35 @@ export async function editExpenseForGroup(
     throw new Error('No files were uploaded');
   }
 
-  return ExpenseService.editForGroup(
-    id,
-    group.superGroup.id,
-    gammaGroupId,
-    gammaUserId,
-    amount,
-    name,
-    description,
-    date,
-    receipts.concat(uploadedFiles),
-    type
-  );
+  // Update as group expense or personal expense based on gammaGroupId
+  if (gammaGroupId !== null && group !== null) {
+    return ExpenseService.editForGroup(
+      id,
+      group.superGroup.id,
+      gammaGroupId,
+      gammaUserId,
+      amount,
+      name,
+      description,
+      date,
+      receipts.concat(uploadedFiles),
+      type
+    );
+  } else {
+    return ExpenseService.editPersonal(
+      id,
+      gammaUserId,
+      amount,
+      name,
+      description,
+      receipts.concat(uploadedFiles),
+      type
+    );
+  }
 }
 
 export async function createPersonalExpense(
+  orgId: number,
   amount: number,
   name: string,
   description: string,
@@ -183,75 +208,12 @@ export async function createPersonalExpense(
 
   return ExpenseService.createPersonal(
     gammaUserId,
+    orgId,
     amount,
     name,
     description,
     date,
     receipts,
-    type
-  );
-}
-
-export async function editPersonalExpense(
-  id: number,
-  amount: number,
-  name: string,
-  description: string,
-  files: FormData,
-  uploadedFiles: number[],
-  type: ExpenseType
-) {
-  const gammaUserId = (await SessionService.getUser())?.id;
-  if (!gammaUserId) {
-    throw new Error('User is not logged in and cannot create an expense');
-  }
-
-  const existing = await ExpenseService.getById(id);
-
-  if (existing === null) {
-    throw new Error('Expense does not exist');
-  } else if (
-    existing.gammaSuperGroupId !== null ||
-    existing.gammaGroupId !== null
-  ) {
-    throw new Error('Expense is not a personal expense');
-  } else if (existing.gammaUserId !== gammaUserId) {
-    throw new Error('User does not own this expense');
-  }
-
-  if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
-    throw new Error(
-      'Expense cannot be edited after it has been paid or approved'
-    );
-  }
-
-  const receipts = (
-    await Promise.all(
-      Array.from(files.getAll('file') as unknown as File[]).map(
-        async (file) => {
-          return await MediaService.saveNamed(
-            file,
-            file.name,
-            Object.values(MediaType)
-          );
-        }
-      )
-    )
-  )
-    .filter((r) => r !== null)
-    .map((r) => r.id);
-
-  if (receipts.concat(uploadedFiles).length === 0) {
-    throw new Error('No files were uploaded');
-  }
-
-  return ExpenseService.editPersonal(
-    id,
-    gammaUserId,
-    amount,
-    name,
-    description,
-    receipts.concat(uploadedFiles),
     type
   );
 }

@@ -1,9 +1,16 @@
 import i18nService from '@/services/i18nService';
 import NameListService from '@/services/nameListService';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Font
+} from '@react-pdf/renderer';
 Font.registerEmojiSource({
   format: 'png',
-  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
+  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/'
 });
 
 const styles = StyleSheet.create({
@@ -50,7 +57,7 @@ const NameListPdf = ({
 }: {
   nl: Awaited<ReturnType<typeof NameListService.getById>>;
   locale: string;
-  gammaNames: { nick: string; amount: number }[];
+  gammaNames: { fullName: string; amount: number }[];
 }) => {
   if (nl === null) return null;
 
@@ -96,8 +103,8 @@ const NameListPdf = ({
             </View>
           ))}
           {gammaNames.map((name) => (
-            <View key={name.nick} style={styles.head}>
-              <Text>{name.nick}</Text>
+            <View key={name.fullName} style={styles.head}>
+              <Text>{name.fullName}</Text>
               {nl.tracked && <Text>{name.amount.toFixed(2)}</Text>}
             </View>
           ))}

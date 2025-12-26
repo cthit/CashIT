@@ -24,7 +24,7 @@ export async function registerBankAccount(id: string, requisitionId: string) {
   return await GoCardlessService.registerBankAccount(id, requisitionId);
 }
 
-export async function recreateRequisition(id: string) {
+export async function recreateRequisition(id: string, orgId: string) {
   const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!isDivisionTreasurer) {
     throw new Error('User is not a division treasurer');
@@ -50,7 +50,10 @@ export async function recreateRequisition(id: string) {
   });
 }
 
-export async function createNewRequisition(institutionId: string) {
+export async function createNewRequisition(
+  institutionId: string,
+  orgId: string
+) {
   const isDivisionTreasurer = await SessionService.isDivisionTreasurer();
   if (!isDivisionTreasurer) {
     throw new Error('User is not a division treasurer');
@@ -65,7 +68,7 @@ export async function createNewRequisition(institutionId: string) {
     Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
 
   return await GoCardlessService.createRequisition({
-    redirect: `${baseUrl}/bank-accounts/finalize-connect`,
+    redirect: `${baseUrl}/org/${orgId}/bank-accounts/finalize-connect`,
     institution_id: institutionId,
     reference: `cashit-${refId}`
   });

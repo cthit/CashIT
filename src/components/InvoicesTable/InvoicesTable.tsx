@@ -13,7 +13,6 @@ import {
   Badge,
   Box,
   IconButton,
-  LinkOverlay,
   Separator,
   Text
 } from '@chakra-ui/react';
@@ -36,8 +35,6 @@ import { RequestStatus } from '@prisma/client';
 import { PiChatFill, PiFileX, PiReceipt } from 'react-icons/pi';
 import InvoiceService from '@/services/invoiceService';
 import { EmptyState } from '../ui/empty-state';
-import Link from 'next/link';
-import styles from './InvoicesTable.module.css';
 import i18nService from '@/services/i18nService';
 import { GammaGroupMember, GammaSuperGroup, GammaUser } from '@/types/gamma';
 import {
@@ -72,16 +69,19 @@ interface InvoiceRow {
   status: InvoiceStatus;
   statusText: string;
   groupId?: string;
+  url: string;
 }
 
 const InvoicesTable = ({
   e,
   locale,
-  superGroups
+  superGroups,
+  orgId
 }: {
   e: Invoice[];
   locale: string;
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
+  orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
 
@@ -118,23 +118,16 @@ const InvoicesTable = ({
         total: InvoiceService.calculateSumForItems(invoice.items),
         status: status,
         statusText: RequestStatusText({ b: status, locale: locale }),
-        groupId: invoice.gammaGroupId
+        groupId: invoice.gammaGroupId,
+        url: `/org/${orgId}/invoices/view?id=${invoice.id}`
       } as InvoiceRow;
     });
-  }, [e, l.group.noGroup, l.group.unknownGroup, locale, superGroups]);
+  }, [e, l.group.noGroup, l.group.unknownGroup, locale, orgId, superGroups]);
 
   const defaultColumns = [
     columnHelper.accessor('description', {
       header: l.general.description,
-      cell: (info) => (
-        <LinkOverlay
-          as={Link}
-          href={'/invoices/view?id=' + info.row.original.id}
-          className={styles.overlay}
-        >
-          {info.getValue()}
-        </LinkOverlay>
-      )
+      cell: (info) => info.getValue()
     }),
     columnHelper.accessor('group', {
       header: l.expense.group,

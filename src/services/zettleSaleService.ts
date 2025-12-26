@@ -61,6 +61,7 @@ export default class ZettleSaleService {
     gammaSuperGroupId: string,
     gammaGroupId: string,
     gammaUserId: string,
+    orgId: number,
     name: string,
     amount: number,
     saleDate: Date
@@ -70,6 +71,7 @@ export default class ZettleSaleService {
         gammaSuperGroupId,
         gammaGroupId,
         gammaUserId,
+        organizationId: orgId,
         name,
         description: '',
         amount,
@@ -78,12 +80,21 @@ export default class ZettleSaleService {
     });
   }
 
-  static async edit(id: number, name: string, amount: number, saleDate: Date) {
+  static async edit(
+    id: number,
+    gammaSuperGroupId: string,
+    gammaGroupId: string,
+    name: string,
+    amount: number,
+    saleDate: Date
+  ) {
     return await prisma.zettleSale.update({
       where: {
         id
       },
       data: {
+        gammaSuperGroupId,
+        gammaGroupId,
         name,
         amount,
         saleDate

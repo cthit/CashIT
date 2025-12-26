@@ -23,6 +23,7 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { createListCollection } from '@chakra-ui/react';
+import i18nService from '@/services/i18nService';
 import {
   getCachedAccountDetails,
   registerNewBankAccount,
@@ -80,11 +81,15 @@ interface ReconnectModeProps {
   requisition?: never;
 }
 
-type BankAccountManagerProps = ConnectModeProps | ReconnectModeProps;
+type BankAccountManagerProps = (ConnectModeProps | ReconnectModeProps) & {
+  orgId: string;
+  locale: string;
+};
 
 export default function BankAccountManager(props: BankAccountManagerProps) {
-  const { mode, existingAccounts } = props;
+  const { mode, existingAccounts, orgId, locale } = props;
   const router = useRouter();
+  const l = i18nService.getLocale(locale);
 
   // Extract accounts and requisitionId based on mode
   const accounts =
@@ -116,7 +121,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
   useEffect(() => {
     if (accounts.length === 0) {
       setTimeout(() => {
-        router.push('/bank-accounts');
+        router.push(`/org/${orgId}/bank-accounts`);
       }, 2000);
       return;
     }
@@ -146,12 +151,12 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
             [accountId]: {
               ...prev[accountId],
               loading: false,
-              error: 'Failed to load account details'
+              error: l.accountManagement.error
             }
           }));
         });
     });
-  }, [accounts, requisitionId, mode, router, existingAccounts]);
+  }, [accounts, requisitionId, mode, router, existingAccounts, orgId, l]);
 
   const updateAccountState = (
     accountId: string,
@@ -198,7 +203,10 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
           } catch (error) {
             updateAccountState(accountId, {
               loading: false,
-              error: error instanceof Error ? error.message : 'Operation failed'
+              error:
+                error instanceof Error
+                  ? error.message
+                  : l.accountManagement.operationFailed
             });
           }
         }
@@ -214,7 +222,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
       // Auto-redirect - immediate if no actions, delayed if actions were processed
       setTimeout(
         () => {
-          router.push('/bank-accounts');
+          router.push(`/org/${orgId}/bank-accounts`);
         },
         hadActionsToProcess ? 1500 : 0
       );
@@ -250,25 +258,34 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
   const getTitle = () => {
     switch (mode) {
       case 'connect':
-        return 'New Bank Connection';
+        return l.accountManagement.newBankConnection;
       case 'reconnect':
-        return 'Reconnect Bank Accounts';
+        return l.accountManagement.reconnectBankAccounts;
       default:
-        return 'Manage Bank Accounts';
+        return l.accountManagement.manageBankAccounts;
     }
   };
 
   const getDescription = () => {
     const accountCount = accounts.length;
-    const accountText = accountCount !== 1 ? 's' : '';
+    const plural =
+      accountCount !== 1
+        ? l.accountManagement.accounts
+        : l.accountManagement.account;
 
     switch (mode) {
       case 'connect':
-        return `Found ${accountCount} account${accountText} in your new connection. Choose what to do with each account below, then process all changes at once.`;
+        return l.accountManagement.connectDescription
+          .replace('{count}', accountCount.toString())
+          .replace('{plural}', plural);
       case 'reconnect':
-        return `Found ${accountCount} account${accountText} to reconnect. Choose what to do with each account below, then process all changes at once.`;
+        return l.accountManagement.reconnectDescription
+          .replace('{count}', accountCount.toString())
+          .replace('{plural}', plural);
       default:
-        return `Found ${accountCount} account${accountText}. Choose what to do with each account below.`;
+        return l.accountManagement.defaultDescription
+          .replace('{count}', accountCount.toString())
+          .replace('{plural}', plural);
     }
   };
 
@@ -276,13 +293,13 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
     return (
       <Box textAlign="center" p={8}>
         <Heading size="lg" color="green.600" mb={4}>
-          ✅ {mode === 'connect' ? 'Connection' : 'Reconnection'} Completed
-          Successfully!
+          ✅{' '}
+          {mode === 'connect'
+            ? l.accountManagement.newBankConnection
+            : l.accountManagement.reconnectBankAccounts}{' '}
+          {l.accountManagement.completedSuccessfully}
         </Heading>
-        <Text mb={4}>
-          All selected accounts have been processed. Redirecting to bank
-          accounts...
-        </Text>
+        <Text mb={4}>{l.accountManagement.allAccountsProcessed}</Text>
       </Box>
     );
   }
@@ -299,13 +316,13 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
       {accounts.length === 0 && (
         <Box textAlign="center" p={8} bg="bg.muted" rounded="md">
           <Heading size="md" mb={2}>
-            No Accounts Found
+            {l.bankConnections.noConnectionsFound}
           </Heading>
           <Text color="fg.muted" mb={4}>
-            No bank accounts were found in this connection.
+            {l.bankConnections.noBankAccountsFound}
           </Text>
           <Text mt={4} color="fg.muted">
-            Redirecting to bank accounts page...
+            {l.accountManagement.redirectingToAccounts}
           </Text>
         </Box>
       )}
@@ -331,7 +348,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
                 <VStack align="start" gap={1}>
                   <Text fontWeight="semibold">
                     {state.loading
-                      ? 'Loading account details...'
+                      ? l.accountManagement.loadingDetails + '...'
                       : state.details?.account.name ||
                         state.details?.account.product ||
                         accountId}
@@ -342,8 +359,14 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
                     </Text>
                   )}
                 </VStack>
-                {state.success && <Badge colorScheme="green">Processed</Badge>}
-                {state.error && <Badge colorScheme="red">Error</Badge>}
+                {state.success && (
+                  <Badge colorScheme="green">
+                    {l.accountManagement.processed}
+                  </Badge>
+                )}
+                {state.error && (
+                  <Badge colorScheme="red">{l.accountManagement.error}</Badge>
+                )}
               </HStack>
 
               {state.error && (
@@ -361,7 +384,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
               )}
 
               {!state.loading && !state.success && (
-                <Field label="What would you like to do with this account?">
+                <Field label={l.accountManagement.whatToDo}>
                   <RadioGroup
                     value={state.action}
                     onValueChange={(details) =>
@@ -372,7 +395,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
                   >
                     <VStack gap={3} align="start">
                       <Radio value="nothing">
-                        Do nothing (skip this account)
+                        {l.accountManagement.doNothing}
                       </Radio>
 
                       <Radio
@@ -380,17 +403,19 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
                         disabled={!!existingAccountWithSameIban}
                       >
                         <HStack>
-                          <Text>Register as new account</Text>
+                          <Text>{l.accountManagement.registerAsNew}</Text>
                           {existingAccountWithSameIban && (
                             <Badge colorScheme="orange" size="sm">
-                              IBAN already exists
+                              {l.accountManagement.ibanExists}
                             </Badge>
                           )}
                         </HStack>
                       </Radio>
 
                       {existingAccounts.length > 0 && (
-                        <Radio value="merge">Merge with existing account</Radio>
+                        <Radio value="merge">
+                          {l.accountManagement.mergeWithExisting}
+                        </Radio>
                       )}
                     </VStack>
                   </RadioGroup>
@@ -398,7 +423,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
               )}
 
               {state.action === 'register' && !state.success && (
-                <Field label="Account Name">
+                <Field label={l.accountManagement.accountName}>
                   <Input
                     value={
                       state.customName ||
@@ -411,7 +436,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
                         customName: e.target.value
                       })
                     }
-                    placeholder="Enter a name for this account"
+                    placeholder={l.accountManagement.accountName}
                   />
                 </Field>
               )}
@@ -419,7 +444,7 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
               {state.action === 'merge' &&
                 existingAccounts.length > 0 &&
                 !state.success && (
-                  <Field label="Select account to merge with">
+                  <Field label={l.accountManagement.mergeWithExisting}>
                     <SelectRoot
                       collection={existingAccountOptions}
                       value={
@@ -437,7 +462,9 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
                     >
                       <SelectLabel />
                       <SelectTrigger>
-                        <SelectValueText placeholder="Select existing account" />
+                        <SelectValueText
+                          placeholder={l.accountManagement.chooseAccount}
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {existingAccountOptions.items.map((item) => (
@@ -458,16 +485,16 @@ export default function BankAccountManager(props: BankAccountManagerProps) {
         <HStack justify="space-between" pt={4}>
           <Button
             variant="outline"
-            onClick={() => router.push('/bank-accounts')}
+            onClick={() => router.push(`/org/${orgId}/bank-accounts`)}
           >
-            Cancel
+            {l.general.delete}
           </Button>
           <Button
             variant="solid"
             onClick={processAllAccounts}
             disabled={!canProcess || isPending}
           >
-            Process All Accounts
+            {l.general.save}
           </Button>
         </HStack>
       )}

@@ -19,11 +19,12 @@ export default class InvoiceService {
     });
   }
 
-  static async getUnsent(gammaGroupId?: string) {
+  static async getUnsent(orgId: number, gammaGroupId?: string) {
     return await prisma.invoice.findMany({
       where: {
         gammaGroupId,
-        sentAt: null
+        sentAt: null,
+        organizationId: orgId
       },
       include: { items: true }
     });
@@ -107,6 +108,7 @@ export default class InvoiceService {
     gammaSuperGroupId: string,
     gammaGroupId: string,
     gammaUserId: string,
+    orgId: number,
     name: string,
     customerName: string,
     description: string,
@@ -131,6 +133,7 @@ export default class InvoiceService {
         gammaUserId,
         gammaSuperGroupId,
         gammaGroupId,
+        organizationId: orgId,
         name,
         customerName,
         description,
@@ -203,6 +206,7 @@ export default class InvoiceService {
 
   static async createPersonal(
     gammaUserId: string,
+    orgId: number,
     name: string,
     customerName: string,
     description: string,
@@ -225,6 +229,7 @@ export default class InvoiceService {
     const expense = await prisma.invoice.create({
       data: {
         gammaUserId,
+        organizationId: orgId,
         name,
         customerName,
         description,

@@ -15,11 +15,13 @@ import { MdAccountBalance, MdOutlineArrowForwardIos } from 'react-icons/md';
 export default function BankAccountsCard({
   accounts,
   locale,
-  linkToControls
+  linkToControls,
+  orgId = 1
 }: {
   accounts: Prisma.BankAccountGetPayload<{}>[];
   locale: string;
   linkToControls?: boolean;
+  orgId?: number;
 }) {
   const l = i18nService.getLocale(locale);
 
@@ -61,7 +63,7 @@ export default function BankAccountsCard({
       height="max-content"
     >
       {linkToControls ? (
-        <Link href="/bank-accounts">
+        <Link href={`/org/${orgId}/bank-accounts`}>
           <Flex
             _hover={{ bg: linkToControls ? 'bg.subtle' : undefined }}
             justifyContent="space-between"
@@ -87,7 +89,7 @@ export default function BankAccountsCard({
             {accounts.map((a) => (
               <Flex justifyContent="space-between" key={a.id}>
                 <Text>
-                  <Link href={'/bank-accounts/view?id=' + a.goCardlessId}>
+                  <Link href={`/org/${orgId}/bank-accounts/view?id=${a.goCardlessId}`}>
                     {a.name}
                   </Link>
                 </Text>

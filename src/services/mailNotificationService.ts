@@ -1,14 +1,33 @@
 import prisma from '@/prisma';
 import { RequestStatus } from '@prisma/client';
 import GotifyService from './gotifyService';
+import GammaService from './gammaService';
+import OrgService from './orgService';
 
 export default class MailNotificationService {
   static async notifyNewDocuments() {
+    const groups = (await GammaService.getAllSuperGroups()).filter((sg) =>
+      ['FUNCTIONARIES', 'ALUMNI'].includes(sg.superGroup.type)
+    );
+    const groupEmailMap = new Map<string, string>();
+    for (const group of groups) {
+      groupEmailMap.set(
+        group.superGroup.id,
+        `kassor.${group.superGroup.name}@chalmers.it`
+      );
+    }
+
+    const orgs = await OrgService.getAll();
+    const orgEmailMap = new Map<number, string>();
+    for (const org of orgs) {
+      if (org.primaryEmail) {
+        orgEmailMap.set(org.id, org.primaryEmail);
+      }
+    }
+
     const expenses = await prisma.expense.findMany({
       where: {
-        createdAt: {
-          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24)
-        },
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
         paidAt: null,
         status: RequestStatus.PENDING
       }
@@ -16,50 +35,75 @@ export default class MailNotificationService {
 
     const invoices = await prisma.invoice.findMany({
       where: {
-        createdAt: {
-          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24)
-        },
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
         sentAt: null,
         status: RequestStatus.PENDING
       }
     });
 
-    if (expenses.length === 0 && invoices.length === 0) {
-      return;
+    if (expenses.length === 0 && invoices.length === 0) return;
+
+    const documentsByEmail = new Map<
+      string,
+      { expenses: typeof expenses; invoices: typeof invoices }
+    >();
+
+    const getEmail = (groupId: string | null, orgId: number | null) =>
+      groupId && groupEmailMap.has(groupId)
+        ? groupEmailMap.get(groupId)!
+        : orgId && orgEmailMap.has(orgId)
+        ? orgEmailMap.get(orgId)!
+        : process.env.DIVISION_TREASURER_EMAIL ?? 'kassor.styrit@chalmers.it';
+
+    for (const expense of expenses) {
+      const email = getEmail(expense.gammaSuperGroupId, expense.organizationId);
+      if (!documentsByEmail.has(email))
+        documentsByEmail.set(email, { expenses: [], invoices: [] });
+      documentsByEmail.get(email)!.expenses.push(expense);
     }
 
-    let message = 'You have new documents to review:\n\n';
-
-    if (expenses.length > 0) {
-      message +=
-        expenses.length +
-        (expenses.length === 1 ? ' expense:\n' : ' expenses:\n');
-      message += expenses
-        .map(
-          (e) =>
-            ` - ${e.name}: ${process.env.BASE_URL}/expenses/view?id=${e.id}`
-        )
-        .join('\n');
-      message += '\n';
+    for (const invoice of invoices) {
+      const email = getEmail(invoice.gammaSuperGroupId, invoice.organizationId);
+      if (!documentsByEmail.has(email))
+        documentsByEmail.set(email, { expenses: [], invoices: [] });
+      documentsByEmail.get(email)!.invoices.push(invoice);
     }
 
-    if (invoices.length > 0) {
-      message +=
-        expenses.length +
-        (expenses.length === 1 ? ' invoice:\n' : ' invoices:\n');
-      message += invoices
-        .map(
-          (i) =>
-            ` - ${i.name}: ${process.env.BASE_URL}/invoices/view?id=${i.id}`
-        )
-        .join('\n');
-    }
+    for (const [
+      email,
+      { expenses: groupExpenses, invoices: groupInvoices }
+    ] of documentsByEmail) {
+      let message = 'You have new documents to review:\n\n';
+      if (groupExpenses.length > 0) {
+        message += `${groupExpenses.length} expense${
+          groupExpenses.length === 1 ? '' : 's'
+        }:\n`;
+        message +=
+          groupExpenses
+            .map(
+              (e) =>
+                ` - ${e.name}: ${process.env.BASE_URL}/org/${e.organizationId}/expenses/view?id=${e.id}`
+            )
+            .join('\n') + '\n';
+      }
+      if (groupInvoices.length > 0) {
+        message += `${groupInvoices.length} invoice${
+          groupInvoices.length === 1 ? '' : 's'
+        }:\n`;
+        message += groupInvoices
+          .map(
+            (i) =>
+              ` - ${i.name}: ${process.env.BASE_URL}/org/${i.organizationId}/invoices/view?id=${i.id}`
+          )
+          .join('\n');
+      }
 
-    await GotifyService.sendMessage(
-      'kassor@chalmers.it',
-      'noreply.cashit@chalmers.it',
-      'New documents to review',
-      message
-    );
+      await GotifyService.sendMessage(
+        email,
+        'noreply.cashit@chalmers.it',
+        'New documents to review',
+        message
+      );
+    }
   }
 }
