@@ -2,19 +2,23 @@ import prisma from '@/prisma';
 import { InvoiceItemVat, Prisma, RequestStatus } from '@prisma/client';
 
 export default class InvoiceService {
-  static async getAll() {
+  static async getAll(orgId: number) {
     return await prisma.invoice.findMany({
+      where: {
+        organizationId: orgId
+      },
       include: {
         items: true
       }
     });
   }
 
-  static async getUnsentCount(gammaGroupId?: string) {
+  static async getUnsentCount(orgId: number, gammaGroupId?: string) {
     return await prisma.invoice.count({
       where: {
         gammaGroupId,
-        sentAt: null
+        sentAt: null,
+        organizationId: orgId
       }
     });
   }
@@ -30,10 +34,11 @@ export default class InvoiceService {
     });
   }
 
-  static async getForSuperGroup(gammaSuperGroupId: string) {
+  static async getForSuperGroup(orgId: number, gammaSuperGroupId: string) {
     const expenses = await prisma.invoice.findMany({
       where: {
-        gammaSuperGroupId
+        gammaSuperGroupId,
+        organizationId: orgId
       },
       include: {
         items: true
@@ -54,10 +59,11 @@ export default class InvoiceService {
     return expense;
   }
 
-  static async getForGroup(gammaGroupId: string) {
+  static async getForGroup(orgId: number, gammaGroupId: string) {
     const expenses = await prisma.invoice.findMany({
       where: {
-        gammaGroupId
+        gammaGroupId,
+        organizationId: orgId
       },
       include: {
         items: true
@@ -66,12 +72,13 @@ export default class InvoiceService {
     return expenses;
   }
 
-  static async getForUser(gammaUserId: string) {
+  static async getForUser(orgId: number, gammaUserId: string) {
     return await prisma.invoice.findMany({
       where: {
         gammaSuperGroupId: null,
         gammaGroupId: null,
-        gammaUserId
+        gammaUserId,
+        organizationId: orgId
       },
       include: {
         items: true
@@ -80,12 +87,14 @@ export default class InvoiceService {
   }
 
   static async getForUserWithGroups(
+    orgId: number,
     gammaUserId: string,
     groups: string[],
     superGroups: string[]
   ) {
     return await prisma.invoice.findMany({
       where: {
+        organizationId: orgId,
         OR: [
           {
             gammaUserId

@@ -56,11 +56,12 @@ export default class SessionService {
       : [];
   }
 
-  static async getInvoices(s?: Session | null) {
+  static async getInvoices(orgId: number, s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
       ? await InvoiceService.getForUserWithGroups(
+          orgId,
           session?.user?.id!,
           groupIds,
           []
@@ -68,11 +69,12 @@ export default class SessionService {
       : [];
   }
 
-  static async getExpenses(s?: Session | null) {
+  static async getExpenses(orgId: number, s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
       ? await ExpenseService.getForUserWithGroups(
+          orgId,
           session?.user?.id!,
           groupIds,
           []
@@ -80,11 +82,12 @@ export default class SessionService {
       : [];
   }
 
-  static async getNameLists(s?: Session | null) {
+  static async getNameLists(orgId: number, s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
       ? await NameListService.getForUserWithGroups(
+          orgId,
           session?.user?.id!,
           groupIds,
           []
@@ -92,11 +95,12 @@ export default class SessionService {
       : [];
   }
 
-  static async getZettleSales(s?: Session | null) {
+  static async getZettleSales(orgId: number, s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
     return session?.user?.id
       ? await ZettleSaleService.getForUserWithGroups(
+          orgId,
           session?.user?.id!,
           groupIds,
           []

@@ -50,10 +50,11 @@ export default class ExpenseService {
     return expenses;
   }
 
-  static async getForGroup(gammaGroupId: string) {
+  static async getForGroup(orgId: number, gammaGroupId: string) {
     const expenses = await prisma.expense.findMany({
       where: {
-        gammaGroupId
+        gammaGroupId,
+        organizationId: orgId
       },
       include: {
         receipts: {
@@ -78,12 +79,13 @@ export default class ExpenseService {
     return expense;
   }
 
-  static async getForUser(gammaUserId: string) {
+  static async getForUser(orgId: number, gammaUserId: string) {
     return await prisma.expense.findMany({
       where: {
         gammaSuperGroupId: null,
         gammaGroupId: null,
-        gammaUserId
+        gammaUserId,
+        organizationId: orgId
       },
       include: {
         receipts: {
@@ -94,12 +96,14 @@ export default class ExpenseService {
   }
 
   static async getForUserWithGroups(
+    orgId: number,
     gammaUserId: string,
     groups: string[],
     superGroups: string[]
   ) {
     return await prisma.expense.findMany({
       where: {
+        organizationId: orgId,
         OR: [
           {
             gammaUserId
