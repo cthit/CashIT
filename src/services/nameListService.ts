@@ -3,8 +3,11 @@ import { NameListType, Prisma } from '@prisma/client';
 import i18nService from './i18nService';
 
 export default class NameListService {
-  static async getAll() {
+  static async getAll(orgId: number) {
     return await prisma.nameList.findMany({
+      where: {
+        organizationId: orgId
+      },
       include: {
         names: true,
         gammaNames: true
@@ -12,10 +15,11 @@ export default class NameListService {
     });
   }
 
-  static async getForSuperGroup(gammaSuperGroupId: string) {
+  static async getForSuperGroup(orgId: number, gammaSuperGroupId: string) {
     const expenses = await prisma.nameList.findMany({
       where: {
-        gammaSuperGroupId
+        gammaSuperGroupId,
+        organizationId: orgId
       },
       include: {
         names: true,
@@ -38,10 +42,11 @@ export default class NameListService {
     return expense;
   }
 
-  static async getForGroup(gammaGroupId: string) {
+  static async getForGroup(orgId: number, gammaGroupId: string) {
     const expenses = await prisma.nameList.findMany({
       where: {
-        gammaGroupId
+        gammaGroupId,
+        organizationId: orgId
       },
       include: {
         names: true,
@@ -51,12 +56,13 @@ export default class NameListService {
     return expenses;
   }
 
-  static async getForUser(gammaUserId: string) {
+  static async getForUser(orgId: number, gammaUserId: string) {
     return await prisma.nameList.findMany({
       where: {
         gammaSuperGroupId: null,
         gammaGroupId: null,
-        gammaUserId
+        gammaUserId,
+        organizationId: orgId
       },
       include: {
         names: true,
@@ -66,12 +72,14 @@ export default class NameListService {
   }
 
   static async getForUserWithGroups(
+    orgId: number,
     gammaUserId: string,
     groups: string[],
     superGroups: string[]
   ) {
     return await prisma.nameList.findMany({
       where: {
+        organizationId: orgId,
         OR: [
           {
             gammaUserId

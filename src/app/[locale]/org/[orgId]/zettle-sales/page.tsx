@@ -25,8 +25,8 @@ export default async function Page(props: {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const sales = await GammaService.includeUserInfo(
     await (divisionTreasurer
-      ? ZettleSaleService.getAll()
-      : SessionService.getZettleSales())
+      ? ZettleSaleService.getAll(Number(orgId))
+      : SessionService.getZettleSales(Number(orgId)))
   );
 
   return (

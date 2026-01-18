@@ -1,35 +1,43 @@
 import prisma from '@/prisma';
 
 export default class ZettleSaleService {
-  static async getAll() {
-    return await prisma.zettleSale.findMany();
+  static async getAll(orgId: number) {
+    return await prisma.zettleSale.findMany({
+      where: {
+        organizationId: orgId
+      }
+    });
   }
 
-  static async getForSuperGroup(gammaSuperGroupId: string) {
+  static async getForSuperGroup(orgId: number, gammaSuperGroupId: string) {
     const expenses = await prisma.zettleSale.findMany({
       where: {
-        gammaSuperGroupId
+        gammaSuperGroupId,
+        organizationId: orgId
       }
     });
     return expenses;
   }
 
-  static async getForGroup(gammaGroupId: string) {
+  static async getForGroup(orgId: number, gammaGroupId: string) {
     const expenses = await prisma.zettleSale.findMany({
       where: {
-        gammaGroupId
+        gammaGroupId,
+        organizationId: orgId
       }
     });
     return expenses;
   }
 
   static async getForUserWithGroups(
+    orgId: number,
     gammaUserId: string,
     groupIds: string[],
     superGroupIds: string[]
   ) {
     const expenses = await prisma.zettleSale.findMany({
       where: {
+        organizationId: orgId,
         OR: [
           {
             gammaGroupId: {
