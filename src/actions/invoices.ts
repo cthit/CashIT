@@ -4,13 +4,16 @@ import InvoiceService from '@/services/invoiceService';
 import SessionService from '@/services/sessionService';
 import { Prisma, RequestStatus } from '@prisma/client';
 
-export async function getInvoicesForGroup(gammaSuperGroupId: string) {
+export async function getInvoicesForGroup(
+  orgId: number,
+  gammaSuperGroupId: string
+) {
   if (!SessionService.canEditGroup(gammaSuperGroupId)) {
     throw new Error(
       'User does not have permission to view invoices for this group'
     );
   }
-  return InvoiceService.getForGroup(gammaSuperGroupId);
+  return InvoiceService.getForGroup(orgId, gammaSuperGroupId);
 }
 
 export async function createInvoiceForGroup(
@@ -106,7 +109,9 @@ export async function editInvoice(
   if (gammaGroupId !== null) {
     group = userGroups.find((g) => g.group.id === gammaGroupId)?.group;
     if (group === undefined) {
-      throw new Error('Group does not exist or user does not have access to it');
+      throw new Error(
+        'Group does not exist or user does not have access to it'
+      );
     }
   }
 
