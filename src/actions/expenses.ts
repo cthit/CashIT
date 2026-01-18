@@ -9,13 +9,16 @@ import SessionService from '@/services/sessionService';
 import UserService from '@/services/userService';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 
-export async function getExpensesForGroup(gammaSuperGroupId: string) {
+export async function getExpensesForGroup(
+  orgId: number,
+  gammaSuperGroupId: string
+) {
   if (!SessionService.canEditGroup(gammaSuperGroupId)) {
     throw new Error(
       'User does not have permission to view expenses for this group'
     );
   }
-  return ExpenseService.getForGroup(gammaSuperGroupId);
+  return ExpenseService.getForGroup(orgId, gammaSuperGroupId);
 }
 
 export async function createExpenseForGroup(
@@ -121,7 +124,9 @@ export async function editExpense(
   if (gammaGroupId !== null) {
     group = userGroups.find((g) => g.group.id === gammaGroupId)?.group;
     if (group === undefined) {
-      throw new Error('Group does not exist or user does not have access to it');
+      throw new Error(
+        'Group does not exist or user does not have access to it'
+      );
     }
   }
 
