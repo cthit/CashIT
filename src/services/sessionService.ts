@@ -69,6 +69,20 @@ export default class SessionService {
       : [];
   }
 
+  static async getUnsentInvoices(orgId: number, s?: Session | null) {
+    const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
+    return session?.user?.id
+      ? await InvoiceService.getForUserWithGroups(
+          orgId,
+          session?.user?.id!,
+          groupIds,
+          [],
+          true
+        )
+      : [];
+  }
+
   static async getExpenses(orgId: number, s?: Session | null) {
     const session = s ?? (await SessionService.getSession());
     const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
@@ -78,6 +92,20 @@ export default class SessionService {
           session?.user?.id!,
           groupIds,
           []
+        )
+      : [];
+  }
+
+  static async getUnpaidExpenses(orgId: number, s?: Session | null) {
+    const session = s ?? (await SessionService.getSession());
+    const groupIds = (await this.getGroups(session)).map((g) => g.group.id);
+    return session?.user?.id
+      ? await ExpenseService.getForUserWithGroups(
+          orgId,
+          session?.user?.id!,
+          groupIds,
+          [],
+          true
         )
       : [];
   }

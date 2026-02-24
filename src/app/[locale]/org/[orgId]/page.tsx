@@ -39,10 +39,10 @@ export default async function Home(props: {
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const unpaid = await (divisionTreasurer
     ? ExpenseService.getUnpaid(organization.id)
-    : SessionService.getExpenses(organization.id));
+    : SessionService.getUnpaidExpenses(organization.id));
   const unsent = await (divisionTreasurer
     ? InvoiceService.getUnsent(organization.id)
-    : SessionService.getInvoices(organization.id));
+    : SessionService.getUnsentInvoices(organization.id));
 
   const bankAccounts = divisionTreasurer
     ? await BankAccountService.getAll()
@@ -58,8 +58,8 @@ export default async function Home(props: {
           {organization.name}
         </Heading>
         <Text fontSize="sm" color="fg.muted" mt={4}>
-          This service is in beta and is subject to change. Please report any bugs or
-          issues to Goose or on{' '}
+          This service is in beta and is subject to change. Please report any
+          bugs or issues to Goose or on{' '}
           <Link
             href="https://github.com/cthit/CashIT/issues"
             target="_blank"
