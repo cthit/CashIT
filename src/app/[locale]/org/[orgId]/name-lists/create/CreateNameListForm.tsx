@@ -247,16 +247,25 @@ export default function CreateNameListForm({
     e: React.KeyboardEvent<HTMLInputElement>,
     index: number
   ) => {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    const nextIndex = index + 1;
-    if (nextIndex < names.length) {
-      nameInputRefs.current[nextIndex]?.focus();
-      nameInputRefs.current[nextIndex]?.select();
-    } else {
-      setNames((prev) => [...prev, { name: '', amount: '' }]);
-      setTimeout(() => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const nextIndex = index + 1;
+      if (nextIndex < names.length) {
         nameInputRefs.current[nextIndex]?.focus();
+        nameInputRefs.current[nextIndex]?.select();
+      } else {
+        setNames((prev) => [...prev, { name: '', amount: '' }]);
+        setTimeout(() => {
+          nameInputRefs.current[nextIndex]?.focus();
+        }, 0);
+      }
+    } else if (e.key === 'Backspace' && names[index].name === '' && index > 0) {
+      e.preventDefault();
+      const newItems = [...names];
+      newItems.splice(index, 1);
+      setNames(newItems);
+      setTimeout(() => {
+        nameInputRefs.current[index - 1]?.focus();
       }, 0);
     }
   };
