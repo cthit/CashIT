@@ -169,6 +169,11 @@
     "listPersonal": "Mina namnlistor",
     "noNicks": "Kom ihåg att inte använda nicks i namnlistor. Använd istället personens fullständiga namn.",
     "type": "Typ",
+    "today": "Idag",
+    "addName": "Lägg till namn",
+    "bulkAdd": "Lägg till flera namn",
+    "bulkAddPlaceholder": "Ange ett namn per rad",
+    "bulkAddButton": "Lägg till",
     "types": {
       "event": "Arrangemang",
       "workFood": "Möteskostnader",

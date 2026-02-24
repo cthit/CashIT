@@ -168,6 +168,11 @@
     "listPersonal": "My name lists",
     "noNicks": "Remember to not use nicks in the name lists. Use the full name of the person instead.",
     "type": "Type",
+    "today": "Today",
+    "addName": "Add name",
+    "bulkAdd": "Add multiple names",
+    "bulkAddPlaceholder": "Enter one name per line",
+    "bulkAddButton": "Add",
     "types": {
       "event": "Event",
       "workFood": "Meeting Costs",

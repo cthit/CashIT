@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Box,
   createListCollection,
   Fieldset,
+  Flex,
   Heading,
   IconButton,
   Input,
@@ -35,6 +36,13 @@ import {
 } from '@/actions/nameLists';
 import { useRouter } from 'next/navigation';
 import NameListService from '@/services/nameListService';
+import dayjs from 'dayjs';
+import {
+  AccordionItem,
+  AccordionItemContent,
+  AccordionItemTrigger,
+  AccordionRoot
+} from '@/components/ui/accordion';
 
 export interface GroupNameItem {
   name: string;
@@ -55,12 +63,12 @@ const sgToMembers = (
             .find((n) => n.gammaUserId === m.user.id)
             ?.cost.toString() ?? ''
       }))
-    : sg?.members.map((m) => ({
+    : (sg?.members.map((m) => ({
         id: m.user.id,
         nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
         fullName: `${m.user.firstName} ${m.user.lastName}`,
         amount: ''
-      })) ?? [];
+      })) ?? []);
 };
 
 export default function CreateNameListForm({
@@ -91,19 +99,25 @@ export default function CreateNameListForm({
 
   const superGroupsReverse = useMemo(
     () =>
-      superGroups.reduce((acc, group) => {
-        acc[group.superGroup.id] = group;
-        return acc;
-      }, {} as Record<string, { members: GammaGroupMember[] }>),
+      superGroups.reduce(
+        (acc, group) => {
+          acc[group.superGroup.id] = group;
+          return acc;
+        },
+        {} as Record<string, { members: GammaGroupMember[] }>
+      ),
     [superGroups]
   );
 
   const groupToSuperGroup = useMemo(
     () =>
-      groups.reduce((acc, group) => {
-        acc[group.id] = group.superGroup.id;
-        return acc;
-      }, {} as Record<string, string>),
+      groups.reduce(
+        (acc, group) => {
+          acc[group.id] = group.superGroup.id;
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
     [groups]
   );
 
@@ -121,7 +135,7 @@ export default function CreateNameListForm({
     nl?.tracked ?? false
   );
   const [nameSource, setNameSource] = useState<'members' | 'custom'>(
-    nl?.names.length ?? 0 > 0 ? 'custom' : 'members'
+    (nl?.names.length ?? 1 > 0) ? 'custom' : 'members'
   );
   const [names, setNames] = useState<GroupNameItem[]>(
     nl?.names.map((n) => ({
@@ -134,6 +148,9 @@ export default function CreateNameListForm({
       ? sgToMembers(superGroupsReverse[groupToSuperGroup[groupId] ?? ''], nl)
       : []
   );
+  const [bulkInput, setBulkInput] = useState('');
+
+  const nameInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const edited = nl !== undefined && nl !== null;
 
@@ -154,7 +171,7 @@ export default function CreateNameListForm({
       edited
         ? editNameList(
             nl.id,
-            groupId === 'cashit-nogroup' ? null : groupId ?? nl.gammaGroupId,
+            groupId === 'cashit-nogroup' ? null : (groupId ?? nl.gammaGroupId),
             name,
             type,
             customNames,
@@ -163,25 +180,25 @@ export default function CreateNameListForm({
             new Date(date)
           ).then(() => router.push(`/org/${orgId}/name-lists`))
         : groupId !== undefined && groupId !== 'cashit-nogroup'
-        ? createNameListForGroup(
-            groupId,
-            orgId,
-            name,
-            type,
-            customNames,
-            gammaNames,
-            trackIndividual,
-            new Date(date)
-          ).then(() => router.push(`/org/${orgId}/name-lists`))
-        : createPersonalNameList(
-            orgId,
-            name,
-            type,
-            customNames,
-            gammaNames,
-            trackIndividual,
-            new Date(date)
-          ).then(() => router.push(`/org/${orgId}/name-lists`));
+          ? createNameListForGroup(
+              groupId,
+              orgId,
+              name,
+              type,
+              customNames,
+              gammaNames,
+              trackIndividual,
+              new Date(date)
+            ).then(() => router.push(`/org/${orgId}/name-lists`))
+          : createPersonalNameList(
+              orgId,
+              name,
+              type,
+              customNames,
+              gammaNames,
+              trackIndividual,
+              new Date(date)
+            ).then(() => router.push(`/org/${orgId}/name-lists`));
     },
     [
       edited,
@@ -214,12 +231,66 @@ export default function CreateNameListForm({
     ]
   });
 
+  const handleBulkAdd = () => {
+    const newNames = bulkInput
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+      .map((s) => ({ name: s, amount: '' }));
+    if (newNames.length > 0) {
+      setNames([...names, ...newNames]);
+    }
+    setBulkInput('');
+  };
+
+  const handleNameKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const nextIndex = index + 1;
+    if (nextIndex < names.length) {
+      nameInputRefs.current[nextIndex]?.focus();
+      nameInputRefs.current[nextIndex]?.select();
+    } else {
+      setNames((prev) => [...prev, { name: '', amount: '' }]);
+      setTimeout(() => {
+        nameInputRefs.current[nextIndex]?.focus();
+      }, 0);
+    }
+  };
+
   return (
     <form onSubmit={createList}>
       <Heading>{nl ? l.nameLists.edit : l.nameLists.create}</Heading>
       <Box p="2.5" />
-      <Fieldset.Root width={400}>
+      <Fieldset.Root maxW="md" width="100%">
         <Fieldset.Content>
+          <Field label={l.general.description} required>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+
+          <Field label={l.economy.date} required>
+            <Flex gap="2" align="center" width="100%">
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                flex="1"
+              />
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => setDate(dayjs().format('YYYY-MM-DD'))}
+                flexShrink={0}
+              >
+                {l.nameLists.today}
+              </Button>
+            </Flex>
+          </Field>
+
           <Field label={l.group.group} required>
             <SelectRoot
               collection={groupOptions}
@@ -258,11 +329,7 @@ export default function CreateNameListForm({
             </SelectRoot>
           </Field>
 
-          <Field label={l.general.description} required>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </Field>
-
-          <Field label={l.expense.type} required>
+          <Field label={l.expense.type}>
             <SelectRoot
               collection={listTypes}
               value={type ? [type] : []}
@@ -282,7 +349,7 @@ export default function CreateNameListForm({
             </SelectRoot>
           </Field>
 
-          <Field label={l.nameLists.format} required>
+          <Field label={l.nameLists.format}>
             <SegmentedControl
               value={nameSource}
               onValueChange={(e) =>
@@ -306,18 +373,6 @@ export default function CreateNameListForm({
             {l.nameLists.trackIndividual}
           </Switch>
 
-          <Field label={l.economy.date} required>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </Field>
-
-          <Field label={l.general.comment}>
-            <Textarea />
-          </Field>
-
           <Box p="2" />
         </Fieldset.Content>
       </Fieldset.Root>
@@ -328,11 +383,21 @@ export default function CreateNameListForm({
           <Separator />
 
           {groupNames.map((member, index) => (
-            <Field label={member.nameNick} key={member.id}>
+            <Flex
+              key={member.id}
+              align="center"
+              justify="space-between"
+              gap="3"
+            >
+              <Text flex="1" minW="0" truncate>
+                {member.nameNick}
+              </Text>
               {trackIndividual ? (
                 <Input
                   type="number"
                   value={member.amount}
+                  width="7rem"
+                  flexShrink={0}
                   onChange={(e) => {
                     const newItems = [...groupNames];
                     newItems[index].amount = e.target.value;
@@ -342,6 +407,7 @@ export default function CreateNameListForm({
               ) : (
                 <Switch
                   checked={+groupNames[index].amount > 0}
+                  flexShrink={0}
                   onChange={() => {
                     const newItems = [...groupNames];
                     newItems[index].amount =
@@ -350,49 +416,54 @@ export default function CreateNameListForm({
                   }}
                 />
               )}
-            </Field>
+            </Flex>
           ))}
 
           {groupNames.length === 0 && (
             <Text>{l.nameLists.membersNotFound}</Text>
           )}
 
-          <Field>
+          <Flex justify="flex-end" mt="2">
             <Button variant="surface" type="submit">
               {l.economy.submit}
             </Button>
-          </Field>
+          </Flex>
         </Fieldset.Content>
       </Fieldset.Root>
 
       <Fieldset.Root maxW="md" size="lg" hidden={nameSource !== 'custom'}>
-        <Fieldset.Legend>
-          {l.nameLists.names}{' '}
-          <IconButton
-            variant="subtle"
-            size="sm"
-            onClick={() => setNames([...names, { name: '', amount: '' }])}
-          >
-            <HiPlus />
-          </IconButton>
-        </Fieldset.Legend>
+        <Fieldset.Legend>{l.nameLists.names}</Fieldset.Legend>
         <Fieldset.Content mt="0.25rem">
           <Separator />
-          {names.map((name, index) => (
-            <Field key={index}>
+
+          {names.map((nameItem, index) => (
+            <Flex
+              key={index}
+              gap="2"
+              align="center"
+              flexWrap={{ base: 'wrap', md: 'nowrap' }}
+            >
               <Input
-                placeholder="Name"
-                value={name.name}
+                placeholder={l.economy.name}
+                value={nameItem.name}
+                flex="1"
+                minW="8rem"
+                ref={(el) => {
+                  nameInputRefs.current[index] = el;
+                }}
                 onChange={(e) => {
                   const newItems = [...names];
                   newItems[index].name = e.target.value;
                   setNames(newItems);
                 }}
+                onKeyDown={(e) => handleNameKeyDown(e, index)}
               />
               {trackIndividual && (
                 <Input
-                  placeholder="Amount"
-                  value={name.amount}
+                  placeholder={l.economy.amount}
+                  value={nameItem.amount}
+                  width="7rem"
+                  flexShrink={0}
                   onChange={(e) => {
                     const newItems = [...names];
                     newItems[index].amount = e.target.value;
@@ -403,6 +474,7 @@ export default function CreateNameListForm({
               <IconButton
                 variant="subtle"
                 size="sm"
+                flexShrink={0}
                 onClick={() => {
                   const newItems = [...names];
                   newItems.splice(index, 1);
@@ -411,13 +483,58 @@ export default function CreateNameListForm({
               >
                 <HiTrash />
               </IconButton>
-            </Field>
+            </Flex>
           ))}
-          <Field>
-            <Button variant="surface" type="submit">
+
+          <Button
+            variant="subtle"
+            size="sm"
+            type="button"
+            onClick={() => {
+              const nextIndex = names.length;
+              setNames((prev) => [...prev, { name: '', amount: '' }]);
+              setTimeout(() => {
+                nameInputRefs.current[nextIndex]?.focus();
+              }, 0);
+            }}
+          >
+            <HiPlus />
+            {l.nameLists.addName}
+          </Button>
+
+          <AccordionRoot collapsible mt="2" variant="plain">
+            <AccordionItem value="bulk-add">
+              <AccordionItemTrigger px="3" py="2" textStyle="sm">
+                {l.nameLists.bulkAdd}
+              </AccordionItemTrigger>
+              <AccordionItemContent px="3" pb="3">
+                <Flex direction="column" gap="2">
+                  <Textarea
+                    placeholder={l.nameLists.bulkAddPlaceholder}
+                    value={bulkInput}
+                    onChange={(e) => setBulkInput(e.target.value)}
+                    rows={4}
+                  />
+                  <Flex justify="flex-end">
+                    <Button
+                      variant="subtle"
+                      size="sm"
+                      type="button"
+                      onClick={handleBulkAdd}
+                    >
+                      {l.nameLists.bulkAddButton}
+                    </Button>
+                  </Flex>
+                </Flex>
+              </AccordionItemContent>
+            </AccordionItem>
+          </AccordionRoot>
+
+          <Flex justify="flex-end" mt="2">
+            <Button type="submit" colorPalette="cyan">
               {l.economy.submit}
             </Button>
-          </Field>
+          </Flex>
         </Fieldset.Content>
       </Fieldset.Root>
     </form>
