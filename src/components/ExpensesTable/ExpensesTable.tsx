@@ -11,13 +11,7 @@ import {
   forwardExpenseToEmail
 } from '@/actions/expenses';
 import ExpenseService from '@/services/expenseService';
-import {
-  Badge,
-  IconButton,
-  Separator,
-  Text,
-  Box
-} from '@chakra-ui/react';
+import { Badge, IconButton, Separator, Text, Box } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -75,6 +69,7 @@ type ExpenseStatus = RequestStatus | 'FINISHED';
 interface ExpenseRow {
   id: number;
   description: string;
+  comment: string;
   group: string;
   groupId?: string;
   date: Date;
@@ -116,10 +111,13 @@ const ExpensesTable = ({
 
   const expenses = useMemo(() => {
     const superGroupsReverse =
-      superGroups?.reduce((acc, sg) => {
-        acc[sg.superGroup.id] = sg.superGroup;
-        return acc;
-      }, {} as Record<string, GammaSuperGroup>) ?? {};
+      superGroups?.reduce(
+        (acc, sg) => {
+          acc[sg.superGroup.id] = sg.superGroup;
+          return acc;
+        },
+        {} as Record<string, GammaSuperGroup>
+      ) ?? {};
 
     const getGroupDisplayName = (superGroupId: string | null): string => {
       if (!superGroupId) return l.group.noGroup;
@@ -136,6 +134,7 @@ const ExpensesTable = ({
       return {
         id: expense.id,
         description: expense.name,
+        comment: expense.description,
         group: getGroupDisplayName(expense.gammaSuperGroupId),
         date: expense.occurredAt,
         type: ExpenseTypeText({
@@ -163,7 +162,7 @@ const ExpensesTable = ({
             href={`/org/${orgId}/expenses/view?id=${info.row.original.id}`}
           >*/
           info.getValue()
-          /*</LinkOverlay>*/
+        /*</LinkOverlay>*/
       }),
       columnHelper.accessor('group', {
         header: l.expense.group,
@@ -304,7 +303,7 @@ const ExpensesTable = ({
 const ExpenseActions = ({
   id,
   status,
-  description,
+  comment,
   receipts,
   locale,
   gammaGroup,
@@ -361,7 +360,7 @@ const ExpenseActions = ({
   return (
     <Box whiteSpace="pre">
       <ExpenseAttachments receipts={receipts} locale={locale} />
-      {description && <ExpenseComment description={description} />}
+      {comment && <ExpenseComment comment={comment} />}
 
       <MenuRoot>
         <MenuTrigger asChild>
@@ -414,7 +413,7 @@ const ExpenseActions = ({
   );
 };
 
-const ExpenseComment = ({ description }: { description: string }) => {
+const ExpenseComment = ({ comment }: { comment: string }) => {
   return (
     <PopoverRoot>
       <PopoverTrigger asChild>
@@ -426,7 +425,7 @@ const ExpenseComment = ({ description }: { description: string }) => {
         <PopoverArrow />
         <PopoverBody>
           <PopoverTitle fontWeight="semibold">Comment</PopoverTitle>
-          <Text my="4">{description}</Text>
+          <Text my="4">{comment}</Text>
         </PopoverBody>
       </PopoverContent>
     </PopoverRoot>
