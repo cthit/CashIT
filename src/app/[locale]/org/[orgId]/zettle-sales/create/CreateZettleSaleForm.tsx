@@ -5,6 +5,7 @@ import {
   Box,
   createListCollection,
   Fieldset,
+  Flex,
   Heading,
   Input
 } from '@chakra-ui/react';
@@ -23,6 +24,8 @@ import {
   SelectTrigger,
   SelectValueText
 } from '@/components/ui/select';
+import dayjs from 'dayjs';
+import { InputGroup } from '@/components/ui/input-group';
 
 export default function CreateZettleSaleForm({
   groups,
@@ -49,7 +52,7 @@ export default function CreateZettleSaleForm({
   const [groupId, setGroupId] = useState<string | undefined>(s?.gammaGroupId);
   const [name, setName] = useState<string>(s?.name ?? '');
   const [date, setDate] = useState<string>(
-    i18nService.formatDate(s?.saleDate ?? new Date(), false)
+    s?.saleDate ? i18nService.formatDate(s.saleDate, false) : ''
   );
   const [amount, setAmount] = useState<string>(s?.amount?.toString() ?? '');
 
@@ -81,6 +84,39 @@ export default function CreateZettleSaleForm({
 
       <Fieldset.Root maxW="md" size="lg">
         <Fieldset.Content>
+          <Field label={l.general.description} required>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+
+          <Field label={l.economy.amount} required>
+            <InputGroup width="100%" endElement="kr">
+              <Input
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </InputGroup>
+          </Field>
+
+          <Field label={l.economy.date} required>
+            <Flex gap="2" align="center" width="100%">
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                flex="1"
+              />
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => setDate(dayjs().format('YYYY-MM-DD'))}
+                flexShrink={0}
+              >
+                {l.nameLists.today}
+              </Button>
+            </Flex>
+          </Field>
+
           <Field label={l.group.group} required>
             <SelectRoot
               collection={groupOptions}
@@ -99,26 +135,6 @@ export default function CreateZettleSaleForm({
                 ))}
               </SelectContent>
             </SelectRoot>
-          </Field>
-
-          <Field label={l.general.description} required>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </Field>
-
-          <Field label={l.expense.date} required>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </Field>
-
-          <Field label={l.economy.amount} required>
-            <Input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
           </Field>
 
           <Field>

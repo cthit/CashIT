@@ -9,6 +9,7 @@ import {
   Heading,
   IconButton,
   Input,
+  InputGroup,
   Separator,
   Text
 } from '@chakra-ui/react';
@@ -424,17 +425,17 @@ export default function CreateNameListForm({
                 {member.nameNick}
               </Text>
               {trackIndividual ? (
-                <Input
-                  type="number"
-                  value={member.amount}
-                  width="7rem"
-                  flexShrink={0}
-                  onChange={(e) => {
-                    const newItems = [...groupNames];
-                    newItems[index].amount = e.target.value;
-                    setGroupNames(newItems);
-                  }}
-                />
+                <InputGroup width="7rem" flexShrink={0} endElement="kr">
+                  <Input
+                    placeholder={l.economy.amount}
+                    value={member.amount}
+                    onChange={(e) => {
+                      const newItems = [...groupNames];
+                      newItems[index].amount = e.target.value;
+                      setGroupNames(newItems);
+                    }}
+                  />
+                </InputGroup>
               ) : (
                 <Switch
                   checked={+groupNames[index].amount > 0}
@@ -491,17 +492,17 @@ export default function CreateNameListForm({
                 onPaste={(e) => handleNamePaste(e, index)}
               />
               {trackIndividual && (
-                <Input
-                  placeholder={l.economy.amount}
-                  value={nameItem.amount}
-                  width="7rem"
-                  flexShrink={0}
-                  onChange={(e) => {
-                    const newItems = [...names];
-                    newItems[index].amount = e.target.value;
-                    setNames(newItems);
-                  }}
-                />
+                <InputGroup width="6.5rem" flexShrink={0} endElement="kr">
+                  <Input
+                    placeholder={l.economy.amount}
+                    value={nameItem.amount}
+                    onChange={(e) => {
+                      const newItems = [...names];
+                      newItems[index].amount = e.target.value;
+                      setNames(newItems);
+                    }}
+                  />
+                </InputGroup>
               )}
               <IconButton
                 variant="subtle"

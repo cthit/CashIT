@@ -18,7 +18,8 @@ import {
   IconButton,
   Icon,
   FileUploadDropzone,
-  FileUploadDropzoneContent
+  FileUploadDropzoneContent,
+  Flex
 } from '@chakra-ui/react';
 import {
   SelectContent,
@@ -38,6 +39,7 @@ import Link from 'next/link';
 import i18nService from '@/services/i18nService';
 import { InputGroup } from '@/components/ui/input-group';
 import { GammaGroup } from '@/types/gamma';
+import dayjs from 'dayjs';
 
 export default function CreateExpenseForm({
   readOnly,
@@ -77,7 +79,7 @@ export default function CreateExpenseForm({
   const [amount, setAmount] = useState<string>((e?.amount ?? '') + '');
   const [groupId, setGroupId] = useState<string | undefined>(
     e !== undefined && e !== null
-      ? e.gammaGroupId ?? 'cashit-nogroup'
+      ? (e.gammaGroupId ?? 'cashit-nogroup')
       : undefined
   );
   const [name, setName] = useState<string>(e?.name ?? '');
@@ -170,11 +172,45 @@ export default function CreateExpenseForm({
     <form onSubmit={submit}>
       <Heading>{editing ? l.expense.editTitle : l.expense.newTitle}</Heading>
       <Box p="1" />
-      <Fieldset.Root width={400}>
+      <Fieldset.Root maxW="md" width="100%">
         <Fieldset.Content>
           <Text color="fg.muted" textStyle="sm">
             {l.expense.newDescription}
           </Text>
+
+          <Field label={l.general.description} disabled={readOnly} required>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+
+          <Field label={l.economy.amountTotal} required>
+            <InputGroup endElement="kr" width="100%">
+              <Input
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={readOnly}
+              />
+            </InputGroup>
+          </Field>
+
+          <Field label={l.economy.date} required>
+            <Flex gap="2" align="center" width="100%">
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                flex="1"
+              />
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => setDate(dayjs().format('YYYY-MM-DD'))}
+                flexShrink={0}
+              >
+                {l.nameLists.today}
+              </Button>
+            </Flex>
+          </Field>
 
           <Field label={l.group.group} required>
             <SelectRoot
@@ -197,30 +233,7 @@ export default function CreateExpenseForm({
             </SelectRoot>
           </Field>
 
-          <Field label={l.general.description} disabled={readOnly} required>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </Field>
-
-          <Field label={l.economy.date} required>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              disabled={readOnly}
-            />
-          </Field>
-
-          <Field label={l.economy.amountTotal} required>
-            <InputGroup endElement="kr" width="100%">
-              <Input
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                disabled={readOnly}
-              />
-            </InputGroup>
-          </Field>
-
-          <Field label={l.expense.type} required>
+          <Field label={l.expense.type}>
             <SelectRoot
               collection={expenseTypes}
               value={type ? [type] : []}
@@ -289,11 +302,11 @@ export default function CreateExpenseForm({
           </Field>
 
           {!readOnly && (
-            <Field>
-              <Button colorPalette="cyan" type="submit">
+            <Flex justify="flex-end" mt="2">
+              <Button type="submit" colorPalette="cyan">
                 {e ? l.general.save : l.economy.create}
               </Button>
-            </Field>
+            </Flex>
           )}
         </Fieldset.Content>
       </Fieldset.Root>
