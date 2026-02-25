@@ -10,8 +10,7 @@ import {
   IconButton,
   Input,
   Separator,
-  Text,
-  Textarea
+  Text
 } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
@@ -37,12 +36,6 @@ import {
 import { useRouter } from 'next/navigation';
 import NameListService from '@/services/nameListService';
 import dayjs from 'dayjs';
-import {
-  AccordionItem,
-  AccordionItemContent,
-  AccordionItemTrigger,
-  AccordionRoot
-} from '@/components/ui/accordion';
 
 export interface GroupNameItem {
   name: string;
@@ -52,24 +45,16 @@ export interface GroupNameItem {
 const sgToMembers = (
   sg: { members: GammaGroupMember[] },
   nl?: Awaited<ReturnType<typeof NameListService.getById>>
-) => {
-  return nl && sg
-    ? sg.members.map((m) => ({
-        id: m.user.id,
-        nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
-        fullName: `${m.user.firstName} ${m.user.lastName}`,
-        amount:
-          nl.gammaNames
-            .find((n) => n.gammaUserId === m.user.id)
-            ?.cost.toString() ?? ''
-      }))
-    : (sg?.members.map((m) => ({
-        id: m.user.id,
-        nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
-        fullName: `${m.user.firstName} ${m.user.lastName}`,
-        amount: ''
-      })) ?? []);
-};
+) =>
+  sg?.members.map((m) => ({
+    id: m.user.id,
+    nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
+    fullName: `${m.user.firstName} ${m.user.lastName}`,
+    amount:
+      nl?.gammaNames
+        .find((n) => n.gammaUserId === m.user.id)
+        ?.cost.toString() ?? ''
+  })) ?? [];
 
 export default function CreateNameListForm({
   superGroups,
@@ -85,17 +70,8 @@ export default function CreateNameListForm({
   locale: string;
 }) {
   const l = i18nService.getLocale(locale);
-
-  const groupOptions = createListCollection({
-    items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
-      groups.map((group) => ({
-        label: group.prettyName,
-        value: group.id
-      }))
-    )
-  });
-
   const router = useRouter();
+  const edited = nl !== undefined && nl !== null;
 
   const superGroupsReverse = useMemo(
     () =>
@@ -121,84 +97,115 @@ export default function CreateNameListForm({
     [groups]
   );
 
+  const groupOptions = useMemo(
+    () =>
+      createListCollection({
+        items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
+          groups.map((group) => ({ label: group.prettyName, value: group.id }))
+        )
+      }),
+    [groups, l.group.noGroup]
+  );
+
+  const listTypes = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: l.nameLists.types.event, value: NameListType.EVENT },
+          { label: l.nameLists.types.workFood, value: NameListType.WORK_FOOD },
+          {
+            label: l.nameLists.types.teambuilding,
+            value: NameListType.TEAMBUILDING
+          },
+          {
+            label: l.nameLists.types.profileClothing,
+            value: NameListType.PROFILE_CLOTHING
+          }
+        ]
+      }),
+    [l.nameLists.types]
+  );
+
   const [groupId, setGroupId] = useState<string | undefined>(
     (nl?.gammaGroupId === null ? '' : nl?.gammaGroupId) ?? undefined
   );
-  const [name, setName] = useState<string>(nl?.name ?? '');
-  const [date, setDate] = useState<string>(
+  const [name, setName] = useState(nl?.name ?? '');
+  const [date, setDate] = useState(
     nl?.occurredAt ? i18nService.formatDate(nl.occurredAt, false) : ''
   );
   const [type, setType] = useState<NameListType>(
     nl?.type ?? NameListType.EVENT
   );
-  const [trackIndividual, setTrackIndividual] = useState<boolean>(
-    nl?.tracked ?? false
-  );
+  const [trackIndividual, setTrackIndividual] = useState(nl?.tracked ?? false);
   const [nameSource, setNameSource] = useState<'members' | 'custom'>(
     (nl?.names.length ?? 1 > 0) ? 'custom' : 'members'
   );
   const [names, setNames] = useState<GroupNameItem[]>(
-    nl?.names.map((n) => ({
-      name: n.name,
-      amount: n.cost.toString()
-    })) ?? []
+    nl?.names.map((n) => ({ name: n.name, amount: n.cost.toString() })) ?? []
   );
   const [groupNames, setGroupNames] = useState(
     groupId
       ? sgToMembers(superGroupsReverse[groupToSuperGroup[groupId] ?? ''], nl)
       : []
   );
-  const [bulkInput, setBulkInput] = useState('');
 
   const nameInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const edited = nl !== undefined && nl !== null;
+  const focusField = useCallback((index: number, select = false) => {
+    setTimeout(() => {
+      nameInputRefs.current[index]?.focus();
+      if (select) nameInputRefs.current[index]?.select();
+    }, 0);
+  }, []);
 
   const createList = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       const useMembers = nameSource === 'members';
-
-      const customNames = !useMembers
-        ? names.map((n) => ({ name: n.name, cost: +n.amount }))
-        : [];
+      const customNames = useMembers
+        ? []
+        : names.map((n) => ({ name: n.name, cost: +n.amount }));
       const gammaNames = useMembers
         ? groupNames
             .map((n) => ({ gammaUserId: n.id, cost: +n.amount }))
             .filter((n) => n.cost > 0)
         : [];
+      const resolvedGroupId = groupId === 'cashit-nogroup' ? null : groupId;
 
-      edited
-        ? editNameList(
-            nl.id,
-            groupId === 'cashit-nogroup' ? null : (groupId ?? nl.gammaGroupId),
-            name,
-            type,
-            customNames,
-            gammaNames,
-            trackIndividual,
-            new Date(date)
-          ).then(() => router.push(`/org/${orgId}/name-lists`))
-        : groupId !== undefined && groupId !== 'cashit-nogroup'
-          ? createNameListForGroup(
-              groupId,
-              orgId,
-              name,
-              type,
-              customNames,
-              gammaNames,
-              trackIndividual,
-              new Date(date)
-            ).then(() => router.push(`/org/${orgId}/name-lists`))
-          : createPersonalNameList(
-              orgId,
-              name,
-              type,
-              customNames,
-              gammaNames,
-              trackIndividual,
-              new Date(date)
-            ).then(() => router.push(`/org/${orgId}/name-lists`));
+      if (edited) {
+        await editNameList(
+          nl.id,
+          resolvedGroupId ?? nl.gammaGroupId,
+          name,
+          type,
+          customNames,
+          gammaNames,
+          trackIndividual,
+          new Date(date)
+        );
+      } else if (resolvedGroupId) {
+        await createNameListForGroup(
+          resolvedGroupId,
+          orgId,
+          name,
+          type,
+          customNames,
+          gammaNames,
+          trackIndividual,
+          new Date(date)
+        );
+      } else {
+        await createPersonalNameList(
+          orgId,
+          name,
+          type,
+          customNames,
+          gammaNames,
+          trackIndividual,
+          new Date(date)
+        );
+      }
+      router.push(`/org/${orgId}/name-lists`);
     },
     [
       edited,
@@ -216,59 +223,76 @@ export default function CreateNameListForm({
     ]
   );
 
-  const listTypes = createListCollection({
-    items: [
-      { label: l.nameLists.types.event, value: NameListType.EVENT },
-      { label: l.nameLists.types.workFood, value: NameListType.WORK_FOOD },
-      {
-        label: l.nameLists.types.teambuilding,
-        value: NameListType.TEAMBUILDING
-      },
-      {
-        label: l.nameLists.types.profileClothing,
-        value: NameListType.PROFILE_CLOTHING
+  const handleNameKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        e.preventDefault();
+        const next = index + 1;
+        if (next < names.length) {
+          focusField(next, true);
+        } else if (e.key === 'Enter') {
+          setNames((prev) => [...prev, { name: '', amount: '' }]);
+          focusField(next);
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (index > 0) focusField(index - 1, true);
+      } else if (
+        e.key === 'Backspace' &&
+        names[index].name === '' &&
+        index > 0
+      ) {
+        e.preventDefault();
+        setNames((prev) => prev.filter((_, i) => i !== index));
+        focusField(index - 1);
       }
-    ]
-  });
+    },
+    [names, focusField]
+  );
 
-  const handleBulkAdd = () => {
-    const newNames = bulkInput
-      .split('\n')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-      .map((s) => ({ name: s, amount: '' }));
-    if (newNames.length > 0) {
-      setNames([...names, ...newNames]);
-    }
-    setBulkInput('');
-  };
+  const handleNamePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
+      const pastedText = e.clipboardData.getData('text');
+      if (!pastedText.includes('\n')) return;
 
-  const handleNameKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    if (e.key === 'Enter') {
       e.preventDefault();
-      const nextIndex = index + 1;
-      if (nextIndex < names.length) {
-        nameInputRefs.current[nextIndex]?.focus();
-        nameInputRefs.current[nextIndex]?.select();
-      } else {
-        setNames((prev) => [...prev, { name: '', amount: '' }]);
-        setTimeout(() => {
-          nameInputRefs.current[nextIndex]?.focus();
-        }, 0);
+      const lines = pastedText
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (lines.length === 0) return;
+
+      const newNames = [...names];
+      let lineIndex = 0;
+      let cur = index;
+
+      if (newNames[cur].name !== '') {
+        newNames.splice(cur + 1, 0, { name: '', amount: '' });
+        cur++;
       }
-    } else if (e.key === 'Backspace' && names[index].name === '' && index > 0) {
-      e.preventDefault();
-      const newItems = [...names];
-      newItems.splice(index, 1);
-      setNames(newItems);
-      setTimeout(() => {
-        nameInputRefs.current[index - 1]?.focus();
-      }, 0);
-    }
-  };
+
+      newNames[cur].name = lines[lineIndex++];
+      cur++;
+
+      while (lineIndex < lines.length && cur < newNames.length) {
+        if (newNames[cur].name === '') {
+          newNames[cur].name = lines[lineIndex++];
+          cur++;
+        } else {
+          break;
+        }
+      }
+
+      while (lineIndex < lines.length) {
+        newNames.splice(cur, 0, { name: lines[lineIndex++], amount: '' });
+        cur++;
+      }
+
+      setNames(newNames);
+      focusField(newNames.length - 1);
+    },
+    [names, focusField]
+  );
 
   return (
     <form onSubmit={createList}>
@@ -307,13 +331,11 @@ export default function CreateNameListForm({
               onValueChange={({ value }) => {
                 const id = value?.[0];
                 setGroupId(id);
-
                 if (id === '') {
                   setGroupNames([]);
                   setNameSource('custom');
                   return;
                 }
-
                 const superGroupId = groups.find((g) => g.id === id)?.superGroup
                   .id;
                 setGroupNames(
@@ -466,6 +488,7 @@ export default function CreateNameListForm({
                   setNames(newItems);
                 }}
                 onKeyDown={(e) => handleNameKeyDown(e, index)}
+                onPaste={(e) => handleNamePaste(e, index)}
               />
               {trackIndividual && (
                 <Input
@@ -484,11 +507,9 @@ export default function CreateNameListForm({
                 variant="subtle"
                 size="sm"
                 flexShrink={0}
-                onClick={() => {
-                  const newItems = [...names];
-                  newItems.splice(index, 1);
-                  setNames(newItems);
-                }}
+                onClick={() =>
+                  setNames((prev) => prev.filter((_, i) => i !== index))
+                }
               >
                 <HiTrash />
               </IconButton>
@@ -502,42 +523,12 @@ export default function CreateNameListForm({
             onClick={() => {
               const nextIndex = names.length;
               setNames((prev) => [...prev, { name: '', amount: '' }]);
-              setTimeout(() => {
-                nameInputRefs.current[nextIndex]?.focus();
-              }, 0);
+              focusField(nextIndex);
             }}
           >
             <HiPlus />
             {l.nameLists.addName}
           </Button>
-
-          <AccordionRoot collapsible mt="2" variant="plain">
-            <AccordionItem value="bulk-add">
-              <AccordionItemTrigger px="3" py="2" textStyle="sm">
-                {l.nameLists.bulkAdd}
-              </AccordionItemTrigger>
-              <AccordionItemContent px="3" pb="3">
-                <Flex direction="column" gap="2">
-                  <Textarea
-                    placeholder={l.nameLists.bulkAddPlaceholder}
-                    value={bulkInput}
-                    onChange={(e) => setBulkInput(e.target.value)}
-                    rows={4}
-                  />
-                  <Flex justify="flex-end">
-                    <Button
-                      variant="subtle"
-                      size="sm"
-                      type="button"
-                      onClick={handleBulkAdd}
-                    >
-                      {l.nameLists.bulkAddButton}
-                    </Button>
-                  </Flex>
-                </Flex>
-              </AccordionItemContent>
-            </AccordionItem>
-          </AccordionRoot>
 
           <Flex justify="flex-end" mt="2">
             <Button type="submit" colorPalette="cyan">
