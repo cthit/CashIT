@@ -11,7 +11,16 @@ import {
   forwardExpenseToEmail
 } from '@/actions/expenses';
 import ExpenseService from '@/services/expenseService';
-import { Badge, IconButton, Separator, Text, Box } from '@chakra-ui/react';
+import {
+  Badge,
+  IconButton,
+  Separator,
+  Text,
+  Box,
+  Heading,
+  Button,
+  Flex
+} from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -26,7 +35,7 @@ import {
   PopoverTitle,
   PopoverTrigger
 } from '@/components/ui/popover';
-import { HiCheck, HiDotsHorizontal } from 'react-icons/hi';
+import { HiCheck, HiDotsHorizontal, HiPlus } from 'react-icons/hi';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 import { PiChatFill, PiCoins, PiPaperclip } from 'react-icons/pi';
 import Link from 'next/link';
@@ -57,6 +66,7 @@ import {
   HiXMark
 } from 'react-icons/hi2';
 import CashitTable from '../CashitTable/CashitTable';
+import TableFilters from '../TableFilters/TableFilters';
 
 const columnHelper = createColumnHelper<ExpenseRow>();
 
@@ -285,18 +295,31 @@ const ExpensesTable = ({
   });
 
   return (
-    <CashitTable
-      table={table}
-      cellWidths={cellWidths}
-      locale={locale}
-      emptyStateComponent={
-        <EmptyState
-          icon={<PiCoins />}
-          title={l.expense.listNotFound}
-          description={l.expense.listNotFoundDesc}
-        />
-      }
-    />
+    <>
+      <Flex alignItems="center" gap="1">
+        <Heading as="h1" size="xl" flexGrow={1}>
+          {l.categories.expenses}
+        </Heading>
+        <TableFilters table={table} locale={locale} />
+        <Link href={`/org/${orgId}/expenses/create`}>
+          <Button colorPalette="cyan">
+            <HiPlus /> {l.expense.newTitle}
+          </Button>
+        </Link>
+      </Flex>
+      <Box p="2" />
+      <CashitTable
+        table={table}
+        cellWidths={cellWidths}
+        emptyStateComponent={
+          <EmptyState
+            icon={<PiCoins />}
+            title={l.expense.listNotFound}
+            description={l.expense.listNotFoundDesc}
+          />
+        }
+      />
+    </>
   );
 };
 

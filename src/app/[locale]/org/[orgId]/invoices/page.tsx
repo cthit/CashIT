@@ -5,12 +5,10 @@ import {
   BreadcrumbLink,
   BreadcrumbRoot
 } from '@/components/ui/breadcrumb';
-import { Box, Flex, Heading } from '@chakra-ui/react';
-import { Button } from '@/components/ui/button';
+import { Box } from '@chakra-ui/react';
 import InvoicesTable from '@/components/InvoicesTable/InvoicesTable';
 import i18nService from '@/services/i18nService';
 import InvoiceService from '@/services/invoiceService';
-import { HiPlus } from 'react-icons/hi';
 import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
@@ -38,17 +36,6 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.categories.invoices}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <Flex alignItems="center" justifyContent="space-between">
-        <Heading as="h1" size="xl">
-          {l.categories.invoices}
-        </Heading>
-        <Link href={`/org/${orgId}/invoices/create`}>
-          <Button colorPalette="cyan">
-            <HiPlus /> {l.invoice.new}
-          </Button>
-        </Link>
-      </Flex>
-      <Box p="2" />
       <InvoicesTable
         e={invoices}
         locale={locale}

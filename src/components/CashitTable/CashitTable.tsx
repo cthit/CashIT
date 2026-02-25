@@ -1,6 +1,5 @@
 import { Box, Flex, Table } from '@chakra-ui/react';
 import { flexRender, Table as TTable } from '@tanstack/react-table';
-import TableFilter from '../TableFilter/TableFilter';
 import TablePagination from '../TablePagination/TablePagination';
 import { useRouter } from 'next/navigation';
 import styles from './CashitTable.module.css';
@@ -8,12 +7,10 @@ import styles from './CashitTable.module.css';
 const CashitTable = ({
   table,
   cellWidths = {},
-  locale,
   emptyStateComponent
 }: {
   table: TTable<any>;
   cellWidths: Record<string, string>;
-  locale: string;
   emptyStateComponent: React.ReactNode;
 }) => {
   const router = useRouter();
@@ -89,9 +86,6 @@ const CashitTable = ({
                           }[header.column.getIsSorted() as string] ??
                             '⇅')}
                       </Box>
-                      {header.column.getCanFilter() ? (
-                        <TableFilter column={header.column} locale={locale} />
-                      ) : null}
                     </Table.ColumnHeader>
                   );
                 })

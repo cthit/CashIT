@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { IconButton } from '@chakra-ui/react';
+import { Box, Flex, Heading, IconButton } from '@chakra-ui/react';
 import {
   MenuContent,
   MenuItem,
@@ -10,7 +10,7 @@ import {
   MenuRoot,
   MenuTrigger
 } from '@/components/ui/menu';
-import { HiDotsHorizontal } from 'react-icons/hi';
+import { HiDotsHorizontal, HiPlus } from 'react-icons/hi';
 import { PiCoins } from 'react-icons/pi';
 import i18nService from '@/services/i18nService';
 import { EmptyState } from '../ui/empty-state';
@@ -29,6 +29,9 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import CashitTable from '../CashitTable/CashitTable';
+import TableFilters from '../TableFilters/TableFilters';
+import Link from 'next/link';
+import { Button } from '../ui/button';
 
 const columnHelper = createColumnHelper<SaleRow>();
 
@@ -62,10 +65,13 @@ const ZettleSalesTable = ({
 
   const sales = useMemo(() => {
     const superGroupsReverse =
-      superGroups?.reduce((acc, sg) => {
-        acc[sg.superGroup.id] = sg.superGroup;
-        return acc;
-      }, {} as Record<string, GammaSuperGroup>) ?? {};
+      superGroups?.reduce(
+        (acc, sg) => {
+          acc[sg.superGroup.id] = sg.superGroup;
+          return acc;
+        },
+        {} as Record<string, GammaSuperGroup>
+      ) ?? {};
 
     const getGroupDisplayName = (superGroupId: string | null): string => {
       if (!superGroupId) return l.group.noGroup;
@@ -153,18 +159,31 @@ const ZettleSalesTable = ({
   });
 
   return (
-    <CashitTable
-      table={table}
-      cellWidths={{}}
-      locale={locale}
-      emptyStateComponent={
-        <EmptyState
-          icon={<PiCoins />}
-          title={l.zettleSales.listNotFound}
-          description={l.zettleSales.listNotFoundDesc}
-        />
-      }
-    />
+    <>
+      <Flex alignItems="center" gap="1">
+        <Heading as="h1" size="xl" flexGrow={1}>
+          {l.home.zettleSales}
+        </Heading>
+        <TableFilters table={table} locale={locale} />
+        <Link href={`/org/${orgId}/zettle-sales/create`}>
+          <Button colorPalette="cyan">
+            <HiPlus /> {l.zettleSales.create}
+          </Button>
+        </Link>
+      </Flex>
+      <Box p="2" />
+      <CashitTable
+        table={table}
+        cellWidths={{}}
+        emptyStateComponent={
+          <EmptyState
+            icon={<PiCoins />}
+            title={l.zettleSales.listNotFound}
+            description={l.zettleSales.listNotFoundDesc}
+          />
+        }
+      />
+    </>
   );
 };
 
