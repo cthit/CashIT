@@ -1,0 +1,11 @@
+.greeting {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .greeting {
+    display: none;
+  }
+}

@@ -3,9 +3,10 @@ import LoginButton from '../../LoginButton/LoginButton';
 import LogoutButton from '../../LogoutButton/LogoutButton';
 import i18nService from '@/services/i18nService';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
-import { Box, Flex, IconButton } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Span } from '@chakra-ui/react';
 import { HiCog } from 'react-icons/hi';
 import Link from 'next/link';
+import styles from './Navbar.module.css';
 
 const Navbar = async ({ locale }: { locale: string }) => {
   const l = i18nService.getLocale(locale);
@@ -15,15 +16,9 @@ const Navbar = async ({ locale }: { locale: string }) => {
       <LanguageSwitcher locale={locale} />
       {user ? (
         <>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginLeft: '0.5rem'
-            }}
-          >
+          <Span className={styles.greeting}>
             {l.header.greeting} {user.name}!{' '}
-          </span>
+          </Span>
           <Box>
             <Link href="/user-settings">
               <IconButton variant="ghost" size="md">
