@@ -84,34 +84,42 @@ export async function editInvoice(
     throw new Error('Invoice does not exist');
   }
 
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(existing.organizationId)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
+
   // Check if user has permission to edit this invoice
-  // User can edit if:
-  // 1. They created the invoice (for personal invoices)
-  // 2. They belong to the group that owns the invoice (for group invoices)
   const userGroups = await SessionService.getGroups();
   const canEdit =
-    existing.gammaUserId === gammaUserId || // User created it
+    isAdmin ||
+    existing.gammaUserId === gammaUserId ||
     (existing.gammaGroupId !== null &&
-      userGroups.some((g) => g.group.id === existing.gammaGroupId)); // User belongs to the group
+      userGroups.some((g) => g.group.id === existing.gammaGroupId));
 
   if (!canEdit) {
     throw new Error('User does not have permission to edit this invoice');
   }
 
-  if (existing.sentAt !== null || existing.status === RequestStatus.APPROVED) {
+  if (!isAdmin && (existing.sentAt !== null || existing.status === RequestStatus.APPROVED)) {
     throw new Error(
       'Invoice cannot be edited after it has been sent or approved'
     );
   }
 
   // Validate the new group if specified
+  // Admins keep the existing group when they don't belong to it
   let group = null;
   if (gammaGroupId !== null) {
-    group = userGroups.find((g) => g.group.id === gammaGroupId)?.group;
-    if (group === undefined) {
-      throw new Error(
-        'Group does not exist or user does not have access to it'
-      );
+    group = userGroups.find((g) => g.group.id === gammaGroupId)?.group ?? null;
+    if (group === null && !isAdmin) {
+      throw new Error('Group does not exist or user does not have access to it');
+    }
+    if (group === null && isAdmin) {
+      group = existing.gammaGroupId === gammaGroupId
+        ? { id: gammaGroupId, superGroup: { id: existing.gammaSuperGroupId! } } as any
+        : null;
     }
   }
 
@@ -185,22 +193,40 @@ export async function createPersonalInvoice(
   );
 }
 
-export async function markInvoiceAsSent(expenseId: number) {
-  return InvoiceService.markAsSent(expenseId);
+async function assertOrgAdminForInvoice(invoiceId: number) {
+  const existing = await InvoiceService.getById(invoiceId);
+  if (existing === null) throw new Error('Invoice does not exist');
+
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(existing.organizationId)
+  ]);
+  if (!divisionTreasurer && !localAdmin) {
+    throw new Error('User does not have admin permission for this invoice');
+  }
 }
 
-export async function markInvoiceAsNotSent(expenseId: number) {
-  return InvoiceService.markAsNotSent(expenseId);
+export async function markInvoiceAsSent(invoiceId: number) {
+  await assertOrgAdminForInvoice(invoiceId);
+  return InvoiceService.markAsSent(invoiceId);
 }
 
-export async function deleteInvoice(expenseId: number) {
-  return InvoiceService.delete(expenseId);
+export async function markInvoiceAsNotSent(invoiceId: number) {
+  await assertOrgAdminForInvoice(invoiceId);
+  return InvoiceService.markAsNotSent(invoiceId);
 }
 
-export async function requestInvoiceRevision(expenseId: number) {
-  return InvoiceService.requestRevision(expenseId);
+export async function deleteInvoice(invoiceId: number) {
+  await assertOrgAdminForInvoice(invoiceId);
+  return InvoiceService.delete(invoiceId);
 }
 
-export async function approveInvoice(expenseId: number) {
-  return InvoiceService.approve(expenseId);
+export async function requestInvoiceRevision(invoiceId: number) {
+  await assertOrgAdminForInvoice(invoiceId);
+  return InvoiceService.requestRevision(invoiceId);
+}
+
+export async function approveInvoice(invoiceId: number) {
+  await assertOrgAdminForInvoice(invoiceId);
+  return InvoiceService.approve(invoiceId);
 }

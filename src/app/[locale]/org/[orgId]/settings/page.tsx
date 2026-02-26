@@ -15,12 +15,16 @@ import OrganizationSettingsForm from './OrganizationSettingsForm';
 export default async function Page(props: {
   params: Promise<{ locale: string; orgId: string }>;
 }) {
-  const divisionTreasurer = await SessionService.isDivisionTreasurer();
-  if (!divisionTreasurer) {
+  const { locale, orgId } = await props.params;
+  const orgIdNum = Number(orgId);
+
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(orgIdNum)
+  ]);
+  if (!divisionTreasurer && !localAdmin) {
     notFound();
   }
-
-  const { locale, orgId } = await props.params;
   const l = i18nService.getLocale(locale);
 
   const organization = await OrgService.getById(Number(orgId));

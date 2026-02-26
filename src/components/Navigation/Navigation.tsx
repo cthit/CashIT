@@ -28,6 +28,10 @@ const Navigation = async ({
   const divisionTreasurer = await SessionService.isDivisionTreasurer();
   const organizations = await OrgService.getAll();
 
+  const orgLocalAdmin = orgId !== undefined
+    ? await SessionService.isOrgLocalAdmin(orgId)
+    : false;
+
   const orgPrefix = orgId !== undefined ? `/org/${orgId}` : '/';
 
   return (
@@ -102,6 +106,14 @@ const Navigation = async ({
               </Icon>{' '}
               {l.categories.receiptCreator}
             </NavigationLink>
+            {(divisionTreasurer || orgLocalAdmin) && (
+              <NavigationLink href={`${orgPrefix}/settings`}>
+                <Icon size="md">
+                  <PiGear />
+                </Icon>{' '}
+                Settings
+              </NavigationLink>
+            )}
           </>
         )}
 

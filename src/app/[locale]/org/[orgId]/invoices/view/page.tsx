@@ -35,22 +35,26 @@ export default async function Page(props: {
   if (invoice === null) notFound();
   const personal = invoice.gammaGroupId === null;
 
-  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(+orgId)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
 
   const group =
-    !personal && !divisionTreasurer
+    !personal && !isAdmin
       ? (await SessionService.getGroups()).find(
           (g) => g.group.id === invoice.gammaGroupId
         )?.group
       : undefined;
 
-  if (!personal && !divisionTreasurer && group === undefined) {
+  if (!personal && !isAdmin && group === undefined) {
     notFound();
   }
 
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit =
-    divisionTreasurer ||
+    isAdmin ||
     group !== undefined ||
     user?.id === invoice.gammaUserId;
 

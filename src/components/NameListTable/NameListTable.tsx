@@ -54,11 +54,13 @@ const NameListTable = ({
   e,
   superGroups,
   locale,
+  allEditable = false,
   orgId
 }: {
   e: NameList[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
+  allEditable?: boolean;
   orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
@@ -138,7 +140,7 @@ const NameListTable = ({
       id: 'actions',
       cell: (info) => {
         const list = info.row.original;
-        return <NameListActions id={list.id} locale={locale} />;
+        return <NameListActions id={list.id} locale={locale} allEditable={allEditable} />;
       }
     })
   ];
@@ -189,7 +191,7 @@ const NameListTable = ({
   );
 };
 
-const NameListActions = ({ id, locale }: { id: number; locale: string }) => {
+const NameListActions = ({ id, locale, allEditable = false }: { id: number; locale: string; allEditable?: boolean }) => {
   const l = i18nService.getLocale(locale);
   const router = useRouter();
 
@@ -207,9 +209,11 @@ const NameListActions = ({ id, locale }: { id: number; locale: string }) => {
         </IconButton>
       </MenuTrigger>
       <MenuContent>
-        <MenuItem color="fg.error" value="delete" onClick={remove}>
-          <HiTrash /> {l.general.delete}
-        </MenuItem>
+        {allEditable && (
+          <MenuItem color="fg.error" value="delete" onClick={remove}>
+            <HiTrash /> {l.general.delete}
+          </MenuItem>
+        )}
       </MenuContent>
     </MenuRoot>
   );

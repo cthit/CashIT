@@ -22,9 +22,14 @@ export default async function Page(props: {
 
   const superGroups = await GammaService.getAllSuperGroups();
 
-  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const orgIdNum = Number(orgId);
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(orgIdNum)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
   const lists = await GammaService.includeUserInfo(
-    await (divisionTreasurer
+    await (isAdmin
       ? NameListService.getAll(Number(orgId))
       : SessionService.getNameLists(Number(orgId)))
   );
@@ -53,7 +58,8 @@ export default async function Page(props: {
         e={lists}
         locale={locale}
         superGroups={superGroups}
-        orgId={Number(orgId)}
+        allEditable={isAdmin}
+        orgId={orgIdNum}
       />
     </>
   );

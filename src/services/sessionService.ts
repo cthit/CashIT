@@ -8,6 +8,7 @@ import InvoiceService from './invoiceService';
 import NameListService from './nameListService';
 import BankAccountService from './bankAccountService';
 import ZettleSaleService from './zettleSaleService';
+import OrgService from './orgService';
 
 /**
  * Service for handling the session of the current user
@@ -199,4 +200,27 @@ export default class SessionService {
       ? await BankAccountService.getAll(groups.map((g) => g.group.id))
       : [];
   }
+
+  static async isOrgLocalAdmin(orgId: number, s?: Session | null) {
+    const session = s ?? (await this.getSession());
+    if (!session?.user?.id) return false;
+
+    // Dev bypass mirrors isDivisionTreasurer behaviour
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.ADMIN_TEST_MODE === 'true'
+    )
+      return false; // Don't short-circuit, let isDivisionTreasurer handle it
+
+    const org = await OrgService.getById(orgId);
+    if (!org) return false;
+
+    const activeGroupsWithPosts = await this.getActiveGroupsWithPosts(session);
+    return activeGroupsWithPosts.some(
+      (g) =>
+        g.post.id === process.env.TREASURER_POST_ID &&
+        g.group.superGroup!.id === org.ownerGammaSuperGroupId
+    );
+  }
+
 }

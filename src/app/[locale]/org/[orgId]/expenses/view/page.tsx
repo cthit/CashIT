@@ -34,24 +34,25 @@ export default async function Page(props: {
     notFound();
   }
   const personal = expense.gammaGroupId === null;
-  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const isAdmin =
+    (await SessionService.isDivisionTreasurer()) ||
+    (await SessionService.isOrgLocalAdmin(Number(orgId)));
 
   const group =
-    !personal && !divisionTreasurer
+    !personal && !isAdmin
       ? (await SessionService.getGroups()).find(
           (g) => g.group.id === expense.gammaGroupId
         )?.group
       : undefined;
 
-  if (!personal && !divisionTreasurer && group === undefined) {
+  if (!personal && !isAdmin && group === undefined) {
     notFound();
   }
 
   const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   const user = (await SessionService.getGammaUser())?.user;
-  const canEdit =
-    divisionTreasurer || group || user?.id === expense.gammaUserId;
+  const canEdit = isAdmin || group || user?.id === expense.gammaUserId;
 
   const org = await OrgService.getById(Number(orgId));
   if (!org) {
