@@ -217,6 +217,20 @@ export async function markInvoiceAsNotSent(invoiceId: number) {
 }
 
 export async function deleteInvoice(invoiceId: number) {
+  const existing = await InvoiceService.getById(invoiceId);
+  if (existing === null) throw new Error('Invoice does not exist');
+
+  const gammaUserId = (await SessionService.getUser())?.id;
+
+  // Allow the creator to delete their own invoice if it hasn't been sent or approved
+  if (gammaUserId && existing.gammaUserId === gammaUserId) {
+    if (existing.sentAt !== null || existing.status === RequestStatus.APPROVED) {
+      throw new Error('Invoice cannot be deleted after it has been sent or approved');
+    }
+    return InvoiceService.delete(invoiceId);
+  }
+
+  // Otherwise require org admin
   await assertOrgAdminForInvoice(invoiceId);
   return InvoiceService.delete(invoiceId);
 }

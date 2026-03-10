@@ -135,6 +135,13 @@ export async function deleteNameList(id: number) {
   const existing = await NameListService.getById(id);
   if (existing === null) throw new Error('Name list does not exist');
 
+  const gammaUserId = (await SessionService.getUser())?.id;
+
+  // Allow creator to delete their own name list
+  if (gammaUserId && existing.gammaUserId === gammaUserId) {
+    return NameListService.delete(id);
+  }
+
   const [divisionTreasurer, localAdmin] = await Promise.all([
     SessionService.isDivisionTreasurer(),
     SessionService.isOrgLocalAdmin(existing.organizationId)

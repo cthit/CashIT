@@ -91,6 +91,13 @@ export async function deleteZettleSale(id: number) {
   const existing = await ZettleSaleService.getById(id);
   if (existing === null) throw new Error('Zettle sale does not exist');
 
+  const gammaUserId = (await SessionService.getUser())?.id;
+
+  // Allow creator to delete their own sale
+  if (gammaUserId && existing.gammaUserId === gammaUserId) {
+    return ZettleSaleService.delete(id);
+  }
+
   const [divisionTreasurer, localAdmin] = await Promise.all([
     SessionService.isDivisionTreasurer(),
     SessionService.isOrgLocalAdmin(existing.organizationId)

@@ -236,14 +236,11 @@ export async function createPersonalExpense(
   );
 }
 
-async function assertOrgAdminForExpense(existing: NonNullable<Awaited<ReturnType<typeof ExpenseService.getById>>>) {
-  const [divisionTreasurer, localAdmin] = await Promise.all([
-    SessionService.isDivisionTreasurer(),
-    SessionService.isOrgLocalAdmin(existing.organizationId)
-  ]);
-  if (!divisionTreasurer && !localAdmin) {
-    throw new Error('User does not have admin permission for this expense');
-  }
+async function isOrgAdminForExpense(existing: NonNullable<Awaited<ReturnType<typeof ExpenseService.getById>>>) {
+  return (
+    await SessionService.isDivisionTreasurer() ||
+    await SessionService.isOrgLocalAdmin(existing.organizationId)
+  );
 }
 
 export async function markExpenseAsPaid(expenseId: number) {
@@ -253,7 +250,9 @@ export async function markExpenseAsPaid(expenseId: number) {
     throw new Error('Expense does not exist');
   }
 
-  await assertOrgAdminForExpense(existing);
+  if (!(await isOrgAdminForExpense(existing))) {
+    throw new Error('User does not have admin permission for this expense');
+  }
 
   return ExpenseService.markAsPaid(expenseId);
 }
@@ -265,7 +264,9 @@ export async function markExpenseAsUnpaid(expenseId: number) {
     throw new Error('Expense does not exist');
   }
 
-  await assertOrgAdminForExpense(existing);
+  if (!(await isOrgAdminForExpense(existing))) {
+    throw new Error('User does not have admin permission for this expense');
+  }
 
   return ExpenseService.markAsUnpaid(expenseId);
 }
@@ -277,7 +278,20 @@ export async function deleteExpense(expenseId: number) {
     throw new Error('Expense does not exist');
   }
 
-  await assertOrgAdminForExpense(existing);
+  const gammaUserId = (await SessionService.getUser())?.id;
+
+  // Allow the creator to delete their own expense if it hasn't been paid or approved
+  if (gammaUserId && existing.gammaUserId === gammaUserId) {
+    if (existing.paidAt !== null || existing.status === RequestStatus.APPROVED) {
+      throw new Error('Expense cannot be deleted after it has been paid or approved');
+    }
+    return ExpenseService.delete(expenseId);
+  }
+
+  // Otherwise require org admin
+  if (!(await isOrgAdminForExpense(existing))) {
+    throw new Error('User does not have admin permission for this expense');
+  }
 
   return ExpenseService.delete(expenseId);
 }
@@ -289,7 +303,9 @@ export async function requestExpenseRevision(expenseId: number) {
     throw new Error('Expense does not exist');
   }
 
-  await assertOrgAdminForExpense(existing);
+  if (!(await isOrgAdminForExpense(existing))) {
+    throw new Error('User does not have admin permission for this expense');
+  }
 
   return ExpenseService.requestRevision(expenseId);
 }
@@ -301,7 +317,9 @@ export async function approveExpense(expenseId: number) {
     throw new Error('Expense does not exist');
   }
 
-  await assertOrgAdminForExpense(existing);
+  if (!(await isOrgAdminForExpense(existing))) {
+    throw new Error('User does not have admin permission for this expense');
+  }
 
   return ExpenseService.approve(expenseId);
 }
