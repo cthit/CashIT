@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { HiDownload, HiPlus, HiTrash } from 'react-icons/hi';
 import i18nService from '@/services/i18nService';
+import dayjs from 'dayjs';
 import ReceiptPdf from '@/components/ReceiptPdf/ReceiptPdf';
 import FileService from '@/services/fileService';
 import { InputGroup } from '@/components/ui/input-group';
@@ -450,11 +451,23 @@ export default function ReceiptCreateForm({
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
           <Field label={l.economy.date} required>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <Flex gap="2" align="center" width="100%">
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                flex="1"
+              />
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => setDate(dayjs().format('YYYY-MM-DD'))}
+                flexShrink={0}
+              >
+                {l.nameLists.today}
+              </Button>
+            </Flex>
           </Field>
           <Field
             label={l.receipt.purchaser}
