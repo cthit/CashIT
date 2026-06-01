@@ -5,6 +5,7 @@ import { useCallback, useRef, useState, memo } from 'react';
 import {
   Box,
   Fieldset,
+  Flex,
   Input,
   Heading,
   createListCollection,
@@ -23,11 +24,11 @@ import {
   SelectValueText
 } from '@/components/ui/select';
 import { HiDownload, HiPlus, HiTrash } from 'react-icons/hi';
-import InvoiceService from '@/services/invoiceService';
 import i18nService from '@/services/i18nService';
 import ReceiptPdf from '@/components/ReceiptPdf/ReceiptPdf';
 import FileService from '@/services/fileService';
 import { InputGroup } from '@/components/ui/input-group';
+import { Switch } from '@/components/ui/switch';
 
 export type FormInvoiceItem = {
   id?: string;
@@ -35,6 +36,7 @@ export type FormInvoiceItem = {
   amount: string;
   count: string;
   vat: InvoiceItemVat;
+  vatAmount?: string;
 };
 
 const vatTypes = createListCollection({
@@ -62,7 +64,8 @@ const ReceiptItemRow = memo(
     onDelete,
     onRef,
     onKeyDown,
-    onNamePaste
+    onNamePaste,
+    manualVatMode
   }: {
     item: FormInvoiceItem;
     index: number;
@@ -82,6 +85,7 @@ const ReceiptItemRow = memo(
       e: React.ClipboardEvent<HTMLInputElement>,
       rowIndex: number
     ) => void;
+    manualVatMode: boolean;
   }) => {
     const handleNameChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,6 +129,10 @@ const ReceiptItemRow = memo(
     );
     const handleKeyDown2 = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, index, 2),
+      [onKeyDown, index]
+    );
+    const handleKeyDown3 = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, index, 3),
       [onKeyDown, index]
     );
     const handleNamePasteLocal = useCallback(
@@ -191,6 +199,21 @@ const ReceiptItemRow = memo(
           </Field>
         </Table.Cell>
 
+        {manualVatMode && (
+          <Table.Cell py="1">
+            <Field>
+              <InputGroup endElement="kr" width="100%">
+                <Input
+                  value={item.vatAmount ?? ''}
+                  onChange={(e) => onUpdate(index, 'vatAmount', e.target.value)}
+                  ref={(el) => onRef(index, 3, el)}
+                  onKeyDown={handleKeyDown3}
+                  placeholder="0.00"
+                />
+              </InputGroup>
+            </Field>
+          </Table.Cell>
+        )}
         <Table.Cell py="1">
           <IconButton variant="subtle" size="sm" onClick={handleDelete}>
             <HiTrash />
@@ -217,6 +240,7 @@ export default function ReceiptCreateForm({
   const [purchaser, setPurchaser] = useState('');
   const [treasurer, setTreasurer] = useState('');
   const [date, setDate] = useState('');
+  const [manualVatMode, setManualVatMode] = useState(false);
 
   const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
 
@@ -244,7 +268,10 @@ export default function ReceiptCreateForm({
         e.preventDefault();
         if (rowIndex > 0) focusCell(rowIndex - 1, colIndex, true);
       } else if (e.key === 'ArrowRight') {
-        if (input.selectionStart === input.value.length && colIndex < 2) {
+        if (
+          input.selectionStart === input.value.length &&
+          colIndex < (manualVatMode ? 3 : 2)
+        ) {
           e.preventDefault();
           focusCell(rowIndex, colIndex + 1, true);
         }
@@ -255,7 +282,7 @@ export default function ReceiptCreateForm({
         }
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (colIndex < 2) {
+        if (colIndex < (manualVatMode ? 3 : 2)) {
           focusCell(rowIndex, colIndex + 1, true);
         } else if (rowIndex + 1 < items.length) {
           focusCell(rowIndex + 1, 0, true);
@@ -277,7 +304,7 @@ export default function ReceiptCreateForm({
         focusCell(rowIndex - 1, 0);
       }
     },
-    [items, focusCell]
+    [items, focusCell, manualVatMode]
   );
 
   const handleItemNamePaste = useCallback(
@@ -348,11 +375,12 @@ export default function ReceiptCreateForm({
           locale={locale}
           date={new Date(date)}
           orgName={orgName}
+          manualVatMode={manualVatMode}
         />
       ).toBlob();
       FileService.saveToFile(`receipt-${new Date().getTime()}.pdf`, blob);
     },
-    [date, items, locale, name, purchaser, treasurer, orgName]
+    [date, items, locale, manualVatMode, name, purchaser, treasurer, orgName]
   );
 
   const handleUpdateItem = useCallback(
@@ -381,6 +409,20 @@ export default function ReceiptCreateForm({
       }
     ]);
   }, []);
+
+  const vatMult: Record<InvoiceItemVat, number> = {
+    [InvoiceItemVat.VAT_0]: 1.0,
+    [InvoiceItemVat.VAT_6]: 1.06,
+    [InvoiceItemVat.VAT_12]: 1.12,
+    [InvoiceItemVat.VAT_25]: 1.25
+  };
+  const total = items.reduce((acc, item) => {
+    const base = (+item.count || 0) * (+item.amount || 0);
+    if (manualVatMode && item.vatAmount) {
+      return acc + base + (+item.vatAmount || 0);
+    }
+    return acc + base * (vatMult[item.vat] ?? 1.25);
+  }, 0);
 
   return (
     <form onSubmit={exportPdf}>
@@ -429,6 +471,19 @@ export default function ReceiptCreateForm({
 
       <Fieldset.Root size="lg">
         <Fieldset.Content mt="0.25rem">
+          <Switch
+            checked={manualVatMode}
+            onCheckedChange={(e) => setManualVatMode(e.checked)}
+          >
+            {l.receipt.manualVatAmount}
+          </Switch>
+          {manualVatMode && (
+            <Flex align="center" gap="2">
+              <Text color="orange.500" textStyle="sm">
+                ⚠️ {l.receipt.manualVatWarning}
+              </Text>
+            </Flex>
+          )}
           <Table.Root>
             <Table.Header>
               <Table.Row>
@@ -436,6 +491,9 @@ export default function ReceiptCreateForm({
                 <Table.ColumnHeader>{l.economy.count}</Table.ColumnHeader>
                 <Table.ColumnHeader>{l.economy.unitPrice}</Table.ColumnHeader>
                 <Table.ColumnHeader>{l.economy.vat}</Table.ColumnHeader>
+                {manualVatMode && (
+                  <Table.ColumnHeader>{l.receipt.vatAmount}</Table.ColumnHeader>
+                )}
                 <Table.ColumnHeader />
               </Table.Row>
             </Table.Header>
@@ -450,6 +508,7 @@ export default function ReceiptCreateForm({
                   onRef={handleItemRef}
                   onKeyDown={handleCellKeyDown}
                   onNamePaste={handleItemNamePaste}
+                  manualVatMode={manualVatMode}
                 />
               ))}
             </Table.Body>
@@ -465,13 +524,7 @@ export default function ReceiptCreateForm({
             </Table.Caption>
           </Table.Root>
 
-          <Text textAlign="right">
-            Total:{' '}
-            {InvoiceService.calculateSumForItems(
-              items.map((i) => formToInvoiceItem(i))
-            ).toFixed(2)}{' '}
-            kr
-          </Text>
+          <Text textAlign="right">Total: {total.toFixed(2)} kr</Text>
 
           <Field alignItems="end">
             <Button

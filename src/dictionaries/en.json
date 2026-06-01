@@ -237,7 +237,10 @@
     "purchaser": "Purchaser",
     "purchaserHint": "Name of the person who made the purchase",
     "treasurer": "Treasurer",
-    "treasurerHint": "Name of the person who will approve or certify the purchase"
+    "treasurerHint": "Name of the person who will approve or certify the purchase",
+    "manualVatAmount": "Manual VAT Amount",
+    "manualVatWarning": "Warning: VAT amounts are taken directly from your entered values and are not multiplied by count. Also make sure to enter the correct VAT rate.",
+    "vatAmount": "VAT Amount"
   },
   "addAccount": {
     "loading": "Loading Available Accounts...",

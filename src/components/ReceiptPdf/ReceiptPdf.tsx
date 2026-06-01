@@ -1,9 +1,5 @@
-import {
-  FormInvoiceItem,
-  formToInvoiceItem
-} from '@/app/[locale]/org/[orgId]/receipt-creator/ReceiptCreateForm';
+import { FormInvoiceItem } from '@/app/[locale]/org/[orgId]/receipt-creator/ReceiptCreateForm';
 import i18nService from '@/services/i18nService';
-import InvoiceService from '@/services/invoiceService';
 import { InvoiceItemVat } from '@prisma/client';
 import {
   Document,
@@ -78,8 +74,9 @@ const ReceiptPdf = ({
   purchaser,
   treasurer,
   date,
-  locale,
-  orgName
+  locale: _locale,
+  orgName,
+  manualVatMode = false
 }: {
   items: FormInvoiceItem[];
   name: string;
@@ -88,14 +85,17 @@ const ReceiptPdf = ({
   date: Date;
   locale: string;
   orgName: string;
+  manualVatMode?: boolean;
 }) => {
-  const invoiceItems = items.map((i) => formToInvoiceItem(i));
-
-  const sum = InvoiceService.calculateSumForItems(invoiceItems);
-  const sumNoVat = invoiceItems.reduce(
-    (acc, item) => acc + +item.count * +item.amount,
-    0
-  );
+  const rowTotal = (item: FormInvoiceItem) => {
+    const base = +item.count * +item.amount;
+    if (manualVatMode && item.vatAmount !== undefined && item.vatAmount !== '') {
+      return base + +item.vatAmount;
+    }
+    return base * vatToNumber(item.vat);
+  };
+  const sum = items.reduce((acc, item) => acc + rowTotal(item), 0);
+  const sumNoVat = items.reduce((acc, item) => acc + +item.count * +item.amount, 0);
 
   return (
     <Document>
@@ -128,20 +128,20 @@ const ReceiptPdf = ({
             <Text style={{ width: '15%', textAlign: 'right' }}>Belopp</Text>
           </View>
           <View style={styles.hr} />
-          {invoiceItems.map((item, index) => (
+          {items.map((item, index) => (
             <View key={index} style={styles.row}>
               <Text style={{ width: '40%' }}>{item.name}</Text>
               <Text style={{ width: '15%', textAlign: 'right' }}>
-                {item.count.toFixed(2)}
+                {(+item.count).toFixed(2)}
               </Text>
               <Text style={{ width: '15%', textAlign: 'right' }}>
-                {item.amount.toFixed(2)}
+                {(+item.amount).toFixed(2)}
               </Text>
               <Text style={{ width: '15%', textAlign: 'right' }}>
                 {vatToText(item.vat)}
               </Text>
               <Text style={{ width: '15%', textAlign: 'right' }}>
-                {(item.count * item.amount * vatToNumber(item.vat)).toFixed(2)}
+                {rowTotal(item).toFixed(2)}
               </Text>
             </View>
           ))}
