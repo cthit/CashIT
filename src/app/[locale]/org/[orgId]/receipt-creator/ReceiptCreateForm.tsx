@@ -1,7 +1,7 @@
 'use client';
 
 import { pdf } from '@react-pdf/renderer';
-import { useCallback, useState, memo } from 'react';
+import { useCallback, useRef, useState, memo } from 'react';
 import {
   Box,
   Fieldset,
@@ -52,14 +52,17 @@ export const formToInvoiceItem = (item: FormInvoiceItem) =>
     amount: +item.amount,
     count: +item.count,
     vat: item.vat
-  } satisfies Prisma.InvoiceItemCreateInput);
+  }) satisfies Prisma.InvoiceItemCreateInput;
 
 const ReceiptItemRow = memo(
   ({
     item,
     index,
     onUpdate,
-    onDelete
+    onDelete,
+    onRef,
+    onKeyDown,
+    onNamePaste
   }: {
     item: FormInvoiceItem;
     index: number;
@@ -69,6 +72,16 @@ const ReceiptItemRow = memo(
       value: string
     ) => void;
     onDelete: (index: number) => void;
+    onRef: (rowIndex: number, col: number, el: HTMLInputElement | null) => void;
+    onKeyDown: (
+      e: React.KeyboardEvent<HTMLInputElement>,
+      rowIndex: number,
+      col: number
+    ) => void;
+    onNamePaste: (
+      e: React.ClipboardEvent<HTMLInputElement>,
+      rowIndex: number
+    ) => void;
   }) => {
     const handleNameChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,24 +115,57 @@ const ReceiptItemRow = memo(
       onDelete(index);
     }, [index, onDelete]);
 
+    const handleKeyDown0 = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, index, 0),
+      [onKeyDown, index]
+    );
+    const handleKeyDown1 = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, index, 1),
+      [onKeyDown, index]
+    );
+    const handleKeyDown2 = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, index, 2),
+      [onKeyDown, index]
+    );
+    const handleNamePasteLocal = useCallback(
+      (e: React.ClipboardEvent<HTMLInputElement>) => onNamePaste(e, index),
+      [onNamePaste, index]
+    );
+
     return (
       <Table.Row>
         <Table.Cell py="1">
           <Field required>
-            <Input value={item.name} onChange={handleNameChange} />
+            <Input
+              value={item.name}
+              onChange={handleNameChange}
+              ref={(el) => onRef(index, 0, el)}
+              onKeyDown={handleKeyDown0}
+              onPaste={handleNamePasteLocal}
+            />
           </Field>
         </Table.Cell>
 
         <Table.Cell py="1">
           <Field invalid={isNaN(+item.count)} required>
-            <Input value={item.count} onChange={handleCountChange} />
+            <Input
+              value={item.count}
+              onChange={handleCountChange}
+              ref={(el) => onRef(index, 1, el)}
+              onKeyDown={handleKeyDown1}
+            />
           </Field>
         </Table.Cell>
 
         <Table.Cell py="1">
           <Field invalid={isNaN(+item.amount)} required>
             <InputGroup endElement="kr" width="100%">
-              <Input value={item.amount} onChange={handleAmountChange} />
+              <Input
+                value={item.amount}
+                onChange={handleAmountChange}
+                ref={(el) => onRef(index, 2, el)}
+                onKeyDown={handleKeyDown2}
+              />
             </InputGroup>
           </Field>
         </Table.Cell>
@@ -171,6 +217,123 @@ export default function ReceiptCreateForm({
   const [purchaser, setPurchaser] = useState('');
   const [treasurer, setTreasurer] = useState('');
   const [date, setDate] = useState('');
+
+  const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
+
+  const focusCell = useCallback((row: number, col: number, select = false) => {
+    setTimeout(() => {
+      const el = inputRefs.current[row]?.[col];
+      if (!el) return;
+      el.focus();
+      if (select) el.select();
+    }, 0);
+  }, []);
+
+  const handleCellKeyDown = useCallback(
+    (
+      e: React.KeyboardEvent<HTMLInputElement>,
+      rowIndex: number,
+      colIndex: number
+    ) => {
+      const input = e.currentTarget;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (rowIndex + 1 < items.length)
+          focusCell(rowIndex + 1, colIndex, true);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (rowIndex > 0) focusCell(rowIndex - 1, colIndex, true);
+      } else if (e.key === 'ArrowRight') {
+        if (input.selectionStart === input.value.length && colIndex < 2) {
+          e.preventDefault();
+          focusCell(rowIndex, colIndex + 1, true);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (input.selectionStart === 0 && colIndex > 0) {
+          e.preventDefault();
+          focusCell(rowIndex, colIndex - 1, true);
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (colIndex < 2) {
+          focusCell(rowIndex, colIndex + 1, true);
+        } else if (rowIndex + 1 < items.length) {
+          focusCell(rowIndex + 1, 0, true);
+        } else {
+          setItems((prev) => [
+            ...prev,
+            { name: '', amount: '', count: '', vat: InvoiceItemVat.VAT_25 }
+          ]);
+          focusCell(rowIndex + 1, 0);
+        }
+      } else if (
+        e.key === 'Backspace' &&
+        colIndex === 0 &&
+        items[rowIndex]?.name === '' &&
+        rowIndex > 0
+      ) {
+        e.preventDefault();
+        setItems((prev) => prev.filter((_, i) => i !== rowIndex));
+        focusCell(rowIndex - 1, 0);
+      }
+    },
+    [items, focusCell]
+  );
+
+  const handleItemNamePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>, rowIndex: number) => {
+      const pastedText = e.clipboardData.getData('text');
+      if (!pastedText.includes('\n')) return;
+      e.preventDefault();
+      const lines = pastedText
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (lines.length === 0) return;
+      const newItems = [...items];
+      let lineIndex = 0;
+      let cur = rowIndex;
+      if (newItems[cur].name !== '') {
+        newItems.splice(cur + 1, 0, {
+          name: '',
+          amount: '',
+          count: '',
+          vat: InvoiceItemVat.VAT_25
+        });
+        cur++;
+      }
+      newItems[cur] = { ...newItems[cur], name: lines[lineIndex++] };
+      cur++;
+      while (lineIndex < lines.length && cur < newItems.length) {
+        if (newItems[cur].name === '') {
+          newItems[cur] = { ...newItems[cur], name: lines[lineIndex++] };
+          cur++;
+        } else {
+          break;
+        }
+      }
+      while (lineIndex < lines.length) {
+        newItems.splice(cur, 0, {
+          name: lines[lineIndex++],
+          amount: '',
+          count: '',
+          vat: InvoiceItemVat.VAT_25
+        });
+        cur++;
+      }
+      setItems(newItems);
+      focusCell(newItems.length - 1, 0);
+    },
+    [items, focusCell]
+  );
+
+  const handleItemRef = useCallback(
+    (rowIndex: number, col: number, el: HTMLInputElement | null) => {
+      if (!inputRefs.current[rowIndex]) inputRefs.current[rowIndex] = [];
+      inputRefs.current[rowIndex][col] = el;
+    },
+    []
+  );
 
   const exportPdf = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -284,6 +447,9 @@ export default function ReceiptCreateForm({
                   index={index}
                   onUpdate={handleUpdateItem}
                   onDelete={handleDeleteItem}
+                  onRef={handleItemRef}
+                  onKeyDown={handleCellKeyDown}
+                  onNamePaste={handleItemNamePaste}
                 />
               ))}
             </Table.Body>

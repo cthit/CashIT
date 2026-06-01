@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   Box,
   Fieldset,
@@ -59,7 +59,7 @@ const formToInvoiceItem = (item: FormInvoiceItem) =>
     amount: +item.amount,
     count: +item.count,
     vat: item.vat
-  } satisfies Prisma.InvoiceItemCreateInput);
+  }) satisfies Prisma.InvoiceItemCreateInput;
 
 const invoiceToForm = (item: Prisma.InvoiceItemGetPayload<{}>) =>
   ({
@@ -67,7 +67,7 @@ const invoiceToForm = (item: Prisma.InvoiceItemGetPayload<{}>) =>
     amount: item.amount + '',
     count: item.count + '',
     vat: item.vat
-  } satisfies FormInvoiceItem);
+  }) satisfies FormInvoiceItem;
 
 export default function SendInvoiceForm({
   readOnly,
@@ -100,7 +100,7 @@ export default function SendInvoiceForm({
 
   const [groupId, setGroupId] = useState<string | undefined>(
     i !== undefined && i !== null
-      ? i.gammaGroupId ?? 'cashit-nogroup'
+      ? (i.gammaGroupId ?? 'cashit-nogroup')
       : undefined
   );
   const [name, setName] = useState<string>(i?.name ?? '');
@@ -130,6 +130,115 @@ export default function SendInvoiceForm({
 
   const [items, setItems] = useState<FormInvoiceItem[]>(
     i?.items?.map((item) => invoiceToForm(item)) ?? []
+  );
+
+  const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
+
+  const focusCell = useCallback((row: number, col: number, select = false) => {
+    setTimeout(() => {
+      const el = inputRefs.current[row]?.[col];
+      if (!el) return;
+      el.focus();
+      if (select) el.select();
+    }, 0);
+  }, []);
+
+  const handleCellKeyDown = useCallback(
+    (
+      e: React.KeyboardEvent<HTMLInputElement>,
+      rowIndex: number,
+      colIndex: number
+    ) => {
+      const input = e.currentTarget;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (rowIndex + 1 < items.length)
+          focusCell(rowIndex + 1, colIndex, true);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (rowIndex > 0) focusCell(rowIndex - 1, colIndex, true);
+      } else if (e.key === 'ArrowRight') {
+        if (input.selectionStart === input.value.length && colIndex < 2) {
+          e.preventDefault();
+          focusCell(rowIndex, colIndex + 1, true);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (input.selectionStart === 0 && colIndex > 0) {
+          e.preventDefault();
+          focusCell(rowIndex, colIndex - 1, true);
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (colIndex < 2) {
+          focusCell(rowIndex, colIndex + 1, true);
+        } else if (rowIndex + 1 < items.length) {
+          focusCell(rowIndex + 1, 0, true);
+        } else {
+          setItems((prev) => [
+            ...prev,
+            { name: '', amount: '', count: '', vat: InvoiceItemVat.VAT_25 }
+          ]);
+          focusCell(rowIndex + 1, 0);
+        }
+      } else if (
+        e.key === 'Backspace' &&
+        colIndex === 0 &&
+        items[rowIndex]?.name === '' &&
+        rowIndex > 0
+      ) {
+        e.preventDefault();
+        setItems((prev) => prev.filter((_, i) => i !== rowIndex));
+        focusCell(rowIndex - 1, 0);
+      }
+    },
+    [items, focusCell]
+  );
+
+  const handleItemNamePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>, rowIndex: number) => {
+      const pastedText = e.clipboardData.getData('text');
+      if (!pastedText.includes('\n')) return;
+      e.preventDefault();
+      const lines = pastedText
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (lines.length === 0) return;
+      const newItems = [...items];
+      let lineIndex = 0;
+      let cur = rowIndex;
+      if (newItems[cur].name !== '') {
+        newItems.splice(cur + 1, 0, {
+          name: '',
+          amount: '',
+          count: '',
+          vat: InvoiceItemVat.VAT_25
+        });
+        cur++;
+      }
+      newItems[cur] = { ...newItems[cur], name: lines[lineIndex++] };
+      cur++;
+      while (lineIndex < lines.length && cur < newItems.length) {
+        if (newItems[cur].name === '') {
+          newItems[cur] = { ...newItems[cur], name: lines[lineIndex++] };
+          cur++;
+        } else {
+          break;
+        }
+      }
+      while (lineIndex < lines.length) {
+        newItems.splice(cur, 0, {
+          name: lines[lineIndex++],
+          amount: '',
+          count: '',
+          vat: InvoiceItemVat.VAT_25
+        });
+        cur++;
+      }
+      setItems(newItems);
+      focusCell(newItems.length - 1, 0);
+    },
+    [items, focusCell]
   );
 
   const createExpense = useCallback(
@@ -356,6 +465,13 @@ export default function SendInvoiceForm({
                           newItems[index].name = e.target.value;
                           setItems(newItems);
                         }}
+                        ref={(el) => {
+                          if (!inputRefs.current[index])
+                            inputRefs.current[index] = [];
+                          inputRefs.current[index][0] = el;
+                        }}
+                        onKeyDown={(e) => handleCellKeyDown(e, index, 0)}
+                        onPaste={(e) => handleItemNamePaste(e, index)}
                       />
                     </Field>
                   </Table.Cell>
@@ -369,6 +485,12 @@ export default function SendInvoiceForm({
                           newItems[index].count = e.target.value;
                           setItems(newItems);
                         }}
+                        ref={(el) => {
+                          if (!inputRefs.current[index])
+                            inputRefs.current[index] = [];
+                          inputRefs.current[index][1] = el;
+                        }}
+                        onKeyDown={(e) => handleCellKeyDown(e, index, 1)}
                       />
                     </Field>
                   </Table.Cell>
@@ -383,6 +505,12 @@ export default function SendInvoiceForm({
                             newItems[index].amount = e.target.value;
                             setItems(newItems);
                           }}
+                          ref={(el) => {
+                            if (!inputRefs.current[index])
+                              inputRefs.current[index] = [];
+                            inputRefs.current[index][2] = el;
+                          }}
+                          onKeyDown={(e) => handleCellKeyDown(e, index, 2)}
                         />
                       </InputGroup>
                     </Field>
