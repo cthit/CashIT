@@ -73,6 +73,7 @@ const ReceiptPdf = ({
   name,
   purchaser,
   treasurer,
+  seller,
   date,
   locale: _locale,
   orgName,
@@ -82,6 +83,7 @@ const ReceiptPdf = ({
   name: string;
   purchaser: string;
   treasurer: string;
+  seller?: string;
   date: Date;
   locale: string;
   orgName: string;
@@ -89,22 +91,27 @@ const ReceiptPdf = ({
 }) => {
   const rowTotal = (item: FormInvoiceItem) => {
     const base = +item.count * +item.amount;
-    if (manualVatMode && item.vatAmount !== undefined && item.vatAmount !== '') {
+    if (
+      manualVatMode &&
+      item.vatAmount !== undefined &&
+      item.vatAmount !== ''
+    ) {
       return base + +item.vatAmount;
     }
     return base * vatToNumber(item.vat);
   };
   const sum = items.reduce((acc, item) => acc + rowTotal(item), 0);
-  const sumNoVat = items.reduce((acc, item) => acc + +item.count * +item.amount, 0);
+  const sumNoVat = items.reduce(
+    (acc, item) => acc + +item.count * +item.amount,
+    0
+  );
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={[styles.section, styles.head]}>
           <View>
-            <Text style={styles.title}>
-              {orgName}
-            </Text>
+            <Text style={styles.title}>{orgName}</Text>
             <Text>Kvitto</Text>
             <Text style={[styles.dataTitle, { marginTop: 15 }]}>Datum</Text>
             <Text>{i18nService.formatDate(date, false)}</Text>
@@ -192,6 +199,12 @@ const ReceiptPdf = ({
             </View>
           </View>
         </View>
+        {seller && seller.trim() !== '' && (
+          <View style={[styles.section, { paddingTop: 0 }]}>
+            <Text style={styles.dataTitle}>Säljare</Text>
+            <Text>{seller}</Text>
+          </View>
+        )}
       </Page>
     </Document>
   );

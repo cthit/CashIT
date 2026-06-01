@@ -239,6 +239,7 @@ export default function ReceiptCreateForm({
   const [name, setName] = useState('');
   const [purchaser, setPurchaser] = useState('');
   const [treasurer, setTreasurer] = useState('');
+  const [seller, setSeller] = useState('');
   const [date, setDate] = useState('');
   const [manualVatMode, setManualVatMode] = useState(false);
 
@@ -372,6 +373,7 @@ export default function ReceiptCreateForm({
           name={name}
           purchaser={purchaser}
           treasurer={treasurer}
+          seller={seller}
           locale={locale}
           date={new Date(date)}
           orgName={orgName}
@@ -380,7 +382,17 @@ export default function ReceiptCreateForm({
       ).toBlob();
       FileService.saveToFile(`receipt-${new Date().getTime()}.pdf`, blob);
     },
-    [date, items, locale, manualVatMode, name, purchaser, treasurer, orgName]
+    [
+      date,
+      items,
+      locale,
+      manualVatMode,
+      name,
+      purchaser,
+      seller,
+      treasurer,
+      orgName
+    ]
   );
 
   const handleUpdateItem = useCallback(
@@ -463,6 +475,9 @@ export default function ReceiptCreateForm({
               value={treasurer}
               onChange={(e) => setTreasurer(e.target.value)}
             />
+          </Field>
+          <Field label={l.receipt.seller} helperText={l.receipt.sellerHint}>
+            <Input value={seller} onChange={(e) => setSeller(e.target.value)} />
           </Field>
 
           <Box p="2" />

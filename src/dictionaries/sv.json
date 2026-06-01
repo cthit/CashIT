@@ -239,8 +239,10 @@
     "purchaserHint": "Namn på den som gjort inköpet",
     "treasurer": "Kassör",
     "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet",
+    "seller": "Säljare",
+    "sellerHint": "Namn eller företag för säljaren",
     "manualVatAmount": "Manuellt momsbelopp",
-    "manualVatWarning": "Varning: Momsbeloppen hämtas direkt från de angivna värdena och multipliceras ej med antal. Se också till att ange rätt momssats.",
+    "manualVatWarning": "Momsbeloppen hämtas direkt från de angivna värdena och multipliceras ej med antal. Se också till att ange rätt momssats.",
     "vatAmount": "Momsbelopp"
   },
   "addAccount": {
