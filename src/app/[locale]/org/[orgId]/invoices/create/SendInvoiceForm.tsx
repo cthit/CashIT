@@ -11,7 +11,8 @@ import {
   createListCollection,
   IconButton,
   Text,
-  Table
+  Table,
+  Flex
 } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
@@ -441,143 +442,154 @@ export default function SendInvoiceForm({
         </Fieldset.Content>
       </Fieldset.Root>
 
-      <Fieldset.Root size="lg">
+      <Fieldset.Root size="lg" minW="0">
         <Fieldset.Content mt="0.25rem">
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>Artikel</Table.ColumnHeader>
-                <Table.ColumnHeader>Antal</Table.ColumnHeader>
-                <Table.ColumnHeader>Á pris</Table.ColumnHeader>
-                <Table.ColumnHeader>Moms</Table.ColumnHeader>
-                <Table.ColumnHeader />
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {items.map((item, index) => (
-                <Table.Row key={index}>
-                  <Table.Cell py="1">
-                    <Field required>
-                      <Input
-                        value={item.name}
-                        onChange={(e) => {
-                          const newItems = [...items];
-                          newItems[index].name = e.target.value;
-                          setItems(newItems);
-                        }}
-                        ref={(el) => {
-                          if (!inputRefs.current[index])
-                            inputRefs.current[index] = [];
-                          inputRefs.current[index][0] = el;
-                        }}
-                        onKeyDown={(e) => handleCellKeyDown(e, index, 0)}
-                        onPaste={(e) => handleItemNamePaste(e, index)}
-                      />
-                    </Field>
-                  </Table.Cell>
+          <Flex flexDir="column" w="100%">
+            <Box
+              p="1px"
+              overflowX="auto"
+              overflowY="visible"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <Table.Root minW={600}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Artikel</Table.ColumnHeader>
+                    <Table.ColumnHeader>Antal</Table.ColumnHeader>
+                    <Table.ColumnHeader>Á pris</Table.ColumnHeader>
+                    <Table.ColumnHeader w={100}>Moms</Table.ColumnHeader>
+                    <Table.ColumnHeader />
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {items.map((item, index) => (
+                    <Table.Row key={index}>
+                      <Table.Cell py="1">
+                        <Field required>
+                          <Input
+                            value={item.name}
+                            onChange={(e) => {
+                              const newItems = [...items];
+                              newItems[index].name = e.target.value;
+                              setItems(newItems);
+                            }}
+                            ref={(el) => {
+                              if (!inputRefs.current[index])
+                                inputRefs.current[index] = [];
+                              inputRefs.current[index][0] = el;
+                            }}
+                            onKeyDown={(e) => handleCellKeyDown(e, index, 0)}
+                            onPaste={(e) => handleItemNamePaste(e, index)}
+                          />
+                        </Field>
+                      </Table.Cell>
 
-                  <Table.Cell py="1">
-                    <Field invalid={isNaN(+item.count)} required>
-                      <Input
-                        value={item.count}
-                        onChange={(e) => {
-                          const newItems = [...items];
-                          newItems[index].count = e.target.value;
-                          setItems(newItems);
-                        }}
-                        ref={(el) => {
-                          if (!inputRefs.current[index])
-                            inputRefs.current[index] = [];
-                          inputRefs.current[index][1] = el;
-                        }}
-                        onKeyDown={(e) => handleCellKeyDown(e, index, 1)}
-                      />
-                    </Field>
-                  </Table.Cell>
+                      <Table.Cell py="1">
+                        <Field invalid={isNaN(+item.count)} required>
+                          <Input
+                            value={item.count}
+                            onChange={(e) => {
+                              const newItems = [...items];
+                              newItems[index].count = e.target.value;
+                              setItems(newItems);
+                            }}
+                            ref={(el) => {
+                              if (!inputRefs.current[index])
+                                inputRefs.current[index] = [];
+                              inputRefs.current[index][1] = el;
+                            }}
+                            onKeyDown={(e) => handleCellKeyDown(e, index, 1)}
+                          />
+                        </Field>
+                      </Table.Cell>
 
-                  <Table.Cell py="1">
-                    <Field invalid={isNaN(+item.amount)} required>
-                      <InputGroup endElement="kr" width="100%">
-                        <Input
-                          value={item.amount}
-                          onChange={(e) => {
+                      <Table.Cell py="1">
+                        <Field invalid={isNaN(+item.amount)} required>
+                          <InputGroup endElement="kr" width="100%">
+                            <Input
+                              value={item.amount}
+                              onChange={(e) => {
+                                const newItems = [...items];
+                                newItems[index].amount = e.target.value;
+                                setItems(newItems);
+                              }}
+                              ref={(el) => {
+                                if (!inputRefs.current[index])
+                                  inputRefs.current[index] = [];
+                                inputRefs.current[index][2] = el;
+                              }}
+                              onKeyDown={(e) => handleCellKeyDown(e, index, 2)}
+                            />
+                          </InputGroup>
+                        </Field>
+                      </Table.Cell>
+
+                      <Table.Cell py="1">
+                        <Field required>
+                          <SelectRoot
+                            collection={vatTypes}
+                            value={[item.vat]}
+                            onValueChange={({ value }) => {
+                              const newItems = [...items];
+                              newItems[index].vat =
+                                value?.[0] as InvoiceItemVat;
+                              setItems(newItems);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValueText placeholder="Select a type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {vatTypes.items.map((item) => (
+                                <SelectItem key={item.value} item={item}>
+                                  {item.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </SelectRoot>
+                        </Field>
+                      </Table.Cell>
+
+                      <Table.Cell py="1">
+                        <IconButton
+                          variant="subtle"
+                          size="sm"
+                          onClick={() => {
                             const newItems = [...items];
-                            newItems[index].amount = e.target.value;
+                            newItems.splice(index, 1);
                             setItems(newItems);
                           }}
-                          ref={(el) => {
-                            if (!inputRefs.current[index])
-                              inputRefs.current[index] = [];
-                            inputRefs.current[index][2] = el;
-                          }}
-                          onKeyDown={(e) => handleCellKeyDown(e, index, 2)}
-                        />
-                      </InputGroup>
-                    </Field>
-                  </Table.Cell>
+                        >
+                          <HiTrash />
+                        </IconButton>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
+          </Flex>
 
-                  <Table.Cell py="1">
-                    <Field required>
-                      <SelectRoot
-                        collection={vatTypes}
-                        value={[item.vat]}
-                        onValueChange={({ value }) => {
-                          const newItems = [...items];
-                          newItems[index].vat = value?.[0] as InvoiceItemVat;
-                          setItems(newItems);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValueText placeholder="Select a type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {vatTypes.items.map((item) => (
-                            <SelectItem key={item.value} item={item}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </SelectRoot>
-                    </Field>
-                  </Table.Cell>
-
-                  <Table.Cell py="1">
-                    <IconButton
-                      variant="subtle"
-                      size="sm"
-                      onClick={() => {
-                        const newItems = [...items];
-                        newItems.splice(index, 1);
-                        setItems(newItems);
-                      }}
-                    >
-                      <HiTrash />
-                    </IconButton>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-            <Table.Caption>
-              <Button
-                variant="subtle"
-                float="right"
-                mt="1"
-                onClick={() =>
-                  setItems([
-                    ...items,
-                    {
-                      name: '',
-                      amount: '',
-                      count: '',
-                      vat: InvoiceItemVat.VAT_25
-                    }
-                  ])
-                }
-              >
-                <HiPlus /> Lägg till artikel
-              </Button>
-            </Table.Caption>
-          </Table.Root>
+          <Field alignItems="end">
+            <Button
+              variant="subtle"
+              float="right"
+              mt="1"
+              onClick={() =>
+                setItems([
+                  ...items,
+                  {
+                    name: '',
+                    amount: '',
+                    count: '',
+                    vat: InvoiceItemVat.VAT_25
+                  }
+                ])
+              }
+            >
+              <HiPlus /> Lägg till artikel
+            </Button>
+          </Field>
 
           <Text textAlign="right">
             Total:{' '}

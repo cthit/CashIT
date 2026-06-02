@@ -497,7 +497,7 @@ export default function ReceiptCreateForm({
         </Fieldset.Content>
       </Fieldset.Root>
 
-      <Fieldset.Root size="lg">
+      <Fieldset.Root size="lg" minW="0">
         <Fieldset.Content mt="0.25rem">
           <Switch
             checked={manualVatMode}
@@ -512,45 +512,61 @@ export default function ReceiptCreateForm({
               </Text>
             </Flex>
           )}
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>{l.economy.product}</Table.ColumnHeader>
-                <Table.ColumnHeader>{l.economy.count}</Table.ColumnHeader>
-                <Table.ColumnHeader>{l.economy.unitPrice}</Table.ColumnHeader>
-                <Table.ColumnHeader>{l.economy.vat}</Table.ColumnHeader>
-                {manualVatMode && (
-                  <Table.ColumnHeader>{l.receipt.vatAmount}</Table.ColumnHeader>
-                )}
-                <Table.ColumnHeader />
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {items.map((item, index) => (
-                <ReceiptItemRow
-                  key={index}
-                  item={item}
-                  index={index}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  onRef={handleItemRef}
-                  onKeyDown={handleCellKeyDown}
-                  onNamePaste={handleItemNamePaste}
-                  manualVatMode={manualVatMode}
-                />
-              ))}
-            </Table.Body>
-            <Table.Caption>
-              <Button
-                variant="subtle"
-                float="right"
-                mt="1"
-                onClick={handleAddItem}
-              >
-                <HiPlus /> {l.economy.addProduct}
-              </Button>
-            </Table.Caption>
-          </Table.Root>
+          <Flex flexDir="column" w="100%">
+            <Box
+              p="1px"
+              overflowX="auto"
+              overflowY="visible"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <Table.Root minW={manualVatMode ? 750 : 600}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>{l.economy.product}</Table.ColumnHeader>
+                    <Table.ColumnHeader>{l.economy.count}</Table.ColumnHeader>
+                    <Table.ColumnHeader>
+                      {l.economy.unitPrice}
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader w={100}>
+                      {l.economy.vat}
+                    </Table.ColumnHeader>
+                    {manualVatMode && (
+                      <Table.ColumnHeader>
+                        {l.receipt.vatAmount}
+                      </Table.ColumnHeader>
+                    )}
+                    <Table.ColumnHeader />
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {items.map((item, index) => (
+                    <ReceiptItemRow
+                      key={index}
+                      item={item}
+                      index={index}
+                      onUpdate={handleUpdateItem}
+                      onDelete={handleDeleteItem}
+                      onRef={handleItemRef}
+                      onKeyDown={handleCellKeyDown}
+                      onNamePaste={handleItemNamePaste}
+                      manualVatMode={manualVatMode}
+                    />
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
+          </Flex>
+
+          <Field alignItems="end">
+            <Button
+              variant="subtle"
+              float="right"
+              mt="1"
+              onClick={handleAddItem}
+            >
+              <HiPlus /> {l.economy.addProduct}
+            </Button>
+          </Field>
 
           <Text textAlign="right">Total: {total.toFixed(2)} kr</Text>
 
