@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { Box, Fieldset, Heading, Text } from '@chakra-ui/react';
+import { Box, Fieldset, Flex, Heading, Text } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -54,19 +54,21 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.general.view}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      {canEdit && (
-        <Box mb="4">
-          <Button asChild colorPalette="cyan">
-            <Link href={`/org/${orgId}/zettle-sales/edit?id=${id}`}>
-              {l.general.edit}
-            </Link>
-          </Button>
-        </Box>
-      )}
+      <Flex alignItems="center" gap="1">
+        <Heading size="lg" flexGrow={1}>
+          {l.zettleSales.zettleSale}
+        </Heading>
+        {canEdit && (
+          <Box mb="4">
+            <Button asChild colorPalette="cyan">
+              <Link href={`/org/${orgId}/zettle-sales/edit?id=${id}`}>
+                {l.general.edit}
+              </Link>
+            </Button>
+          </Box>
+        )}
+      </Flex>
       <Fieldset.Root>
-        <Fieldset.Legend>
-          <Heading size="lg">{l.zettleSales.zettleSale}</Heading>
-        </Fieldset.Legend>
         <Fieldset.Content mt="0.25rem">
           <Field label={l.group.group}>
             <Text>{selectedGroup?.prettyName || l.general.unknown}</Text>

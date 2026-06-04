@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { Box, Fieldset, Heading, Text } from '@chakra-ui/react';
+import { Box, Fieldset, Flex, Heading, Text } from '@chakra-ui/react';
 import {
   BreadcrumbCurrentLink,
   BreadcrumbLink,
@@ -77,28 +77,33 @@ export default async function Page(props: {
     [NameListType.PROFILE_CLOTHING]: l.nameLists.types.profileClothing
   };
 
-  const superGroupsReverse = superGroups.reduce((acc, group) => {
-    acc[group.superGroup.id] = group;
-    return acc;
-  }, {} as Record<string, { members: GammaGroupMember[] }>);
+  const superGroupsReverse = superGroups.reduce(
+    (acc, group) => {
+      acc[group.superGroup.id] = group;
+      return acc;
+    },
+    {} as Record<string, { members: GammaGroupMember[] }>
+  );
 
   const isMembers = nameList.gammaNames.length > 0;
   let displayNames: { name: string; amount: string }[] = [];
 
   if (isMembers) {
-    const group = groups.find(g => g.id === nameList.gammaGroupId);
+    const group = groups.find((g) => g.id === nameList.gammaGroupId);
     const superGroupId = group?.superGroup.id;
     const sg = superGroupsReverse[superGroupId ?? ''];
     const members = sg ? sg.members : [];
-    displayNames = nameList.gammaNames.map(gn => {
-      const member = members.find(m => m.user.id === gn.gammaUserId);
+    displayNames = nameList.gammaNames.map((gn) => {
+      const member = members.find((m) => m.user.id === gn.gammaUserId);
       return {
-        name: member ? `${member.user.firstName} "${member.user.nick}" ${member.user.lastName}` : 'Unknown',
+        name: member
+          ? `${member.user.firstName} "${member.user.nick}" ${member.user.lastName}`
+          : 'Unknown',
         amount: gn.cost.toString()
       };
     });
   } else {
-    displayNames = nameList.names.map(n => ({
+    displayNames = nameList.names.map((n) => ({
       name: n.name,
       amount: n.cost.toString()
     }));
@@ -116,25 +121,25 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.general.view}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      {canEdit && (
-        <Box mb="4">
+      <Flex alignItems="center" gap="1">
+        <Heading size="lg" flexGrow={1}>
+          {l.nameLists.nameList}
+        </Heading>
+        {canEdit && (
           <Button asChild colorPalette="cyan">
             <Link href={`/org/${orgId}/name-lists/edit?id=${id}`}>
               {l.general.edit}
             </Link>
           </Button>
-          <DownloadNameListButton
-            nl={nameList}
-            locale={locale}
-            superGroups={superGroups}
-            groups={groups}
-          />
-        </Box>
-      )}
+        )}
+        <DownloadNameListButton
+          nl={nameList}
+          locale={locale}
+          superGroups={superGroups}
+          groups={groups}
+        />
+      </Flex>
       <Fieldset.Root>
-        <Fieldset.Legend>
-          <Heading size="lg">{l.nameLists.nameList}</Heading>
-        </Fieldset.Legend>
         <Fieldset.Content mt="0.25rem">
           <Field label={l.group.group}>
             <Text>
@@ -168,9 +173,7 @@ export default async function Page(props: {
               <Text>{nameList.tracked ? item.amount : ''}</Text>
             </Field>
           ))}
-          {displayNames.length === 0 && (
-            <Text>No names found</Text>
-          )}
+          {displayNames.length === 0 && <Text>No names found</Text>}
         </Fieldset.Content>
       </Fieldset.Root>
     </>
