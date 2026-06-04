@@ -1,16 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Box,
   createListCollection,
   Fieldset,
+  Flex,
   Heading,
   IconButton,
   Input,
+  InputGroup,
   Separator,
-  Text,
-  Textarea
+  Text
 } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ import {
 } from '@/actions/nameLists';
 import { useRouter } from 'next/navigation';
 import NameListService from '@/services/nameListService';
+import dayjs from 'dayjs';
 
 export interface GroupNameItem {
   name: string;
@@ -44,24 +46,16 @@ export interface GroupNameItem {
 const sgToMembers = (
   sg: { members: GammaGroupMember[] },
   nl?: Awaited<ReturnType<typeof NameListService.getById>>
-) => {
-  return nl && sg
-    ? sg.members.map((m) => ({
-        id: m.user.id,
-        nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
-        fullName: `${m.user.firstName} ${m.user.lastName}`,
-        amount:
-          nl.gammaNames
-            .find((n) => n.gammaUserId === m.user.id)
-            ?.cost.toString() ?? ''
-      }))
-    : sg?.members.map((m) => ({
-        id: m.user.id,
-        nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
-        fullName: `${m.user.firstName} ${m.user.lastName}`,
-        amount: ''
-      })) ?? [];
-};
+) =>
+  sg?.members.map((m) => ({
+    id: m.user.id,
+    nameNick: `${m.user.firstName} "${m.user.nick}" ${m.user.lastName}`,
+    fullName: `${m.user.firstName} ${m.user.lastName}`,
+    amount:
+      nl?.gammaNames
+        .find((n) => n.gammaUserId === m.user.id)
+        ?.cost.toString() ?? ''
+  })) ?? [];
 
 export default function CreateNameListForm({
   superGroups,
@@ -77,57 +71,78 @@ export default function CreateNameListForm({
   locale: string;
 }) {
   const l = i18nService.getLocale(locale);
-
-  const groupOptions = createListCollection({
-    items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
-      groups.map((group) => ({
-        label: group.prettyName,
-        value: group.id
-      }))
-    )
-  });
-
   const router = useRouter();
+  const edited = nl !== undefined && nl !== null;
 
   const superGroupsReverse = useMemo(
     () =>
-      superGroups.reduce((acc, group) => {
-        acc[group.superGroup.id] = group;
-        return acc;
-      }, {} as Record<string, { members: GammaGroupMember[] }>),
+      superGroups.reduce(
+        (acc, group) => {
+          acc[group.superGroup.id] = group;
+          return acc;
+        },
+        {} as Record<string, { members: GammaGroupMember[] }>
+      ),
     [superGroups]
   );
 
   const groupToSuperGroup = useMemo(
     () =>
-      groups.reduce((acc, group) => {
-        acc[group.id] = group.superGroup.id;
-        return acc;
-      }, {} as Record<string, string>),
+      groups.reduce(
+        (acc, group) => {
+          acc[group.id] = group.superGroup.id;
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
     [groups]
+  );
+
+  const groupOptions = useMemo(
+    () =>
+      createListCollection({
+        items: [{ label: l.group.noGroup, value: 'cashit-nogroup' }].concat(
+          groups.map((group) => ({ label: group.prettyName, value: group.id }))
+        )
+      }),
+    [groups, l.group.noGroup]
+  );
+
+  const listTypes = useMemo(
+    () =>
+      createListCollection({
+        items: [
+          { label: l.nameLists.types.event, value: NameListType.EVENT },
+          { label: l.nameLists.types.workFood, value: NameListType.WORK_FOOD },
+          {
+            label: l.nameLists.types.teambuilding,
+            value: NameListType.TEAMBUILDING
+          },
+          {
+            label: l.nameLists.types.profileClothing,
+            value: NameListType.PROFILE_CLOTHING
+          }
+        ]
+      }),
+    [l.nameLists.types]
   );
 
   const [groupId, setGroupId] = useState<string | undefined>(
     (nl?.gammaGroupId === null ? '' : nl?.gammaGroupId) ?? undefined
   );
-  const [name, setName] = useState<string>(nl?.name ?? '');
-  const [date, setDate] = useState<string>(
+  const [name, setName] = useState(nl?.name ?? '');
+  const [date, setDate] = useState(
     nl?.occurredAt ? i18nService.formatDate(nl.occurredAt, false) : ''
   );
   const [type, setType] = useState<NameListType>(
     nl?.type ?? NameListType.EVENT
   );
-  const [trackIndividual, setTrackIndividual] = useState<boolean>(
-    nl?.tracked ?? false
-  );
+  const [trackIndividual, setTrackIndividual] = useState(nl?.tracked ?? false);
   const [nameSource, setNameSource] = useState<'members' | 'custom'>(
-    nl?.names.length ?? 0 > 0 ? 'custom' : 'members'
+    (nl?.names.length ?? 1 > 0) ? 'custom' : 'members'
   );
   const [names, setNames] = useState<GroupNameItem[]>(
-    nl?.names.map((n) => ({
-      name: n.name,
-      amount: n.cost.toString()
-    })) ?? []
+    nl?.names.map((n) => ({ name: n.name, amount: n.cost.toString() })) ?? []
   );
   const [groupNames, setGroupNames] = useState(
     groupId
@@ -135,53 +150,63 @@ export default function CreateNameListForm({
       : []
   );
 
-  const edited = nl !== undefined && nl !== null;
+  const nameInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const focusField = useCallback((index: number, select = false) => {
+    setTimeout(() => {
+      nameInputRefs.current[index]?.focus();
+      if (select) nameInputRefs.current[index]?.select();
+    }, 0);
+  }, []);
 
   const createList = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       const useMembers = nameSource === 'members';
-
-      const customNames = !useMembers
-        ? names.map((n) => ({ name: n.name, cost: +n.amount }))
-        : [];
+      const customNames = useMembers
+        ? []
+        : names.map((n) => ({ name: n.name, cost: +n.amount }));
       const gammaNames = useMembers
         ? groupNames
             .map((n) => ({ gammaUserId: n.id, cost: +n.amount }))
             .filter((n) => n.cost > 0)
         : [];
+      const resolvedGroupId = groupId === 'cashit-nogroup' ? null : groupId;
 
-      edited
-        ? editNameList(
-            nl.id,
-            groupId === 'cashit-nogroup' ? null : groupId ?? nl.gammaGroupId,
-            name,
-            type,
-            customNames,
-            gammaNames,
-            trackIndividual,
-            new Date(date)
-          ).then(() => router.push(`/org/${orgId}/name-lists`))
-        : groupId !== undefined && groupId !== 'cashit-nogroup'
-        ? createNameListForGroup(
-            groupId,
-            orgId,
-            name,
-            type,
-            customNames,
-            gammaNames,
-            trackIndividual,
-            new Date(date)
-          ).then(() => router.push(`/org/${orgId}/name-lists`))
-        : createPersonalNameList(
-            orgId,
-            name,
-            type,
-            customNames,
-            gammaNames,
-            trackIndividual,
-            new Date(date)
-          ).then(() => router.push(`/org/${orgId}/name-lists`));
+      if (edited) {
+        await editNameList(
+          nl.id,
+          resolvedGroupId ?? nl.gammaGroupId,
+          name,
+          type,
+          customNames,
+          gammaNames,
+          trackIndividual,
+          new Date(date)
+        );
+      } else if (resolvedGroupId) {
+        await createNameListForGroup(
+          resolvedGroupId,
+          orgId,
+          name,
+          type,
+          customNames,
+          gammaNames,
+          trackIndividual,
+          new Date(date)
+        );
+      } else {
+        await createPersonalNameList(
+          orgId,
+          name,
+          type,
+          customNames,
+          gammaNames,
+          trackIndividual,
+          new Date(date)
+        );
+      }
+      router.push(`/org/${orgId}/name-lists`);
     },
     [
       edited,
@@ -199,27 +224,107 @@ export default function CreateNameListForm({
     ]
   );
 
-  const listTypes = createListCollection({
-    items: [
-      { label: l.nameLists.types.event, value: NameListType.EVENT },
-      { label: l.nameLists.types.workFood, value: NameListType.WORK_FOOD },
-      {
-        label: l.nameLists.types.teambuilding,
-        value: NameListType.TEAMBUILDING
-      },
-      {
-        label: l.nameLists.types.profileClothing,
-        value: NameListType.PROFILE_CLOTHING
+  const handleNameKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') {
+        e.preventDefault();
+        const next = index + 1;
+        if (next < names.length) {
+          focusField(next, true);
+        } else if (e.key === 'Enter') {
+          setNames((prev) => [...prev, { name: '', amount: '' }]);
+          focusField(next);
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (index > 0) focusField(index - 1, true);
+      } else if (
+        e.key === 'Backspace' &&
+        names[index].name === '' &&
+        index > 0
+      ) {
+        e.preventDefault();
+        setNames((prev) => prev.filter((_, i) => i !== index));
+        focusField(index - 1);
       }
-    ]
-  });
+    },
+    [names, focusField]
+  );
+
+  const handleNamePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
+      const pastedText = e.clipboardData.getData('text');
+      if (!pastedText.includes('\n')) return;
+
+      e.preventDefault();
+      const lines = pastedText
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (lines.length === 0) return;
+
+      const newNames = [...names];
+      let lineIndex = 0;
+      let cur = index;
+
+      if (newNames[cur].name !== '') {
+        newNames.splice(cur + 1, 0, { name: '', amount: '' });
+        cur++;
+      }
+
+      newNames[cur].name = lines[lineIndex++];
+      cur++;
+
+      while (lineIndex < lines.length && cur < newNames.length) {
+        if (newNames[cur].name === '') {
+          newNames[cur].name = lines[lineIndex++];
+          cur++;
+        } else {
+          break;
+        }
+      }
+
+      while (lineIndex < lines.length) {
+        newNames.splice(cur, 0, { name: lines[lineIndex++], amount: '' });
+        cur++;
+      }
+
+      setNames(newNames);
+      focusField(newNames.length - 1);
+    },
+    [names, focusField]
+  );
 
   return (
     <form onSubmit={createList}>
       <Heading>{nl ? l.nameLists.edit : l.nameLists.create}</Heading>
       <Box p="2.5" />
-      <Fieldset.Root width={400}>
+      <Fieldset.Root maxW="md" width="100%">
         <Fieldset.Content>
+          <Field label={l.general.description} required>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
+
+          <Field label={l.economy.date} required>
+            <Flex gap="2" align="center" width="100%">
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                flex="1"
+              />
+              <Button
+                variant="subtle"
+                size="sm"
+                type="button"
+                onClick={() => setDate(dayjs().format('YYYY-MM-DD'))}
+                flexShrink={0}
+              >
+                {l.nameLists.today}
+              </Button>
+            </Flex>
+          </Field>
+
           <Field label={l.group.group} required>
             <SelectRoot
               collection={groupOptions}
@@ -227,13 +332,11 @@ export default function CreateNameListForm({
               onValueChange={({ value }) => {
                 const id = value?.[0];
                 setGroupId(id);
-
                 if (id === '') {
                   setGroupNames([]);
                   setNameSource('custom');
                   return;
                 }
-
                 const superGroupId = groups.find((g) => g.id === id)?.superGroup
                   .id;
                 setGroupNames(
@@ -258,11 +361,7 @@ export default function CreateNameListForm({
             </SelectRoot>
           </Field>
 
-          <Field label={l.general.description} required>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </Field>
-
-          <Field label={l.expense.type} required>
+          <Field label={l.expense.type}>
             <SelectRoot
               collection={listTypes}
               value={type ? [type] : []}
@@ -282,7 +381,7 @@ export default function CreateNameListForm({
             </SelectRoot>
           </Field>
 
-          <Field label={l.nameLists.format} required>
+          <Field label={l.nameLists.format}>
             <SegmentedControl
               value={nameSource}
               onValueChange={(e) =>
@@ -306,18 +405,6 @@ export default function CreateNameListForm({
             {l.nameLists.trackIndividual}
           </Switch>
 
-          <Field label={l.economy.date} required>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </Field>
-
-          <Field label={l.general.comment}>
-            <Textarea />
-          </Field>
-
           <Box p="2" />
         </Fieldset.Content>
       </Fieldset.Root>
@@ -328,20 +415,31 @@ export default function CreateNameListForm({
           <Separator />
 
           {groupNames.map((member, index) => (
-            <Field label={member.nameNick} key={member.id}>
+            <Flex
+              key={member.id}
+              align="center"
+              justify="space-between"
+              gap="3"
+            >
+              <Text flex="1" minW="0" truncate>
+                {member.nameNick}
+              </Text>
               {trackIndividual ? (
-                <Input
-                  type="number"
-                  value={member.amount}
-                  onChange={(e) => {
-                    const newItems = [...groupNames];
-                    newItems[index].amount = e.target.value;
-                    setGroupNames(newItems);
-                  }}
-                />
+                <InputGroup width="7rem" flexShrink={0} endElement="kr">
+                  <Input
+                    placeholder={l.economy.amount}
+                    value={member.amount}
+                    onChange={(e) => {
+                      const newItems = [...groupNames];
+                      newItems[index].amount = e.target.value;
+                      setGroupNames(newItems);
+                    }}
+                  />
+                </InputGroup>
               ) : (
                 <Switch
                   checked={+groupNames[index].amount > 0}
+                  flexShrink={0}
                   onChange={() => {
                     const newItems = [...groupNames];
                     newItems[index].amount =
@@ -350,74 +448,94 @@ export default function CreateNameListForm({
                   }}
                 />
               )}
-            </Field>
+            </Flex>
           ))}
 
           {groupNames.length === 0 && (
             <Text>{l.nameLists.membersNotFound}</Text>
           )}
 
-          <Field>
+          <Flex justify="flex-end" mt="2">
             <Button variant="surface" type="submit">
               {l.economy.submit}
             </Button>
-          </Field>
+          </Flex>
         </Fieldset.Content>
       </Fieldset.Root>
 
       <Fieldset.Root maxW="md" size="lg" hidden={nameSource !== 'custom'}>
-        <Fieldset.Legend>
-          {l.nameLists.names}{' '}
-          <IconButton
-            variant="subtle"
-            size="sm"
-            onClick={() => setNames([...names, { name: '', amount: '' }])}
-          >
-            <HiPlus />
-          </IconButton>
-        </Fieldset.Legend>
+        <Fieldset.Legend>{l.nameLists.names}</Fieldset.Legend>
         <Fieldset.Content mt="0.25rem">
           <Separator />
-          {names.map((name, index) => (
-            <Field key={index}>
+
+          {names.map((nameItem, index) => (
+            <Flex
+              key={index}
+              gap="2"
+              align="center"
+              flexWrap={{ base: 'wrap', md: 'nowrap' }}
+            >
               <Input
-                placeholder="Name"
-                value={name.name}
+                placeholder={l.economy.name}
+                value={nameItem.name}
+                flex="1"
+                minW="8rem"
+                ref={(el) => {
+                  nameInputRefs.current[index] = el;
+                }}
                 onChange={(e) => {
                   const newItems = [...names];
                   newItems[index].name = e.target.value;
                   setNames(newItems);
                 }}
+                onKeyDown={(e) => handleNameKeyDown(e, index)}
+                onPaste={(e) => handleNamePaste(e, index)}
               />
               {trackIndividual && (
-                <Input
-                  placeholder="Amount"
-                  value={name.amount}
-                  onChange={(e) => {
-                    const newItems = [...names];
-                    newItems[index].amount = e.target.value;
-                    setNames(newItems);
-                  }}
-                />
+                <InputGroup width="6.5rem" flexShrink={0} endElement="kr">
+                  <Input
+                    placeholder={l.economy.amount}
+                    value={nameItem.amount}
+                    onChange={(e) => {
+                      const newItems = [...names];
+                      newItems[index].amount = e.target.value;
+                      setNames(newItems);
+                    }}
+                  />
+                </InputGroup>
               )}
               <IconButton
                 variant="subtle"
                 size="sm"
-                onClick={() => {
-                  const newItems = [...names];
-                  newItems.splice(index, 1);
-                  setNames(newItems);
-                }}
+                flexShrink={0}
+                onClick={() =>
+                  setNames((prev) => prev.filter((_, i) => i !== index))
+                }
               >
                 <HiTrash />
               </IconButton>
-            </Field>
+            </Flex>
           ))}
-          <Field>
-            <Button variant="surface" type="submit">
+
+          <Button
+            variant="subtle"
+            size="sm"
+            type="button"
+            onClick={() => {
+              const nextIndex = names.length;
+              setNames((prev) => [...prev, { name: '', amount: '' }]);
+              focusField(nextIndex);
+            }}
+          >
+            <HiPlus />
+            {l.nameLists.addName}
+          </Button>
+
+          <Flex justify="flex-end" mt="2">
+            <Button type="submit" colorPalette="cyan">
               {l.economy.submit}
             </Button>
-          </Field>
+          </Flex>
         </Fieldset.Content>
       </Fieldset.Root>
     </form>

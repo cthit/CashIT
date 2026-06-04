@@ -16,7 +16,10 @@ import {
   IconButton,
   Separator,
   Text,
-  Box
+  Box,
+  Heading,
+  Button,
+  Flex
 } from '@chakra-ui/react';
 import {
   MenuContent,
@@ -32,7 +35,7 @@ import {
   PopoverTitle,
   PopoverTrigger
 } from '@/components/ui/popover';
-import { HiCheck, HiDotsHorizontal } from 'react-icons/hi';
+import { HiCheck, HiDotsHorizontal, HiPlus } from 'react-icons/hi';
 import { ExpenseType, RequestStatus } from '@prisma/client';
 import { PiChatFill, PiCoins, PiPaperclip } from 'react-icons/pi';
 import Link from 'next/link';
@@ -63,6 +66,7 @@ import {
   HiXMark
 } from 'react-icons/hi2';
 import CashitTable from '../CashitTable/CashitTable';
+import TableFilters from '../TableFilters/TableFilters';
 
 const columnHelper = createColumnHelper<ExpenseRow>();
 
@@ -75,6 +79,7 @@ type ExpenseStatus = RequestStatus | 'FINISHED';
 interface ExpenseRow {
   id: number;
   description: string;
+  comment: string;
   group: string;
   groupId?: string;
   date: Date;
@@ -116,10 +121,13 @@ const ExpensesTable = ({
 
   const expenses = useMemo(() => {
     const superGroupsReverse =
-      superGroups?.reduce((acc, sg) => {
-        acc[sg.superGroup.id] = sg.superGroup;
-        return acc;
-      }, {} as Record<string, GammaSuperGroup>) ?? {};
+      superGroups?.reduce(
+        (acc, sg) => {
+          acc[sg.superGroup.id] = sg.superGroup;
+          return acc;
+        },
+        {} as Record<string, GammaSuperGroup>
+      ) ?? {};
 
     const getGroupDisplayName = (superGroupId: string | null): string => {
       if (!superGroupId) return l.group.noGroup;
@@ -136,6 +144,7 @@ const ExpensesTable = ({
       return {
         id: expense.id,
         description: expense.name,
+        comment: expense.description,
         group: getGroupDisplayName(expense.gammaSuperGroupId),
         date: expense.occurredAt,
         type: ExpenseTypeText({
@@ -163,7 +172,7 @@ const ExpensesTable = ({
             href={`/org/${orgId}/expenses/view?id=${info.row.original.id}`}
           >*/
           info.getValue()
-          /*</LinkOverlay>*/
+        /*</LinkOverlay>*/
       }),
       columnHelper.accessor('group', {
         header: l.expense.group,
@@ -286,25 +295,38 @@ const ExpensesTable = ({
   });
 
   return (
-    <CashitTable
-      table={table}
-      cellWidths={cellWidths}
-      locale={locale}
-      emptyStateComponent={
-        <EmptyState
-          icon={<PiCoins />}
-          title={l.expense.listNotFound}
-          description={l.expense.listNotFoundDesc}
-        />
-      }
-    />
+    <>
+      <Flex alignItems="center" gap="1">
+        <Heading as="h1" size="xl" flexGrow={1}>
+          {l.categories.expenses}
+        </Heading>
+        <TableFilters table={table} locale={locale} />
+        <Link href={`/org/${orgId}/expenses/create`}>
+          <Button colorPalette="cyan">
+            <HiPlus /> {l.expense.newTitle}
+          </Button>
+        </Link>
+      </Flex>
+      <Box p="2" />
+      <CashitTable
+        table={table}
+        cellWidths={cellWidths}
+        emptyStateComponent={
+          <EmptyState
+            icon={<PiCoins />}
+            title={l.expense.listNotFound}
+            description={l.expense.listNotFoundDesc}
+          />
+        }
+      />
+    </>
   );
 };
 
 const ExpenseActions = ({
   id,
   status,
-  description,
+  comment,
   receipts,
   locale,
   gammaGroup,
@@ -361,7 +383,7 @@ const ExpenseActions = ({
   return (
     <Box whiteSpace="pre">
       <ExpenseAttachments receipts={receipts} locale={locale} />
-      {description && <ExpenseComment description={description} />}
+      {comment && <ExpenseComment comment={comment} />}
 
       <MenuRoot>
         <MenuTrigger asChild>
@@ -414,7 +436,7 @@ const ExpenseActions = ({
   );
 };
 
-const ExpenseComment = ({ description }: { description: string }) => {
+const ExpenseComment = ({ comment }: { comment: string }) => {
   return (
     <PopoverRoot>
       <PopoverTrigger asChild>
@@ -426,7 +448,7 @@ const ExpenseComment = ({ description }: { description: string }) => {
         <PopoverArrow />
         <PopoverBody>
           <PopoverTitle fontWeight="semibold">Comment</PopoverTitle>
-          <Text my="4">{description}</Text>
+          <Text my="4">{comment}</Text>
         </PopoverBody>
       </PopoverContent>
     </PopoverRoot>

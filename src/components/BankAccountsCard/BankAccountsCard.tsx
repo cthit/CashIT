@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { Prisma } from '@prisma/client';
 import Link from 'next/link';
+import React from 'react';
 import { MdAccountBalance, MdOutlineArrowForwardIos } from 'react-icons/md';
 
 export default function BankAccountsCard({
@@ -82,23 +83,30 @@ export default function BankAccountsCard({
         </Box>
       )}
 
-      {accounts.length > 0 && (
-        <>
-          <Separator />
-          <Box p={4}>
-            {accounts.map((a) => (
-              <Flex justifyContent="space-between" key={a.id}>
-                <Text>
-                  <Link href={`/org/${orgId}/bank-accounts/view?id=${a.goCardlessId}`}>
-                    {a.name}
-                  </Link>
+      {accounts.length > 0 &&
+        accounts.map((a) => (
+          <React.Fragment key={a.id}>
+            <Separator />
+            <Link
+              href={`/org/${orgId}/bank-accounts/view?id=${a.goCardlessId}`}
+              key={a.id}
+            >
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                px="4"
+                py="1"
+              >
+                <Text>{a.name}</Text>
+                <Box flexGrow="1" />
+                <Text mr="3">
+                  {i18nService.formatNumber(a.balanceAvailable)}
                 </Text>
-                <Text>{i18nService.formatNumber(a.balanceAvailable)}</Text>
+                <MdOutlineArrowForwardIos />
               </Flex>
-            ))}
-          </Box>
-        </>
-      )}
+            </Link>
+          </React.Fragment>
+        ))}
 
       {accounts.length !== 1 && (
         <>

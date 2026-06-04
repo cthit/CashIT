@@ -9,6 +9,7 @@ import {
 import {
   Box,
   Fieldset,
+  Flex,
   Heading,
   Separator,
   Table,
@@ -77,19 +78,21 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.general.view}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      {canEdit && (
-        <Box mb="4">
-          <Button asChild colorPalette="cyan">
-            <Link href={`/org/${orgId}/invoices/edit?id=${id}`}>
-              {l.general.edit}
-            </Link>
-          </Button>
-        </Box>
-      )}
+      <Flex alignItems="center" gap="1">
+        <Heading size="lg" flexGrow={1}>
+          {l.expense.invoice}
+        </Heading>
+        {canEdit && (
+          <Box mb="4">
+            <Button asChild colorPalette="cyan">
+              <Link href={`/org/${orgId}/invoices/edit?id=${id}`}>
+                {l.general.edit}
+              </Link>
+            </Button>
+          </Box>
+        )}
+      </Flex>
       <Fieldset.Root maxW="md" size="lg">
-        <Fieldset.Legend>
-          <Heading size="lg">{l.expense.invoice}</Heading>
-        </Fieldset.Legend>
         <Fieldset.Content mt="0.25rem">
           <Field label={l.group.group}>
             <Text>

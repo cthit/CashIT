@@ -35,7 +35,7 @@
     "expenses": "Kostnader",
     "invoices": "Kundfakturor",
     "teambuilding": "Teambuilding",
-    "food": "Arbetsmat",
+    "food": "Möteskostnader",
     "accounting": "Redovisning",
     "tools": "Verktyg",
     "receiptCreator": "Kvittoskapare"
@@ -169,6 +169,11 @@
     "listPersonal": "Mina namnlistor",
     "noNicks": "Kom ihåg att inte använda nicks i namnlistor. Använd istället personens fullständiga namn.",
     "type": "Typ",
+    "today": "Idag",
+    "addName": "Lägg till namn",
+    "bulkAdd": "Lägg till flera namn",
+    "bulkAddPlaceholder": "Ange ett namn per rad",
+    "bulkAddButton": "Lägg till",
     "types": {
       "event": "Arrangemang",
       "workFood": "Möteskostnader",
@@ -233,7 +238,12 @@
     "purchaser": "Inköpare",
     "purchaserHint": "Namn på den som gjort inköpet",
     "treasurer": "Kassör",
-    "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet"
+    "treasurerHint": "Namn på den som ska godkänna eller attestera inköpet",
+    "seller": "Säljare",
+    "sellerHint": "Namn eller företag för säljaren",
+    "manualVatAmount": "Manuellt momsbelopp",
+    "manualVatWarning": "Momsbeloppen hämtas direkt från de angivna värdena och multipliceras ej med antal. Se också till att ange rätt momssats.",
+    "vatAmount": "Momsbelopp"
   },
   "addAccount": {
     "loading": "Laddar tillgängliga konton...",

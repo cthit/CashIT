@@ -10,7 +10,12 @@ import {
   SelectTrigger,
   SelectValueText
 } from '@/components/ui/select';
-import { Column, ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  flexRender,
+  Header
+} from '@tanstack/react-table';
 import { useMemo } from 'react';
 
 declare module '@tanstack/react-table' {
@@ -22,15 +27,16 @@ declare module '@tanstack/react-table' {
 }
 
 const TableFilter = ({
-  column,
+  header,
   locale
 }: {
-  column: Column<any, unknown>;
+  header: Header<any, unknown>;
   locale: string;
   excludeDefault?: string[];
 }) => {
   const l = i18nService.getLocale(locale);
 
+  const column = header.column;
   const columnFilterValue = column.getFilterValue();
   const { filterVariant } = column.columnDef.meta ?? {};
   const sortedUniqueValues = useMemo(
@@ -54,70 +60,81 @@ const TableFilter = ({
     [sortedUniqueValues]
   );
 
-  return filterVariant === 'range' ? (
-    <div>
-      <div>
-        {/* See faceted column filters example for min max values functionality */}
-        <Input
-          type="number"
-          value={(columnFilterValue as [number, number])?.[0] ?? ''}
-          onChange={(value) =>
-            column.setFilterValue((old: [number, number]) => [value, old?.[1]])
+  return (
+    <>
+      <div>{flexRender(column.columnDef.header, header.getContext())}</div>
+      {filterVariant === 'range' ? (
+        <div>
+          <div>
+            {/* See faceted column filters example for min max values functionality */}
+            <Input
+              type="number"
+              value={(columnFilterValue as [number, number])?.[0] ?? ''}
+              onChange={(value) =>
+                column.setFilterValue((old: [number, number]) => [
+                  value,
+                  old?.[1]
+                ])
+              }
+              placeholder={`Min`}
+            />
+            <Input
+              type="number"
+              value={(columnFilterValue as [number, number])?.[1] ?? ''}
+              onChange={(value) =>
+                column.setFilterValue((old: [number, number]) => [
+                  old?.[0],
+                  value
+                ])
+              }
+              placeholder={`Max`}
+            />
+          </div>
+          <div className="h-1" />
+        </div>
+      ) : filterVariant === 'select' ? (
+        <SelectRoot
+          collection={selections}
+          multiple
+          value={
+            column.getFilterValue()
+              ? Array.isArray(column.getFilterValue())
+                ? (column.getFilterValue() as unknown[]).map(String)
+                : [String(column.getFilterValue())]
+              : []
           }
-          placeholder={`Min`}
-        />
+          onValueChange={({ value }) => {
+            column.setFilterValue(value);
+          }}
+          disabled={selections.items.length === 0}
+          closeOnSelect={false}
+          marginTop="-0.4rem"
+        >
+          <SelectLabel />
+          <SelectTrigger>
+            <SelectValueText
+              textOverflow="ellipsis"
+              textWrap="nowrap"
+              display="block"
+            />
+          </SelectTrigger>
+          <SelectContent position="absolute" zIndex={1001}>
+            {selections.items.map((item) => (
+              <SelectItem key={item.value} item={item} textWrap="nowrap">
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+      ) : (
         <Input
-          type="number"
-          value={(columnFilterValue as [number, number])?.[1] ?? ''}
-          onChange={(value) =>
-            column.setFilterValue((old: [number, number]) => [old?.[0], value])
-          }
-          placeholder={`Max`}
+          onChange={(value) => column.setFilterValue(value.target.value)}
+          placeholder={l.general.search}
+          type="text"
+          value={(columnFilterValue ?? '') as string}
         />
-      </div>
-      <div className="h-1" />
-    </div>
-  ) : filterVariant === 'select' ? (
-    <SelectRoot
-      collection={selections}
-      multiple
-      value={
-        column.getFilterValue()
-          ? Array.isArray(column.getFilterValue())
-            ? (column.getFilterValue() as unknown[]).map(String)
-            : [String(column.getFilterValue())]
-          : []
-      }
-      onValueChange={({ value }) => {
-        column.setFilterValue(value);
-      }}
-      disabled={selections.items.length === 0}
-      closeOnSelect={false}
-      marginTop="-0.4rem"
-    >
-      <SelectLabel />
-      <SelectTrigger>
-        <SelectValueText
-          textOverflow="ellipsis"
-          textWrap="nowrap"
-          display="block"
-        />
-      </SelectTrigger>
-      <SelectContent position="absolute">
-        {selections.items.map((item) => (
-          <SelectItem key={item.value} item={item} textWrap="nowrap">
-            {item.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </SelectRoot>
-  ) : (
-    <Input
-      onChange={(value) => column.setFilterValue(value.target.value)}
-      placeholder={l.general.search}
-      type="text"
-      value={(columnFilterValue ?? '') as string}
-    />
+      )}
+    </>
   );
 };
 

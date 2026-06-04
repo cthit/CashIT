@@ -7,10 +7,8 @@ import {
   BreadcrumbLink,
   BreadcrumbRoot
 } from '@/components/ui/breadcrumb';
-import { Box, Flex, Heading } from '@chakra-ui/react';
-import { Button } from '@/components/ui/button';
+import { Box } from '@chakra-ui/react';
 import i18nService from '@/services/i18nService';
-import { HiPlus } from 'react-icons/hi';
 import GammaService from '@/services/gammaService';
 
 export default async function Page(props: {
@@ -37,17 +35,6 @@ export default async function Page(props: {
         <BreadcrumbCurrentLink>{l.categories.expenses}</BreadcrumbCurrentLink>
       </BreadcrumbRoot>
       <Box p="4" />
-      <Flex alignItems="center" justifyContent="space-between">
-        <Heading as="h1" size="xl">
-          {l.categories.expenses}
-        </Heading>
-        <Link href={`/org/${orgId}/expenses/create`}>
-          <Button colorPalette="cyan">
-            <HiPlus /> {l.expense.newTitle}
-          </Button>
-        </Link>
-      </Flex>
-      <Box p="2" />
       <ExpensesTable
         groups={groups}
         superGroups={superGroups}

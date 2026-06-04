@@ -90,11 +90,13 @@ export default class InvoiceService {
     orgId: number,
     gammaUserId: string,
     groups: string[],
-    superGroups: string[]
+    superGroups: string[],
+    unsentOnly = false
   ) {
     return await prisma.invoice.findMany({
       where: {
         organizationId: orgId,
+        sentAt: unsentOnly ? null : undefined,
         OR: [
           {
             gammaUserId

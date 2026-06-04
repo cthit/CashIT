@@ -14,7 +14,9 @@ import {
   Box,
   IconButton,
   Separator,
-  Text
+  Text,
+  Flex,
+  Heading
 } from '@chakra-ui/react';
 import {
   MenuContent,
@@ -50,6 +52,10 @@ import {
 } from '@tanstack/react-table';
 import { HiCheck, HiTrash, HiXMark } from 'react-icons/hi2';
 import CashitTable from '../CashitTable/CashitTable';
+import { Button } from '@/components/ui/button';
+import { HiPlus } from 'react-icons/hi';
+import Link from 'next/link';
+import TableFilters from '../TableFilters/TableFilters';
 
 type Invoice = Awaited<
   ReturnType<typeof InvoiceService.getForGroup>
@@ -87,10 +93,13 @@ const InvoicesTable = ({
 
   const invoices = useMemo(() => {
     const superGroupsReverse =
-      superGroups?.reduce((acc, sg) => {
-        acc[sg.superGroup.id] = sg.superGroup;
-        return acc;
-      }, {} as Record<string, GammaSuperGroup>) ?? {};
+      superGroups?.reduce(
+        (acc, sg) => {
+          acc[sg.superGroup.id] = sg.superGroup;
+          return acc;
+        },
+        {} as Record<string, GammaSuperGroup>
+      ) ?? {};
 
     const getGroupDisplayName = (superGroupId: string | null): string => {
       if (!superGroupId) return l.group.noGroup;
@@ -213,18 +222,31 @@ const InvoicesTable = ({
   });
 
   return (
-    <CashitTable
-      table={table}
-      emptyStateComponent={
-        <EmptyState
-          icon={<PiFileX />}
-          title={l.invoice.listNotFound}
-          description={l.invoice.listNotFoundDesc}
-        />
-      }
-      locale={locale}
-      cellWidths={{}}
-    />
+    <>
+      <Flex alignItems="center" gap="1">
+        <Heading as="h1" size="xl" flexGrow={1}>
+          {l.categories.invoices}
+        </Heading>
+        <TableFilters table={table} locale={locale} />
+        <Link href={`/org/${orgId}/invoices/create`}>
+          <Button colorPalette="cyan">
+            <HiPlus /> {l.invoice.new}
+          </Button>
+        </Link>
+      </Flex>
+      <Box p="2" />
+      <CashitTable
+        table={table}
+        emptyStateComponent={
+          <EmptyState
+            icon={<PiFileX />}
+            title={l.invoice.listNotFound}
+            description={l.invoice.listNotFoundDesc}
+          />
+        }
+        cellWidths={{}}
+      />
+    </>
   );
 };
 

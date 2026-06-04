@@ -55,13 +55,15 @@ const Header = async ({
             </DrawerContent>
           </DrawerRoot>
         )}
-        <Box>
-          <Heading textStyle="2xl" display="inline" mr="0.3rem" ml="2">
-            <Link href={orgPrefix}>CashIT</Link>
-          </Heading>
-          <Span color="fg.muted" fontSize="sm">
-            beta v0.6.0
-          </Span>
+        <Box asChild ml="2">
+          <Link href={orgPrefix}>
+            <Heading textStyle="2xl" mr="0.3rem" mb="-0.4rem">
+              CashIT
+            </Heading>
+            <Span color="fg.muted" fontSize="sm" className={styles.headerTag}>
+              beta v0.7.0
+            </Span>
+          </Link>
         </Box>
       </Flex>
       <Navbar locale={locale} />

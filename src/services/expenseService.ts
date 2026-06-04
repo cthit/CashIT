@@ -99,11 +99,13 @@ export default class ExpenseService {
     orgId: number,
     gammaUserId: string,
     groups: string[],
-    superGroups: string[]
+    superGroups: string[],
+    unpaidOnly = false
   ) {
     return await prisma.expense.findMany({
       where: {
         organizationId: orgId,
+        paidAt: unpaidOnly ? null : undefined,
         OR: [
           {
             gammaUserId
