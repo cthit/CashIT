@@ -29,10 +29,16 @@ export default async function Page(props: {
     notFound();
   }
 
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(+orgId)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
+
   const groups = (await SessionService.getGroups()).map((g) => g.group);
 
   const user = (await SessionService.getGammaUser())?.user;
-  const canEdit = user?.id === sale.gammaUserId;
+  const canEdit = isAdmin || user?.id === sale.gammaUserId;
 
   if (!canEdit) {
     notFound();

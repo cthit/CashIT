@@ -19,9 +19,14 @@ export default async function Page(props: {
 
   const groups = await SessionService.getGroups();
   const superGroups = await GammaService.getAllSuperGroups();
-  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const orgIdNum = Number(orgId);
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(orgIdNum)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
   const expenses = await GammaService.includeUserInfo(
-    await (divisionTreasurer
+    await (isAdmin
       ? ExpenseService.getAll(Number(orgId))
       : SessionService.getExpenses(Number(orgId)))
   );
@@ -41,8 +46,8 @@ export default async function Page(props: {
         e={expenses}
         locale={locale}
         treasurerPostId={process.env.TREASURER_POST_ID}
-        allEditable={divisionTreasurer}
-        orgId={Number(orgId)}
+        allEditable={isAdmin}
+        orgId={orgIdNum}
       />
       <Box p="4" />
     </>

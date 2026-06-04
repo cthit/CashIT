@@ -86,28 +86,35 @@ export async function editNameList(
     throw new Error('Name list does not exist');
   }
 
-  // Check if user has permission to edit this name list
-  // User can edit if:
-  // 1. They created the name list (for personal name lists)
-  // 2. They belong to the group that owns the name list (for group name lists)
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(existing.organizationId)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
+
   const userGroups = await SessionService.getGroups();
   const canEdit =
-    existing.gammaUserId === gammaUserId || // User created it
+    isAdmin ||
+    existing.gammaUserId === gammaUserId ||
     (existing.gammaGroupId !== null &&
-      userGroups.some((g) => g.group.id === existing.gammaGroupId)); // User belongs to the group
+      userGroups.some((g) => g.group.id === existing.gammaGroupId));
 
   if (!canEdit) {
     throw new Error('User does not have permission to edit this name list');
   }
 
-  console.log('Editing name list with ID:', id, 'and gammaGroupId:', gammaGroupId);
-
   // Validate the new group if specified
+  // Admins keep the existing group when they don't belong to it
   let group = null;
   if (gammaGroupId !== null) {
-    group = userGroups.find((g) => g.group.id === gammaGroupId)?.group;
-    if (group === undefined) {
+    group = userGroups.find((g) => g.group.id === gammaGroupId)?.group ?? null;
+    if (group === null && !isAdmin) {
       throw new Error('Group does not exist or user does not have access to it');
+    }
+    if (group === null && isAdmin) {
+      group = existing.gammaGroupId === gammaGroupId
+        ? { id: gammaGroupId, superGroup: { id: existing.gammaSuperGroupId! } } as any
+        : null;
     }
   }
 
@@ -125,5 +132,23 @@ export async function editNameList(
 }
 
 export async function deleteNameList(id: number) {
+  const existing = await NameListService.getById(id);
+  if (existing === null) throw new Error('Name list does not exist');
+
+  const gammaUserId = (await SessionService.getUser())?.id;
+
+  // Allow creator to delete their own name list
+  if (gammaUserId && existing.gammaUserId === gammaUserId) {
+    return NameListService.delete(id);
+  }
+
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(existing.organizationId)
+  ]);
+  if (!divisionTreasurer && !localAdmin) {
+    throw new Error('User does not have admin permission for this name list');
+  }
+
   await NameListService.delete(id);
 }

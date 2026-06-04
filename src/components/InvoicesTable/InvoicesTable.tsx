@@ -82,11 +82,13 @@ const InvoicesTable = ({
   e,
   locale,
   superGroups,
+  allEditable = false,
   orgId
 }: {
   e: Invoice[];
   locale: string;
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
+  allEditable?: boolean;
   orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
@@ -182,7 +184,7 @@ const InvoicesTable = ({
       id: 'actions',
       cell: (info) => {
         const invoice = info.row.original;
-        return <InvoiceActions {...invoice} locale={locale} />;
+        return <InvoiceActions {...invoice} locale={locale} allEditable={allEditable} />;
       }
     })
   ];
@@ -254,9 +256,11 @@ const InvoiceActions = ({
   id,
   status,
   description,
-  locale
+  locale,
+  allEditable = false
 }: InvoiceRow & {
   locale: string;
+  allEditable?: boolean;
 }) => {
   const router = useRouter();
   const l = i18nService.getLocale(locale);
@@ -301,34 +305,38 @@ const InvoiceActions = ({
           </IconButton>
         </MenuTrigger>
         <MenuContent>
-          {status === 'FINISHED' ? (
-            <MenuItem value="mark-not-sent" onClick={markUnpaid}>
-              <PiReceipt /> {l.invoice.markNotSent}
-            </MenuItem>
-          ) : (
+          {allEditable && (
             <>
-              <MenuItem value="mark-sent" onClick={markPaid}>
-                <PiReceipt />{' '}
-                {status === RequestStatus.APPROVED
-                  ? l.invoice.markSent
-                  : l.invoice.approveMarkSent}
+              {status === 'FINISHED' ? (
+                <MenuItem value="mark-not-sent" onClick={markUnpaid}>
+                  <PiReceipt /> {l.invoice.markNotSent}
+                </MenuItem>
+              ) : (
+                <>
+                  <MenuItem value="mark-sent" onClick={markPaid}>
+                    <PiReceipt />{' '}
+                    {status === RequestStatus.APPROVED
+                      ? l.invoice.markSent
+                      : l.invoice.approveMarkSent}
+                  </MenuItem>
+                  {status !== RequestStatus.APPROVED && (
+                    <MenuItem value="approve" onClick={approve}>
+                      <HiCheck /> {l.invoice.approveSending}
+                    </MenuItem>
+                  )}
+                  {status !== RequestStatus.REJECTED && (
+                    <MenuItem value="deny" onClick={requestRevision}>
+                      <HiXMark /> {l.economy.requestRevision}
+                    </MenuItem>
+                  )}
+                </>
+              )}
+              <Separator my="0.25rem" />
+              <MenuItem color="fg.error" value="delete" onClick={remove}>
+                <HiTrash /> {l.general.delete}
               </MenuItem>
-              {status !== RequestStatus.APPROVED && (
-                <MenuItem value="approve" onClick={approve}>
-                  <HiCheck /> {l.invoice.approveSending}
-                </MenuItem>
-              )}
-              {status !== RequestStatus.REJECTED && (
-                <MenuItem value="deny" onClick={requestRevision}>
-                  <HiXMark /> {l.economy.requestRevision}
-                </MenuItem>
-              )}
             </>
           )}
-          <Separator my="0.25rem" />
-          <MenuItem color="fg.error" value="delete" onClick={remove}>
-            <HiTrash /> {l.general.delete}
-          </MenuItem>
         </MenuContent>
       </MenuRoot>
     </Box>

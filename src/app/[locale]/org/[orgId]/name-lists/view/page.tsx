@@ -32,7 +32,11 @@ export default async function Page(props: {
   const nameList = await NameListService.getById(+id);
   if (nameList === null) notFound();
   const personal = nameList === null || nameList.gammaGroupId === null;
-  const divisionTreasurer = await SessionService.isDivisionTreasurer();
+  const [divisionTreasurer, localAdmin] = await Promise.all([
+    SessionService.isDivisionTreasurer(),
+    SessionService.isOrgLocalAdmin(+orgId)
+  ]);
+  const isAdmin = divisionTreasurer || localAdmin;
 
   const group = !personal
     ? (await SessionService.getGroups()).find(
@@ -40,7 +44,7 @@ export default async function Page(props: {
       )?.group
     : undefined;
 
-  if (!personal && !divisionTreasurer && group === undefined) {
+  if (!personal && !isAdmin && group === undefined) {
     notFound();
   }
 
@@ -48,7 +52,7 @@ export default async function Page(props: {
     personal || group === undefined
       ? undefined
       : await GammaService.getSuperGroup(group.superGroup.id);
-  if (!personal && !divisionTreasurer && sg === undefined) {
+  if (!personal && !isAdmin && sg === undefined) {
     notFound();
   }
 
@@ -62,7 +66,7 @@ export default async function Page(props: {
 
   const user = (await SessionService.getGammaUser())?.user;
   const canEdit =
-    divisionTreasurer ||
+    isAdmin ||
     group !== undefined ||
     user?.id === nameList.gammaUserId;
 

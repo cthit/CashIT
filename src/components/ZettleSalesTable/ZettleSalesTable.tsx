@@ -54,11 +54,13 @@ const ZettleSalesTable = ({
   e,
   superGroups,
   locale,
+  allEditable = false,
   orgId
 }: {
   e: ZettleSale[];
   superGroups?: { superGroup: GammaSuperGroup; members: GammaGroupMember[] }[];
   locale: string;
+  allEditable?: boolean;
   orgId: number;
 }) => {
   const l = i18nService.getLocale(locale);
@@ -123,7 +125,7 @@ const ZettleSalesTable = ({
       id: 'actions',
       cell: (info) => {
         const sale = info.row.original;
-        return <SaleActions id={sale.id} locale={locale} orgId={orgId} />;
+        return <SaleActions id={sale.id} locale={locale} orgId={orgId} allEditable={allEditable} />;
       }
     })
   ];
@@ -190,11 +192,13 @@ const ZettleSalesTable = ({
 const SaleActions = ({
   id,
   locale,
-  orgId
+  orgId,
+  allEditable = false
 }: {
   id: number;
   locale: string;
   orgId: number;
+  allEditable?: boolean;
 }) => {
   const l = i18nService.getLocale(locale);
   const router = useRouter();
@@ -222,9 +226,11 @@ const SaleActions = ({
         >
           {l.general.edit}
         </MenuItem>
-        <MenuItem color="fg.error" value="delete" onClick={remove}>
-          {l.general.delete} <MenuItemCommand>D</MenuItemCommand>
-        </MenuItem>
+        {allEditable && (
+          <MenuItem color="fg.error" value="delete" onClick={remove}>
+            {l.general.delete} <MenuItemCommand>D</MenuItemCommand>
+          </MenuItem>
+        )}
       </MenuContent>
     </MenuRoot>
   );
